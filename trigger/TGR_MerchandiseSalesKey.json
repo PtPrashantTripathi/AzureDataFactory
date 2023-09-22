@@ -1,0 +1,29 @@
+{
+	"name": "TGR_MerchandiseSalesKey",
+	"properties": {
+		"description": "MerchandiseSalesKey to be loaded every day at 7:05 pm EST",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_DB2_Stage_Generic_Inc",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"Domain": "Pos",
+					"SourceTable": "MRC_SK_INF"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 24,
+				"startTime": "2023-05-24T19:05:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

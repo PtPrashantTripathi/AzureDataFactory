@@ -1,0 +1,51 @@
+{
+	"name": "PL_ADRM_Schema_Update",
+	"properties": {
+		"activities": [
+			{
+				"name": "ADRM_Schema_Update",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/ADRM_Migration/ADRMSchema_Update",
+					"baseParameters": {
+						"entity_name": {
+							"value": "@pipeline().parameters.Entity",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@pipeline().parameters.Domain",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"Domain": {
+				"type": "string",
+				"defaultValue": "Pos"
+			},
+			"Entity": {
+				"type": "string",
+				"defaultValue": "AgeGroup,Brand"
+			}
+		},
+		"folder": {
+			"name": "IDW_Migration"
+		},
+		"annotations": []
+	}
+}

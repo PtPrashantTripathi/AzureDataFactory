@@ -1,0 +1,223 @@
+{
+	"name": "PL_DemandForecast_DeletionFromNonADRMStage",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKP_CONFIG_FILE",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "00.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_TeraData_CONFIG_Promo_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "TERADATA_DB_CONFIGURATION_PROMO.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_TBL",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_CONFIG_FILE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_CONFIG_FILE').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(and(equals(item().SourceTableName,pipeline().parameters.p_SourceTableName),equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)),equals(item().DatabaseName,pipeline().parameters.p_DatabaseName))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FLTR_TBL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FLTR_TBL').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 3,
+					"activities": [
+						{
+							"name": "COPY_SRC_TERADATA_TO_ADLS",
+							"description": "Copy Generic TeraData to Data Lake",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "TeradataSource",
+									"query": {
+										"value": "@item().queryPattern",
+										"type": "Expression"
+									},
+									"partitionOption": "Hash",
+									"partitionSettings": {
+										"partitionColumnName": {
+											"value": "@{item().PartitionColumn}",
+											"type": "Expression"
+										}
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"parallelCopies": 10
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Teradata_Generic",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_GENERIC_COPY_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": {
+											"value": "data.csv",
+											"type": "Expression"
+										},
+										"folderPath": {
+											"value": "data/@{item().Domain}/@{item().SourceSystem}/@{item().SourceTableName}/delete",
+											"type": "Expression"
+										},
+										"fileSystem": "raw"
+									}
+								}
+							]
+						},
+						{
+							"name": "Databricks Notebook for Deletion",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "COPY_SRC_TERADATA_TO_ADLS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "00.03:00:00",
+								"retry": 2,
+								"retryIntervalInSeconds": 120,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published_Pos/PosAPI/GRC/DemandForecast/DeletionFromStage",
+								"baseParameters": {
+									"entity_name": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"fullorincl": {
+										"value": "@item().FullOrIncremental",
+										"type": "Expression"
+									},
+									"source_table": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"source_system": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@item().Domain",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_01",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_SourceTableName": {
+				"type": "string",
+				"defaultValue": "DLY_UT_P_ANLT_SL_FCST_HST"
+			},
+			"p_DatabaseName": {
+				"type": "string",
+				"defaultValue": "DL_CNTL_ADVA"
+			},
+			"fullorincl": {
+				"type": "string",
+				"defaultValue": "D"
+			},
+			"p_SourceSystem": {
+				"type": "string",
+				"defaultValue": "DemandForecast"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/Datastage"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"name": "TRG_SAAS_INCL_RWB_P_FCST_HST",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl_SAASRetirement",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_DatabaseName": "VPROD_PR_PROMO_HST",
+					"p_SourceSystem": "SAASRetirement",
+					"p_TableName": "RWB_P_FCST_HST"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-09-01T06:00:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

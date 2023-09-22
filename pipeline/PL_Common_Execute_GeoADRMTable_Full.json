@@ -1,0 +1,25 @@
+{
+	"name": "PL_Common_Execute_GeoADRMTable_Full",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute PL_Geo_ADRM_Data_Load_copy1",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Geo_ADRM_Data_Load",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"concurrency": 1,
+		"folder": {
+			"name": "Geo/Eventbased"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,43 @@
+{
+	"name": "TRG_Copy_SPO_ADLS",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Copy_SPO_ADLS",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"FilePath": "/Shared%20Documents/Forecasting/DOB%20shared/DOB%20Merchant%20Override.xlsx",
+					"SP_Site": "advancedanalytics",
+					"SecretName_TenantId": "TenantID",
+					"SecretName_SPClientId": "Apex-Data-Science-SharepointAccess-ClientId",
+					"SecretName_SPSecret": "Apex-Data-Science-SharepointAccess-ClientSecret"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2022-08-17T08:53:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						20
+					],
+					"weekDays": [
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

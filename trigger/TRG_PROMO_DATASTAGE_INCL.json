@@ -1,0 +1,30 @@
+{
+	"name": "TRG_PROMO_DATASTAGE_INCL",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_DataStage_Execute_Table_Copy_Incl",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_SourceSystem": "PosPromo",
+					"p_DatabaseName": "VPROD_PR_PROMO_HST",
+					"p_SourceTableName": "PROMO_UT_P_HST"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-07-14T06:00:00",
+				"endTime": "2022-07-30T00:01:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"name": "TRG_Prodcut_ATP_Synapse_Load",
+	"properties": {
+		"description": "ATP Data Loads every 2 Hrs",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_DS_ATP_ETP_Stage_Load_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"RunId": "R08"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 2,
+				"startTime": "2023-08-31T09:00:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

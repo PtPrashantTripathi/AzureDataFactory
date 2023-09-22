@@ -1,0 +1,103 @@
+{
+	"name": "PL_SaveIPOPCosmosToStage",
+	"properties": {
+		"activities": [
+			{
+				"name": "Save Cosmos Data to Stage",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Execute Increase RU for UPC_LOC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "00.02:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/SaveIPOPToStage",
+					"baseParameters": {
+						"stores": {
+							"value": "@string(pipeline().parameters.store_list)",
+							"type": "Expression"
+						},
+						"requestor": "STME",
+						"filter_cond": {
+							"value": "@coalesce(null,'')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_UPC_LOC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Execute Increase RU for UPC_LOC",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "UPC_LOCLocationLevel",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "F",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute Decrease RU for UPC_LOC",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Save Cosmos Data to Stage",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "UPC_LOCLocationLevel",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"store_list": {
+				"type": "array"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"name": "LS_Teradata_Generic",
+	"properties": {
+		"annotations": [],
+		"type": "Teradata",
+		"typeProperties": {
+			"connectionString": "DbcName=TDDVA.apex.com;UID=APEX_ADF_DEV_USER",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault01",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "teradatapassword"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHosted-IR-BI-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

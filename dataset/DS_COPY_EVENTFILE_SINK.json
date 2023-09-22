@@ -1,0 +1,30 @@
+{
+	"name": "DS_COPY_EVENTFILE_SINK",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ServeADLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"EventFilePath": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().EventFilePath",
+					"type": "Expression"
+				},
+				"fileSystem": "pos"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

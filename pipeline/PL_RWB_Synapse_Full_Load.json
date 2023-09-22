@@ -1,0 +1,95 @@
+{
+	"name": "PL_RWB_Synapse_Full_Load",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_RWB_Synapse_Load",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/SAASRetirement/Rwb_Ut_P_Fcst_Hst_Synapse_Full_Load",
+					"baseParameters": {
+						"entity_name": {
+							"value": "@pipeline().parameters.entity_name",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_DS3",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "SP_Synapse_Load",
+				"description": "Loads the below synapse DW tables\n\nPromotionAdvertisementBlock,\nPromotionPosHistory,\nPromotionAdvertisementSampleDocumentFact,\nPromotionStorePosHistory,\nPromotionVehicle",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "NB_RWB_Synapse_Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[APEX_ETL].[PROC_FCT_PROMO_TB_LOAD]",
+					"storedProcedureParameters": {
+						"ENTITY_NAME": {
+							"value": {
+								"value": "@pipeline().parameters.entity_name",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"FULL_OR_INCL": {
+							"value": {
+								"value": "@pipeline().parameters.fullorincl",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSynapseAnalytics01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"entity_name": {
+				"type": "string",
+				"defaultValue": "RWB_UT_P_FCST_HST"
+			},
+			"fullorincl": {
+				"type": "string",
+				"defaultValue": "F"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/SAASRetirement"
+		},
+		"annotations": []
+	}
+}

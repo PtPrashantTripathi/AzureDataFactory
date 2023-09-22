@@ -1,0 +1,47 @@
+{
+	"name": "DS_OutPut_CSV",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"fileName": {
+				"type": "string"
+			},
+			"folderName": {
+				"type": "string"
+			},
+			"domain": {
+				"type": "string"
+			},
+			"sourceSystem": {
+				"type": "string"
+			},
+			"tableName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@{dataset().folderName}/@{dataset().fileName}.csv",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@{dataset().domain}/@{dataset().sourceSystem}/@{dataset().tableName}",
+					"type": "Expression"
+				},
+				"fileSystem": "raw/data"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

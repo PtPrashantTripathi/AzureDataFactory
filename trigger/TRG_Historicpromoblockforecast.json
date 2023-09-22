@@ -1,0 +1,36 @@
+{
+	"name": "TRG_Historicpromoblockforecast",
+	"properties": {
+		"description": "Trigger for Historicpromoblockforecast table",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_DOB_DS_to_STG",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"sourcetablename": "historicpromoblockforecast"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-01-25T03:00:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						5
+					]
+				}
+			}
+		}
+	}
+}

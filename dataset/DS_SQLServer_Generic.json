@@ -1,0 +1,47 @@
+{
+	"name": "DS_SQLServer_Generic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQLServer_Generic",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"serverInstance": {
+					"value": "@dataset().ds_ServerInstance",
+					"type": "Expression"
+				},
+				"databaseName": {
+					"value": "@dataset().ds_DatabaseName",
+					"type": "Expression"
+				},
+				"sqlserverusername": {
+					"value": "@dataset().ds_UserName",
+					"type": "Expression"
+				},
+				"sqlserverpassword": "sqlserverpassword"
+			}
+		},
+		"parameters": {
+			"ds_ServerInstance": {
+				"type": "string"
+			},
+			"ds_DatabaseName": {
+				"type": "string"
+			},
+			"ds_UserName": {
+				"type": "string",
+				"defaultValue": "US\\APEXMSINT"
+			}
+		},
+		"folder": {
+			"name": "SQLServer"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "upc"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

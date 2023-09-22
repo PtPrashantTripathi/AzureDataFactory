@@ -1,0 +1,31 @@
+{
+	"name": "PL_Raw_To_Cleanse_via_Autoloader",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_Raw_To_Cleanse_Autoloader",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/CLEANSING/AutoLoader"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_UPC_LOC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": []
+	}
+}

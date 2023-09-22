@@ -1,0 +1,24 @@
+{
+	"name": "LS_SharePoint_Generic",
+	"properties": {
+		"parameters": {
+			"SP_Domain_Name": {
+				"type": "string",
+				"defaultValue": "https://apex365.sharepoint.com"
+			},
+			"FilePath": {
+				"type": "string"
+			},
+			"SP_Site": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "HttpServer",
+		"typeProperties": {
+			"url": "@{concat(linkedService().SP_Domain_Name,'/sites/',linkedService().SP_Site,'/_api/web/GetFileByServerRelativeUrl(','''/sites/',linkedService().SP_Site,linkedService().FilePath,''')/$value')}",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}

@@ -1,0 +1,25 @@
+{
+	"name": "TRG_COMMON_DIM_GEO_ADRM_EVENTBASED",
+	"properties": {
+		"description": "To load STAGEADRN Entities for DIM_GEO",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_Execute_GeoADRMTable_Eventbased",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/raw/blobs/EventBased/Geo/DataIngestion/",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/6ed3c07f-2f9c-4a7b-bee4-3ee8620d38d1/resourceGroups/rg-np-apex-etl-int/providers/Microsoft.Storage/storageAccounts/saea2grsnpapexdlakeint",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

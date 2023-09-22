@@ -1,0 +1,47 @@
+{
+	"name": "PL_SaveIPOPStageToStage",
+	"properties": {
+		"activities": [
+			{
+				"name": "Save Cosmos Data to Stage",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "00.02:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/ExportUPC_LOCStagetoStage",
+					"baseParameters": {
+						"stores": {
+							"value": "@string(pipeline().parameters.store_list)",
+							"type": "Expression"
+						},
+						"requestor": "STME",
+						"filter_cond": {
+							"value": "@coalesce(null,'')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_UPC_LOC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"store_list": {
+				"type": "array"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": []
+	}
+}

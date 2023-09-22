@@ -1,0 +1,188 @@
+{
+	"name": "PL_Common_DB2_CFD_Execute_Table_Copies_Incl",
+	"properties": {
+		"description": "Master pipeline Incremental load for PMM (DB2) and CFD",
+		"activities": [
+			{
+				"name": "LKP_CONFIG_FILE",
+				"description": "This activity reads from a source file located in configuration in the Data Lake",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_DB2_CONFIG_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "POS_HOURLY_DB2_CONFIGURATION.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_SRC",
+				"description": "This activity filters the configuration data based  on the entity_name and database_name",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_CONFIG_FILE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_CONFIG_FILE').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(and(equals(item().EntityName,pipeline().parameters.p_EntityName),equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)),equals(item().SourceTableName,'CF_UPC_P_ATTR_ASC'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FOREACH_SRC_Tables",
+				"description": "Process each entry from the configuration file",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FLTR_SRC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FLTR_SRC').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Execute PL_SRC_DB2_Generic_Copy_Full",
+							"description": "Call generic copy pipeline",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_DB2_CFD_Generic_Copy_Incl",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"tableName": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"databaseName": {
+										"value": "@item().ConnectionString",
+										"type": "Expression"
+									},
+									"dbvalue": "",
+									"domain": {
+										"value": "@item().Domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									},
+									"folderName": {
+										"value": "@concat('delta/','Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Day=',formatDateTime(utcnow(),'dd'),'/','Hour=',formatDateTime(utcnow(),'hh'))",
+										"type": "Expression"
+									},
+									"watermarkColumnName": {
+										"value": "@item().WatermarkColumnName",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@concat(item().SourceTableName,'-',formatDateTime(utcnow()) )",
+										"type": "Expression"
+									},
+									"userName": {
+										"value": "@item().UserName",
+										"type": "Expression"
+									},
+									"queryPattern": {
+										"value": "UPC_ID,CF_P_ATTR_ID,P_HCY_ID,P_HCY_LVL_ID,CF_UPC_P_ATTR_SEQ_ID,CF_P_ATTR_STD_VAL_SEQ_ID,case when(length(CF_UPC_P_ATTR_VAL_DSC)>0) then replace(replace(replace(CF_UPC_P_ATTR_VAL_DSC,chr(13),' '),chr(10),' '),'\\','\\\\') else CF_UPC_P_ATTR_VAL_DSC end as CF_UPC_P_ATTR_VAL_DSC,RW_UDT_TS,RW_UDT_PRC_ID",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "ExecutePL_Common_Generic_Cleanse",
+							"description": "Call generic cleanse pipeline",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Execute PL_SRC_DB2_Generic_Copy_Full",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Generic_Cleanse",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"tableName": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_EntityName": {
+				"type": "string",
+				"defaultValue": "Org"
+			},
+			"p_SourceSystem": {
+				"type": "string",
+				"defaultValue": "PMM"
+			}
+		},
+		"folder": {
+			"name": "Digital-Merchandising/DB2/CFD"
+		},
+		"annotations": []
+	}
+}

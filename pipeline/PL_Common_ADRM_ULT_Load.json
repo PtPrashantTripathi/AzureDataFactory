@@ -1,0 +1,233 @@
+{
+	"name": "PL_Common_ADRM_ULT_Load",
+	"properties": {
+		"description": "Generic Copy pipeline Full load for PMM (Sqlserver) and DRAdmin",
+		"activities": [
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "tableName",
+					"value": [
+						"AntiTheftDeviceType",
+						"BrandRelationshipType",
+						"ItemDocumentType",
+						"Language",
+						"PartyType",
+						"PosNameType",
+						"PosGroupRelationshipType",
+						"PosAddOnProgram",
+						"ScentType",
+						"PosTaxonomyLevel",
+						"PosPackagingType",
+						"FixtureCategory",
+						"FixtureType",
+						"FloorplanMerchandiseArea",
+						"FloorplanDepartment",
+						"LabelMark",
+						"LabelMarkGroup"
+					]
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('tableName')",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Insert record for raw file_1",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "Lookup_ult1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published/DATA/CLEANSE/getRawFiles",
+								"baseParameters": {
+									"tableName": {
+										"value": "@item()",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@concat(item(),'.csv')",
+										"type": "Expression"
+									},
+									"filePath": {
+										"value": "ULT/ADRMLookup/",
+										"type": "Expression"
+									},
+									"timestampIngested": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									},
+									"rowsCopied": {
+										"value": "@string(activity('Lookup_ult1').output.count)",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "ULT",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "ADRM",
+										"type": "Expression"
+									},
+									"Watermark_Value": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_01",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Lookup_ult1",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"dataset": {
+									"referenceName": "DS_ADRM_ULT",
+									"type": "DatasetReference",
+									"parameters": {
+										"tableName": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "PL_Common_Notebook_1",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "NB_CLNSNG_1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Notebook",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"entity": {
+										"value": "@item()",
+										"type": "Expression"
+									},
+									"fullorincl": "F",
+									"level_exec": "0"
+								}
+							}
+						},
+						{
+							"name": "NB_CLNSNG_1",
+							"description": "Notebook for carrying out the cleansing activity",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "Insert record for raw file_1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published/DATA/CLEANSE/rawToCleanseDataload",
+								"baseParameters": {
+									"tableName": {
+										"value": "@item()",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "ULT",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_01",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"tableName": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-01T09:17:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

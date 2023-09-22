@@ -1,0 +1,239 @@
+{
+	"name": "PL_Export_PubSub_Item_And_Pos",
+	"properties": {
+		"activities": [
+			{
+				"name": "Export_Pos_Merged_With_Item",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "PL_ScaleCosmos_Increase_Pos_RU",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PL_ScaleCosmos_Increase_Item_RU",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_ServiceBus/Export_Pos_Item_toServiceBus"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Export_Item_Merged_With_Pos",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "PL_ScaleCosmos_Increase_Item_RU",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PL_ScaleCosmos_Increase_Pos_RU",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_ServiceBus/Export_Item_Pos_toServiceBus"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Increase_Pos_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Delete the Pos Collection Event File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": "Pos",
+						"fullorincl": "I"
+					}
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Increase_Item_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Delete the Sku Collection Event File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": "Sku",
+						"fullorincl": "I"
+					}
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Decrease_Pos_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Export_Pos_Merged_With_Item",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "Export_Item_Merged_With_Pos",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": "Pos"
+					}
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Decrease_Item_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Export_Item_Merged_With_Pos",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "Export_Pos_Merged_With_Item",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": "Sku"
+					}
+				}
+			},
+			{
+				"name": "Delete the Pos Collection Event File",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Pos_Collection_Completion.blob"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "Delete the Sku Collection Event File",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Item_Collection_Completion.blob"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "PosAPI/PubSub"
+		},
+		"annotations": []
+	}
+}

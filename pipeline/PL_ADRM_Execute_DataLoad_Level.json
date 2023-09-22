@@ -1,0 +1,160 @@
+{
+	"name": "PL_ADRM_Execute_DataLoad_Level",
+	"properties": {
+		"activities": [
+			{
+				"name": "Until1",
+				"description": "Until loop executes one level at a time",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "SET_INITIAL_LEVEL_VALUE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(int(variables('count_level')),int(activity('LKP_GET_MAXLEVEL').output.firstRow.max_level))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "SET_SUB_VALUE",
+							"description": "Set the sub value to hold the increment of the original count value",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "sub",
+								"value": {
+									"value": "@string(add(int(variables('count_level')),1))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "SET_COUNT_LEVEL_VALUE",
+							"description": "set the count value to the incremented value of itself",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "SET_SUB_VALUE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "count_level",
+								"value": {
+									"value": "@variables('sub')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "EXEC_PL_DataLoad_Order",
+							"description": "Execute the order pipeline for the corresponding level",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "SET_COUNT_LEVEL_VALUE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ADRM_Execute_DataLoad_Order",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"fullorincl": {
+										"value": "@pipeline().parameters.fullorincl",
+										"type": "Expression"
+									},
+									"level": {
+										"value": "@sub(int(variables('count_level')),1)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "SET_INITIAL_LEVEL_VALUE",
+				"description": "Set the initial value of level to 1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LKP_GET_MAXLEVEL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "count_level",
+					"value": "2"
+				}
+			},
+			{
+				"name": "LKP_GET_MAXLEVEL",
+				"description": "Get the maximum level value from the log table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureDatabricksDeltaLakeSource",
+						"query": {
+							"value": "select max(levelExec) as max_level from logadrmexecpos",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_AzureDatabricksDeltaLakeDataset",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"fullorincl": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"count_level": {
+				"type": "String"
+			},
+			"sub": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-01T09:17:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,110 @@
+{
+	"name": "PL_Delete_Cosmos_Collection",
+	"properties": {
+		"description": "It will fully delete the given collection",
+		"activities": [
+			{
+				"name": "NB_Cosmos_CleanUp",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Execute Increase RU for UPC_LOC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "3.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_CosmosDB/DeleteCosmosCollection",
+					"baseParameters": {
+						"database": {
+							"value": "@pipeline().parameters.DatabaseName",
+							"type": "Expression"
+						},
+						"collection": {
+							"value": "@pipeline().parameters.CollectionName",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Execute Increase RU for UPC_LOC",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "@pipeline().parameters.CollectionName",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "F",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute Decrease RU for UPC_LOC",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "NB_Cosmos_CleanUp",
+						"dependencyConditions": [
+							"Succeeded",
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "@pipeline().parameters.CollectionName",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"DatabaseName": {
+				"type": "string",
+				"defaultValue": "ServePos"
+			},
+			"CollectionName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-03T10:56:19Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

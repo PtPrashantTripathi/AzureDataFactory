@@ -1,0 +1,12 @@
+{
+	"name": "DS_Teradata_Generic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_Teradata_Generic",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "TeradataTable",
+		"schema": []
+	}
+}

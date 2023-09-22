@@ -1,0 +1,130 @@
+{
+	"name": "PL_Execute_PubSub_Merged_Collections",
+	"properties": {
+		"activities": [
+			{
+				"name": "Create PubSub Completed file",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "If_File_Exists",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 4,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Completed_Merged_PubSub_Load.blob"
+						}
+					}
+				]
+			},
+			{
+				"name": "Check_Existing_Run",
+				"type": "Validation",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Completed_Merged_PubSub_Load.blob"
+						}
+					},
+					"timeout": "00.00:15:00",
+					"sleep": 10
+				}
+			},
+			{
+				"name": "If_File_Exists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Check_Existing_Run",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('Check_Existing_Run').output.exists,bool(true))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute Merged PubSub PL",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_PubSub_Merged_Collections",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "PosAPI/PubSub"
+		},
+		"annotations": []
+	}
+}

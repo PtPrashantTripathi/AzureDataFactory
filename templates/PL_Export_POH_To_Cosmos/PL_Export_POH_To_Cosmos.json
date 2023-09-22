@@ -1,0 +1,2596 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name"
+		},
+		"LS_AzureDatabricks_01": {
+			"type": "string"
+		},
+		"LS_AzureDataLakeStorage01": {
+			"type": "string"
+		},
+		"Odbc1": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Export_POH_To_Cosmos')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Run PL_ExportToCosmos Pipeline",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute  ADRM PL_Common_Notebook",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Export_To_Cosmos",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"collectionname": {
+									"value": "@pipeline().parameters.collectioname",
+									"type": "Expression"
+								},
+								"fullorincl": {
+									"value": "@pipeline().parameters.fullorincl",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute  ADRM PL_Common_Notebook",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Cleansing PL_Common_Generic_Cleanse",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Common_Notebook",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"entity": {
+									"value": "@pipeline().parameters.collectioname",
+									"type": "Expression"
+								},
+								"fullorincl": {
+									"value": "@pipeline().parameters.fullorincl",
+									"type": "Expression"
+								},
+								"level_exec": "-2"
+							}
+						}
+					},
+					{
+						"name": "If Full or Incremental",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Filter_POH",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.fullorincl,'F')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Excecute Incremental Load",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Common_DB2_Generic_Copy_Incl",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"tableName": {
+												"value": "@activity('Filter_POH').output.value[0].SourceTableName",
+												"type": "Expression"
+											},
+											"databaseName": {
+												"value": "@activity('Filter_POH').output.value[0].ConnectionString",
+												"type": "Expression"
+											},
+											"dbvalue": " ",
+											"domain": {
+												"value": "@activity('Filter_POH').output.value[0].Domain",
+												"type": "Expression"
+											},
+											"sourceSystem": {
+												"value": "@activity('Filter_POH').output.value[0].SourceSystem",
+												"type": "Expression"
+											},
+											"folderName": {
+												"value": "@concat('delta/','Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Day=',formatDateTime(utcnow(),'dd'))",
+												"type": "Expression"
+											},
+											"watermarkColumnName": {
+												"value": "@activity('Filter_POH').output.value[0].WatermarkColumnName",
+												"type": "Expression"
+											},
+											"fileName": {
+												"value": "@concat(activity('Filter_POH').output.value[0].SourceTableName,'-',formatDateTime(utcnow()) )",
+												"type": "Expression"
+											},
+											"userName": {
+												"value": "@concat(activity('Filter_POH').output.value[0].SourceTableName,'-',formatDateTime(utcnow()) )",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Execcute_Full_Load",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Common_DB2_Generic_Copy_Full",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"tableName": {
+												"value": "@activity('Filter_POH').output.value[0].SourceTableName",
+												"type": "Expression"
+											},
+											"databaseName": {
+												"value": "@activity('Filter_POH').output.value[0].ConnectionString",
+												"type": "Expression"
+											},
+											"dbvalue": " ",
+											"WatermarkColumnName": {
+												"value": "@activity('Filter_POH').output.value[0].WatermarkColumnName",
+												"type": "Expression"
+											},
+											"sourceSystem": {
+												"value": "@activity('Filter_POH').output.value[0].SourceSystem",
+												"type": "Expression"
+											},
+											"domain": {
+												"value": "@activity('Filter_POH').output.value[0].Domain",
+												"type": "Expression"
+											},
+											"folderName": {
+												"value": "@concat('full/','Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Day=',formatDateTime(utcnow(),'dd'))",
+												"type": "Expression"
+											},
+											"fileName": {
+												"value": "@concat(activity('Filter_POH').output.value[0].SourceTableName,'-',formatDateTime(utcnow()) )",
+												"type": "Expression"
+											},
+											"userName": {
+												"value": "@activity('Filter_POH').output.value[0].UserName",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Execute Cleansing PL_Common_Generic_Cleanse",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "If Full or Incremental",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Common_Generic_Cleanse",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "STO_UPC",
+								"sourceSystem": "PMM"
+							}
+						}
+					},
+					{
+						"name": "Lookup_Config_file",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Delete the Event File",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_DB2_CONFIG_CSV",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "DB2_CONFIGURATION.CSV"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Filter_POH",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Lookup_Config_file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup_Config_file').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@equals(item().EntityName,'POH')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Generate Event for Next Run",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Run PL_ExportToCosmos Pipeline",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_COMM_CONTROL_CSV",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_Event_Blob",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "STO_UPC_event.blob"
+								}
+							}
+						]
+					},
+					{
+						"name": "Delete the Event File",
+						"type": "Delete",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_Event_Blob",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "STO_UPC_event.blob"
+								}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					}
+				],
+				"parameters": {
+					"collectioname": {
+						"type": "string"
+					},
+					"fullorincl": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "PosAPI/POH"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Export_To_Cosmos')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Common_Notebook')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Common_Generic_Cleanse')]",
+				"[concat(variables('factoryId'), '/datasets/DS_DB2_CONFIG_CSV')]",
+				"[concat(variables('factoryId'), '/datasets/DS_COMM_CONTROL_CSV')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Event_Blob')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Common_DB2_Generic_Copy_Incl')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Common_DB2_Generic_Copy_Full')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Export_To_Cosmos')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "NB_ADRM_ENTITY",
+						"description": "Master notebook to process each entity passed as parameter",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "PL_ScaleCosmos_Increase_RU",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_CosmosDB/RunCosmosNotebook",
+							"baseParameters": {
+								"collectionname": {
+									"value": "@pipeline().parameters.collectionname",
+									"type": "Expression"
+								},
+								"fullorincl": {
+									"value": "@pipeline().parameters.fullorincl",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('LS_AzureDatabricks_01')]",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "PL_ScaleCosmos_Increase_RU",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_ScaleCosmos_Increase_RU",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"p_CollectionName": {
+									"value": "@pipeline().parameters.collectionname",
+									"type": "Expression"
+								},
+								"fullorincl": {
+									"value": "@pipeline().parameters.fullorincl",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "PL_ScaleCosmos_Decrease_RU",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "NB_ADRM_ENTITY",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_ScaleCosmos_Decrease_RU",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"p_CollectionName": {
+									"value": "@pipeline().parameters.collectionname",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"parameters": {
+					"collectionname": {
+						"type": "string"
+					},
+					"fullorincl": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "PosAPI"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-03-03T10:59:23Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_ScaleCosmos_Increase_RU')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_ScaleCosmos_Decrease_RU')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Common_Notebook')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "NB_ADRM_ENTITY",
+						"description": "Master notebook to process each entity passed as parameter",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Master_ADRM_Pos",
+							"baseParameters": {
+								"entity_name": {
+									"value": "@pipeline().parameters.entity",
+									"type": "Expression"
+								},
+								"fullorincl": {
+									"value": "@pipeline().parameters.fullorincl",
+									"type": "Expression"
+								},
+								"level_exec": {
+									"value": "@pipeline().parameters.level_exec",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('LS_AzureDatabricks_01')]",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"entity": {
+						"type": "string"
+					},
+					"fullorincl": {
+						"type": "string"
+					},
+					"level_exec": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "PosAPI"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-03-03T12:16:45Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Common_Generic_Cleanse')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Generic Cleansing Pipeline",
+				"activities": [
+					{
+						"name": "NB_CLNSNG",
+						"description": "Notebook for carrying out the cleansing activity",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Published/DATA/CLEANSE/rawToCleanseDataload",
+							"baseParameters": {
+								"tableName": {
+									"value": "@pipeline().parameters.tableName",
+									"type": "Expression"
+								},
+								"sourceSystem": {
+									"value": "@pipeline().parameters.sourceSystem",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('LS_AzureDatabricks_01')]",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"tableName": {
+						"type": "string"
+					},
+					"sourceSystem": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Digital-Merchandising/Cleanse"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_DB2_CONFIG_CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_AzureDataLakeStorage01')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Common"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"folderPath": "configuration",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Domain",
+						"type": "String"
+					},
+					{
+						"name": "SourceSystem",
+						"type": "String"
+					},
+					{
+						"name": "ConnectionString",
+						"type": "String"
+					},
+					{
+						"name": "EntityName",
+						"type": "String"
+					},
+					{
+						"name": "SourceTableName",
+						"type": "String"
+					},
+					{
+						"name": "WatermarkColumnName",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_COMM_CONTROL_CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_AzureDataLakeStorage01')]",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Common"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "control.txt",
+						"folderPath": "configuration",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "SRC_Name",
+						"type": "String"
+					},
+					{
+						"name": "SRC_Table",
+						"type": "String"
+					},
+					{
+						"name": "Watermark_Column",
+						"type": "String"
+					},
+					{
+						"name": "Watermark_Value",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Event_Blob')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_AzureDataLakeStorage01')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"folderPath": "data/event",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ScaleCosmos_Increase_RU')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LKP_ScaleCosmos_Config",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ScaleCosmos_Pos",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "FLTR_Collection_RU_Increase",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "LKP_ScaleCosmos_Config",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LKP_ScaleCosmos_Config').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@and(and(and(equals(item().CollectionName,pipeline().parameters.p_CollectionName),equals(item().DataFactoryName,pipeline().DataFactory)),equals(item().OperationRUCount,'Increase')),equals(item().fullorincl,pipeline().parameters.fullorincl))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetCommonAPISecret",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "FLTR_Collection_RU_Increase",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@activity('FLTR_Collection_RU_Increase').output.value[0].p_GetCommonAPISecret_URL",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "ScaleCosmosDB",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "GetCommonAPISecret",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@activity('FLTR_Collection_RU_Increase').output.value[0].p_ScaleCosmosDB_URL",
+								"type": "Expression"
+							},
+							"method": "POST",
+							"headers": {
+								"Ocp-Apim-Subscription-Key": {
+									"value": "@activity('GetCommonAPISecret').output.value",
+									"type": "Expression"
+								}
+							},
+							"body": {
+								"value": "@activity('FLTR_Collection_RU_Increase').output.value[0].p_ScaleCosmosDB_Body",
+								"type": "Expression"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"p_CollectionName": {
+						"type": "string"
+					},
+					"fullorincl": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "PosAPI"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-03-01T09:17:18Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ScaleCosmos_Pos')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_ScaleCosmos_Decrease_RU')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LKP_ScaleCosmos_Config",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_ScaleCosmos_Pos",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "FLTR_Collection_RU_Decrease",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "LKP_ScaleCosmos_Config",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LKP_ScaleCosmos_Config').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@and(and(equals(item().CollectionName,pipeline().parameters.p_CollectionName),equals(item().DataFactoryName,pipeline().DataFactory)),equals(item().OperationRUCount,'Decrease'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GetCommonAPISecret",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "FLTR_Collection_RU_Decrease",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@activity('FLTR_Collection_RU_Decrease').output.value[0].p_GetCommonAPISecret_URL",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "ScaleCosmosDB",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "GetCommonAPISecret",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@activity('FLTR_Collection_RU_Decrease').output.value[0].p_ScaleCosmosDB_URL",
+								"type": "Expression"
+							},
+							"method": "POST",
+							"headers": {
+								"Ocp-Apim-Subscription-Key": {
+									"value": "@activity('GetCommonAPISecret').output.value",
+									"type": "Expression"
+								}
+							},
+							"body": {
+								"value": "@activity('FLTR_Collection_RU_Decrease').output.value[0].p_ScaleCosmosDB_Body",
+								"type": "Expression"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"p_CollectionName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "PosAPI"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-03-01T09:17:17Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ScaleCosmos_Pos')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Common_DB2_Generic_Copy_Incl')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Generic Copy pipeline for incremental load PMM (DB2) and CFD",
+				"activities": [
+					{
+						"name": "COPY_SRC_DB2_DATA_TO_ADLS",
+						"description": "Copy Generic DB2 Data to Data Lake",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LKP_GET_MAXDATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "LKP_GET_PREV_MAXDATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OdbcSource",
+								"query": {
+									"value": "SELECT * FROM @{pipeline().parameters.dbvalue}@{pipeline().parameters.databaseName}.@{pipeline().parameters.tableName}\nWHERE @{pipeline().parameters.watermarkColumnName} > TIMESTAMP_FORMAT(REPLACE('@{activity('LKP_GET_PREV_MAXDATE').output.firstRow.Watermark_Value}','T',''),'YYYY-MM-DD HH24:MI:SS:NNNNNN')  \nand @{pipeline().parameters.watermarkColumnName} <='@{activity('LKP_GET_MAXDATE').output.firstRow.max_updated_time}'\nFOR FETCH ONLY WITH UR",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 10
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_DB2_Generic",
+								"type": "DatasetReference",
+								"parameters": {
+									"databaseName": {
+										"value": "@pipeline().parameters.databaseName",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"userName": {
+										"value": "@pipeline().parameters.userName",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_SINK_Generic_csv",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": {
+										"value": "@pipeline().parameters.fileName",
+										"type": "Expression"
+									},
+									"folderName": {
+										"value": "@pipeline().parameters.folderName",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "LKP_GET_MAXDATE",
+						"description": "Get the latest max watermark date from database",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OdbcSource",
+								"query": {
+									"value": "SELECT max(@{pipeline().parameters.WatermarkColumnName}) as max_updated_time FROM @{pipeline().parameters.dbvalue}@{pipeline().parameters.databaseName}.@{pipeline().parameters.tableName} FOR FETCH ONLY WITH UR",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "DS_DB2_Generic",
+								"type": "DatasetReference",
+								"parameters": {
+									"databaseName": {
+										"value": "@pipeline().parameters.databaseName",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"userName": {
+										"value": "@pipeline().parameters.userName",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					},
+					{
+						"name": "UPDATE_PREPROCESS_FILE",
+						"description": "Copy the data from postprocess to preprocess file",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SRC_Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SRC_Name"
+										}
+									},
+									{
+										"source": {
+											"name": "SRC_Table",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SRC_Table"
+										}
+									},
+									{
+										"source": {
+											"name": "Watermark_Column",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Watermark_Column"
+										}
+									},
+									{
+										"source": {
+											"name": "Watermark_Value",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Watermark_Value"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_COMM_POSTPROCESS_CSV",
+								"type": "DatasetReference",
+								"parameters": {
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_COMM_PREPROCESS_CSV",
+								"type": "DatasetReference",
+								"parameters": {
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "LKP_GET_PREV_MAXDATE",
+						"description": "Get the previous  max watermark date from pre-process file",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "UPDATE_PREPROCESS_FILE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_COMM_PREPROCESS_CSV",
+								"type": "DatasetReference",
+								"parameters": {
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					},
+					{
+						"name": "UPDATE_POSTPROCESS_FILE",
+						"description": "Update the max watermark date in post-process file",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Databricks Notebook for cleansing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "SRC_Name",
+										"value": {
+											"value": "@pipeline().parameters.sourceSystem",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "SRC_Table",
+										"value": {
+											"value": "@pipeline().parameters.tableName",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Watermark_Column",
+										"value": {
+											"value": "@pipeline().parameters.watermarkColumnName",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Watermark_Value",
+										"value": {
+											"value": "@if(equals(activity('LKP_GET_MAXDATE').output.firstRow.max_updated_time,null),null,\nformatDateTime(activity('LKP_GET_MAXDATE').output.firstRow.max_updated_time,'yyyy-MM-ddTHH:mm:ss:ffffff'))",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SRC_Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SRC_Name"
+										}
+									},
+									{
+										"source": {
+											"name": "SRC_Table",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SRC_Table"
+										}
+									},
+									{
+										"source": {
+											"name": "Watermark_Column",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Watermark_Column"
+										}
+									},
+									{
+										"source": {
+											"name": "Watermark_Value",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Watermark_Value"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_COMM_CONTROL_CSV",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_COMM_POSTPROCESS_CSV",
+								"type": "DatasetReference",
+								"parameters": {
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CREATE_AUDIT_FILE",
+						"description": "Create audit file into Datalake",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "UPDATE_POSTPROCESS_FILE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "Watermark_Value_Latest",
+										"value": {
+											"value": "@{formatDateTime(activity('LKP_GET_MAXDATE').output.firstRow.max_updated_time,'yyyy-MM-ddTHH:mm:ss:ffffff')}",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Pipeline_Name",
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Pipeline_Runid",
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Rows_Copied",
+										"value": {
+											"value": "@activity('COPY_SRC_DB2_DATA_TO_ADLS').output.rowsCopied",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Pipeline_Runtime_UTC",
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "SRC_Name",
+										"value": {
+											"value": "@pipeline().parameters.sourceSystem",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "SRC_Table",
+										"value": {
+											"value": "@pipeline().parameters.tableName",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Watermark_Column",
+										"value": {
+											"value": "@pipeline().parameters.watermarkColumnName",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Watermark_Value_Previous",
+										"value": {
+											"value": "@{activity('LKP_GET_PREV_MAXDATE').output.firstRow.Watermark_Value}",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Rows_Read",
+										"value": {
+											"value": "@activity('COPY_SRC_DB2_DATA_TO_ADLS').output.rowsRead",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SRC_Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SRC_Name"
+										}
+									},
+									{
+										"source": {
+											"name": "SRC_Table",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SRC_Table"
+										}
+									},
+									{
+										"source": {
+											"name": "Watermark_Column",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Watermark_Column"
+										}
+									},
+									{
+										"source": {
+											"name": "Watermark_Value_Previous",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Watermark_Value_Previous"
+										}
+									},
+									{
+										"source": {
+											"name": "Watermark_Value_Latest",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Watermark_Value_Latest"
+										}
+									},
+									{
+										"source": {
+											"name": "Rows_Read",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Rows_Read"
+										}
+									},
+									{
+										"source": {
+											"name": "Rows_Copied",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Rows_Copied"
+										}
+									},
+									{
+										"source": {
+											"name": "Pipeline_Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Pipeline_Name"
+										}
+									},
+									{
+										"source": {
+											"name": "Pipeline_Runid",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Pipeline_Runid"
+										}
+									},
+									{
+										"source": {
+											"name": "Pipeline_Runtime_UTC",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Pipeline_Runtime_UTC"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_COMM_CONTROL_CSV",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_COMM_AUDIT_CSV",
+								"type": "DatasetReference",
+								"parameters": {
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@pipeline().parameters.fileName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "DELETE FILE FROM ADLS",
+						"description": "Delete SQLServer Data from Data Lake in case of failure",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "UPDATE_POSTPROCESS_FILE",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_SINK_Generic_csv",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": {
+										"value": "@pipeline().parameters.fileName",
+										"type": "Expression"
+									},
+									"folderName": {
+										"value": "@pipeline().parameters.folderName",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									}
+								}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true
+							}
+						}
+					},
+					{
+						"name": "Databricks Notebook for cleansing",
+						"description": "Registering the log details in a delta table using databricks activity",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "COPY_SRC_DB2_DATA_TO_ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Published/DATA/CLEANSE/getRawFiles",
+							"baseParameters": {
+								"tableName": {
+									"value": "@pipeline().parameters.tableName",
+									"type": "Expression"
+								},
+								"fileName": {
+									"value": "@concat(pipeline().parameters.fileName,'.csv')",
+									"type": "Expression"
+								},
+								"filePath": {
+									"value": "@concat('data/',pipeline().parameters.domain,'/',pipeline().parameters.sourceSystem,'/',pipeline().parameters.tableName,'/',pipeline().parameters.folderName,'/')",
+									"type": "Expression"
+								},
+								"timestampIngested": {
+									"value": "@utcnow()",
+									"type": "Expression"
+								},
+								"rowsCopied": {
+									"value": "@string(activity('COPY_SRC_DB2_DATA_TO_ADLS').output.rowsCopied)",
+									"type": "Expression"
+								},
+								"domain": {
+									"value": "@pipeline().parameters.domain",
+									"type": "Expression"
+								},
+								"sourceSystem": {
+									"value": "@pipeline().parameters.sourceSystem",
+									"type": "Expression"
+								},
+								"Watermark_Value": {
+									"value": "@activity('LKP_GET_MAXDATE').output.firstRow.max_updated_time",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('LS_AzureDatabricks_01')]",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"tableName": {
+						"type": "string"
+					},
+					"databaseName": {
+						"type": "string"
+					},
+					"dbvalue": {
+						"type": "string"
+					},
+					"domain": {
+						"type": "string"
+					},
+					"sourceSystem": {
+						"type": "string"
+					},
+					"folderName": {
+						"type": "string"
+					},
+					"watermarkColumnName": {
+						"type": "string"
+					},
+					"fileName": {
+						"type": "string"
+					},
+					"userName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Digital-Merchandising/DB2/Common"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_DB2_Generic')]",
+				"[concat(variables('factoryId'), '/datasets/DS_SINK_Generic_csv')]",
+				"[concat(variables('factoryId'), '/datasets/DS_COMM_POSTPROCESS_CSV')]",
+				"[concat(variables('factoryId'), '/datasets/DS_COMM_PREPROCESS_CSV')]",
+				"[concat(variables('factoryId'), '/datasets/DS_COMM_CONTROL_CSV')]",
+				"[concat(variables('factoryId'), '/datasets/DS_COMM_AUDIT_CSV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Common_DB2_Generic_Copy_Full')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Generic Copy pipeline for full load PMM (DB2) and CFD",
+				"activities": [
+					{
+						"name": "LKP_GET_MAXDATE",
+						"description": "Extracting the maximum timestamp from the set of records",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OdbcSource",
+								"query": {
+									"value": "SELECT max(@{pipeline().parameters.WatermarkColumnName}) as maxupdatedtime FROM @{pipeline().parameters.dbvalue}@{pipeline().parameters.databaseName}.@{pipeline().parameters.tableName} FOR FETCH ONLY WITH UR",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "DS_DB2_Generic",
+								"type": "DatasetReference",
+								"parameters": {
+									"databaseName": {
+										"value": "@pipeline().parameters.databaseName",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"userName": {
+										"value": "@pipeline().parameters.userName",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "COPY_SRC_DB2_DATA_TO_ADLS",
+						"description": "Copying the set of records till maximum timestamp from source system to ADLS ",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LKP_GET_MAXDATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OdbcSource",
+								"query": {
+									"value": "SELECT * FROM @{pipeline().parameters.dbvalue}@{pipeline().parameters.databaseName}.@{pipeline().parameters.tableName} WHERE @{pipeline().parameters.WatermarkColumnName} <='@{activity('LKP_GET_MAXDATE').output.firstRow.maxupdatedtime}'  FOR FETCH ONLY WITH UR",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"parallelCopies": 10
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_DB2_Generic",
+								"type": "DatasetReference",
+								"parameters": {
+									"databaseName": {
+										"value": "@pipeline().parameters.databaseName",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"userName": {
+										"value": "@pipeline().parameters.userName",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_SINK_Generic_csv",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": {
+										"value": "@pipeline().parameters.fileName",
+										"type": "Expression"
+									},
+									"folderName": {
+										"value": "@pipeline().parameters.folderName",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "CREATE_POSTPROCESS_FILE",
+						"description": "Get the maximum watermark date in a file",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Databricks Notebook for cleansing",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "SRC_Table",
+										"value": {
+											"value": "@pipeline().parameters.tableName",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Watermark_Column",
+										"value": {
+											"value": "@pipeline().parameters.WatermarkColumnName",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Watermark_Value",
+										"value": {
+											"value": "@formatDateTime(activity('LKP_GET_MAXDATE').output.firstRow.maxupdatedtime,'yyyy-MM-ddTHH:mm:ss:ffffff')",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "SRC_Name",
+										"value": {
+											"value": "@pipeline().parameters.sourceSystem",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SRC_Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SRC_Name"
+										}
+									},
+									{
+										"source": {
+											"name": "SRC_Table",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SRC_Table"
+										}
+									},
+									{
+										"source": {
+											"name": "Watermark_Column",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Watermark_Column"
+										}
+									},
+									{
+										"source": {
+											"name": "Watermark_Value",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Watermark_Value"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_COMM_CONTROL_CSV",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_COMM_POSTPROCESS_CSV",
+								"type": "DatasetReference",
+								"parameters": {
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Databricks Notebook for cleansing",
+						"description": "Registering the log details in a delta table using databricks notebook activity",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "COPY_SRC_DB2_DATA_TO_ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Published/DATA/CLEANSE/getRawFiles",
+							"baseParameters": {
+								"tableName": {
+									"value": "@pipeline().parameters.tableName",
+									"type": "Expression"
+								},
+								"fileName": {
+									"value": "@concat(pipeline().parameters.fileName,'.csv')",
+									"type": "Expression"
+								},
+								"filePath": {
+									"value": "@concat('data/',pipeline().parameters.domain,'/',pipeline().parameters.sourceSystem,'/',pipeline().parameters.tableName,'/',pipeline().parameters.folderName,'/')",
+									"type": "Expression"
+								},
+								"timestampIngested": {
+									"value": "@utcnow()",
+									"type": "Expression"
+								},
+								"rowsCopied": {
+									"value": "@string(activity('COPY_SRC_DB2_DATA_TO_ADLS').output.rowsCopied)",
+									"type": "Expression"
+								},
+								"sourceSystem": {
+									"value": "@pipeline().parameters.sourceSystem",
+									"type": "Expression"
+								},
+								"domain": {
+									"value": "@pipeline().parameters.domain",
+									"type": "Expression"
+								},
+								"Watermark_Value": {
+									"value": "@activity('LKP_GET_MAXDATE').output.firstRow.maxupdatedtime",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('LS_AzureDatabricks_01')]",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"tableName": {
+						"type": "string"
+					},
+					"databaseName": {
+						"type": "string"
+					},
+					"dbvalue": {
+						"type": "string"
+					},
+					"WatermarkColumnName": {
+						"type": "string"
+					},
+					"sourceSystem": {
+						"type": "string"
+					},
+					"domain": {
+						"type": "string"
+					},
+					"folderName": {
+						"type": "string"
+					},
+					"fileName": {
+						"type": "string"
+					},
+					"userName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Digital-Merchandising/DB2/Common"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_DB2_Generic')]",
+				"[concat(variables('factoryId'), '/datasets/DS_SINK_Generic_csv')]",
+				"[concat(variables('factoryId'), '/datasets/DS_COMM_CONTROL_CSV')]",
+				"[concat(variables('factoryId'), '/datasets/DS_COMM_POSTPROCESS_CSV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ScaleCosmos_Pos')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_AzureDataLakeStorage01')]",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Pos_ScaleCosmosDB_config.csv",
+						"folderPath": "configuration/Pos",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": "|",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_DB2_Generic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('Odbc1')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"databaseName": {
+						"type": "string"
+					},
+					"tableName": {
+						"type": "string"
+					},
+					"userName": {
+						"type": "string",
+						"defaultValue": "APEXINT"
+					}
+				},
+				"folder": {
+					"name": "DB2"
+				},
+				"annotations": [],
+				"type": "OdbcTable",
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SINK_Generic_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_AzureDataLakeStorage01')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"fileName": {
+						"type": "string",
+						"defaultValue": "FileName"
+					},
+					"folderName": {
+						"type": "string",
+						"defaultValue": "full"
+					},
+					"domain": {
+						"type": "string"
+					},
+					"sourceSystem": {
+						"type": "string"
+					},
+					"tableName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Common"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@{dataset().folderName}/@{dataset().fileName}.csv",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@{dataset().domain}/@{dataset().sourceSystem}/@{dataset().tableName}",
+							"type": "Expression"
+						},
+						"fileSystem": "raw/data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_COMM_POSTPROCESS_CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_AzureDataLakeStorage01')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tableName": {
+						"type": "string"
+					},
+					"domain": {
+						"type": "string"
+					},
+					"sourceSystem": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Common"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@{dataset().tableName}_postprocess.txt",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@{dataset().domain}/@{dataset().sourceSystem}/@{dataset().tableName}",
+							"type": "Expression"
+						},
+						"fileSystem": "raw/data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": ""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_COMM_PREPROCESS_CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_AzureDataLakeStorage01')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tableName": {
+						"type": "string"
+					},
+					"domain": {
+						"type": "string"
+					},
+					"sourceSystem": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Common"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@{dataset().tableName}_preprocess.txt",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@{dataset().domain}/@{dataset().sourceSystem}/@{dataset().tableName}",
+							"type": "Expression"
+						},
+						"fileSystem": "raw/data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": ""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_COMM_AUDIT_CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "[parameters('LS_AzureDataLakeStorage01')]",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"sourceSystem": {
+						"type": "string"
+					},
+					"domain": {
+						"type": "string"
+					},
+					"tableName": {
+						"type": "string"
+					},
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Common"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@{dataset().fileName}.txt",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@{dataset().domain}/@{dataset().sourceSystem}/@{dataset().tableName}/audit",
+							"type": "Expression"
+						},
+						"fileSystem": "raw/data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": ""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		}
+	]
+}

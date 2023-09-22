@@ -1,0 +1,45 @@
+{
+	"name": "PL_ADRM_Schema_Generation",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_ADRM_SCHEMA_GEN",
+				"description": "Master notebook to generate schema of entities",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Master_ADRM_Schema_Gen",
+					"baseParameters": {
+						"entity_name": {
+							"value": "@pipeline().parameters.entity_name",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"entity_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-03T11:19:38Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

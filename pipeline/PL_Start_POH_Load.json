@@ -1,0 +1,396 @@
+{
+	"name": "PL_Start_POH_Load",
+	"properties": {
+		"activities": [
+			{
+				"name": "Check Event File",
+				"type": "Validation",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "STO_UPC_event.blob"
+						}
+					},
+					"timeout": "00.00:10:00",
+					"sleep": 10
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Check Event File",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('Check Event File').output.exists,bool(true))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Start the POH Load",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Export_POH_To_Cosmos_new",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"collectioname": "StoreItem",
+									"fullorincl": "I"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "RESTORE_POSTPROCESS_FILE STO_UPC",
+				"description": "Copy the data from preprocess to postprocess file",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "If Condition1",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SRC_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SRC_Table",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Table",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Column",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Column",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Value",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Value",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_PREPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "STO_UPC",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "Merchandising",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "PMM",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_COMM_POSTPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "STO_UPC",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "Merchandising",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "PMM",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "RESTORE_POSTPROCESS_FILE ATP_LOGIS_HST",
+				"description": "Copy the data from preprocess to postprocess file",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "If Condition1",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SRC_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SRC_Table",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Table",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Column",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Column",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Value",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Value",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_PREPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "NEW_IS_SELLABLE_LOGIC_HST",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "Pos",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "ATP",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_COMM_POSTPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "NEW_IS_SELLABLE_LOGIC_HST",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "Pos",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "ATP",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Generate Event for Next Run",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "If Condition1",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "STO_UPC_event.blob"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "PosAPI/POH"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,130 @@
+{
+	"name": "PL_ADRM_ULT_ATTR_ADDITION_Load",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_TeraData_CONFIG_Promo_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "ADRM_ULT_ATTRIBUTE_ADDITION_CONFIG.csv"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Filter1",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Lookup1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(equals(item().SourceSystem,pipeline().parameters.p_sourceSystem),equals(item().Domain,pipeline().parameters.p_domain))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Filter1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Filter1').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "PL_Generic_ADRM_ULT_Load",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Generic_ADRM_ULT_Load",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"p_tableName": {
+										"value": "@item().TableName",
+										"type": "Expression"
+									},
+									"p_sourceSystem": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									},
+									"p_domain": {
+										"value": "@item().Domain",
+										"type": "Expression"
+									},
+									"p_LevelExec": {
+										"value": "@item().LevelExec",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_domain": {
+				"type": "string"
+			},
+			"p_sourceSystem": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": []
+	}
+}

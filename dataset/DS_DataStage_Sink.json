@@ -1,0 +1,39 @@
+{
+	"name": "DS_DataStage_Sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_Promo_Datastage",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"hostid": {
+					"value": "@dataset().hostid",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"hostid": {
+				"type": "string"
+			},
+			"filePath": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "SftpLocation",
+				"fileName": "data.csv.gz",
+				"folderPath": {
+					"value": "@dataset().filePath",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"name": "LS_NASFile_UPC_LOC_Serve",
+	"properties": {
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "\\\\ius.apex.com\\mjrdata\\Apex",
+			"userId": "US\\EDAFSI",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault01",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "fsapexpassword"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHosted-IR-BI-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

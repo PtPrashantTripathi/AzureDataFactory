@@ -1,0 +1,380 @@
+{
+	"name": "PL_Common_DB2_Generic_Copy_Full",
+	"properties": {
+		"description": "Generic Copy pipeline for full load PMM (DB2) and CFD",
+		"activities": [
+			{
+				"name": "LKP_GET_MAXDATE",
+				"description": "Extracting the maximum timestamp from the set of records",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OdbcSource",
+						"query": {
+							"value": "@concat('SELECT max(',string(pipeline().parameters.WatermarkColumnName), ') as maxupdatedtime FROM ', string(pipeline().parameters.dbvalue),string(pipeline().parameters.databaseName),'.',string(pipeline().parameters.tableName),' FOR FETCH ONLY WITH UR')",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "DS_DB2_Generic",
+						"type": "DatasetReference",
+						"parameters": {
+							"databaseName": {
+								"value": "@pipeline().parameters.databaseName",
+								"type": "Expression"
+							},
+							"tableName": {
+								"value": "@pipeline().parameters.tableName",
+								"type": "Expression"
+							},
+							"userName": {
+								"value": "@pipeline().parameters.userName",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "COPY_SRC_DB2_DATA_TO_ADLS",
+				"description": "Copying the set of records till maximum timestamp from source system to ADLS ",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "LKP_GET_MAXDATE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OdbcSource",
+						"query": {
+							"value": "SELECT UPC_ID,UT_ID,PKY_ID,MPRS_CT_ID,UPC_CB_FTG_QT,UPC_INV_CLRN_ID,UPC_RND_CNT_DT,RW_UDT_USER_ID,RW_UDT_TS,P_MJR_PFRM_CST_AM,STO_T_UPC_INV_AM,UPC_T_FNC_CHR_AM,UPC_T_FNC_CR_AM,UPC_T_STG_CHR_AM,UPC_T_STO_HDL_AM,UPC_T_STO_HDL_AM,UPC_T_FRT_AM,UPC_T_DC_HDL_AM,UPC_BOY_CST_AM,UPC_EOY_CST_AM,UPC_FST_RCT_CST_AM,UPC_FST_RCT_DT,UPC_FCL_YR_NW_ID,PHY_CNT_LST_ADJ,LST_PHY_INV_DT,POS_BLBK_FLG,STO_POH_DCML_QT,UPC_LST_SL_DT,YTD_SL_QT,YTD_SL_AM,YTD_RCT_QT,LST_RCT_QT,LST_RCT_DT,LST_RCT_CT,ZER_POH_FLG  FROM @{pipeline().parameters.dbvalue}@{pipeline().parameters.databaseName}.@{pipeline().parameters.tableName} WHERE @{pipeline().parameters.WatermarkColumnName} <='@{activity('LKP_GET_MAXDATE').output.firstRow.maxupdatedtime}'  FOR FETCH ONLY WITH UR",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"parallelCopies": 10
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_DB2_Generic",
+						"type": "DatasetReference",
+						"parameters": {
+							"databaseName": {
+								"value": "@pipeline().parameters.databaseName",
+								"type": "Expression"
+							},
+							"tableName": {
+								"value": "@pipeline().parameters.tableName",
+								"type": "Expression"
+							},
+							"userName": {
+								"value": "@pipeline().parameters.userName",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_SINK_Generic_csv",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": {
+								"value": "@pipeline().parameters.fileName",
+								"type": "Expression"
+							},
+							"folderName": {
+								"value": "@pipeline().parameters.folderName",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "@pipeline().parameters.domain",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "@pipeline().parameters.sourceSystem",
+								"type": "Expression"
+							},
+							"tableName": {
+								"value": "@pipeline().parameters.tableName",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "CREATE_POSTPROCESS_FILE",
+				"description": "Get the maximum watermark date in a file",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Databricks Notebook for cleansing",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "SRC_Table",
+								"value": {
+									"value": "@pipeline().parameters.tableName",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Watermark_Column",
+								"value": {
+									"value": "@pipeline().parameters.WatermarkColumnName",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Watermark_Value",
+								"value": {
+									"value": "@formatDateTime(activity('LKP_GET_MAXDATE').output.firstRow.maxupdatedtime,'yyyy-MM-ddTHH:mm:ss:ffffff')",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "SRC_Name",
+								"value": {
+									"value": "@pipeline().parameters.sourceSystem",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SRC_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Name"
+								}
+							},
+							{
+								"source": {
+									"name": "SRC_Table",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Table"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Column",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Column"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Value",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Value"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_COMM_POSTPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "@pipeline().parameters.tableName",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "@pipeline().parameters.domain",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "@pipeline().parameters.sourceSystem",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Databricks Notebook for cleansing",
+				"description": "Registering the log details in a delta table using databricks notebook activity",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "COPY_SRC_DB2_DATA_TO_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published/DATA/CLEANSE/getRawFiles",
+					"baseParameters": {
+						"tableName": {
+							"value": "@pipeline().parameters.tableName",
+							"type": "Expression"
+						},
+						"fileName": {
+							"value": "@concat(pipeline().parameters.fileName,'.csv')",
+							"type": "Expression"
+						},
+						"filePath": {
+							"value": "@concat('data/',pipeline().parameters.domain,'/',pipeline().parameters.sourceSystem,'/',pipeline().parameters.tableName,'/',pipeline().parameters.folderName,'/')",
+							"type": "Expression"
+						},
+						"timestampIngested": {
+							"value": "@utcnow()",
+							"type": "Expression"
+						},
+						"rowsCopied": {
+							"value": "@string(activity('COPY_SRC_DB2_DATA_TO_ADLS').output.rowsCopied)",
+							"type": "Expression"
+						},
+						"sourceSystem": {
+							"value": "@pipeline().parameters.sourceSystem",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@pipeline().parameters.domain",
+							"type": "Expression"
+						},
+						"Watermark_Value": {
+							"value": "@activity('LKP_GET_MAXDATE').output.firstRow.maxupdatedtime",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"tableName": {
+				"type": "string"
+			},
+			"databaseName": {
+				"type": "string"
+			},
+			"dbvalue": {
+				"type": "string"
+			},
+			"WatermarkColumnName": {
+				"type": "string"
+			},
+			"sourceSystem": {
+				"type": "string"
+			},
+			"domain": {
+				"type": "string"
+			},
+			"folderName": {
+				"type": "string"
+			},
+			"fileName": {
+				"type": "string"
+			},
+			"userName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Digital-Merchandising/DB2/Common"
+		},
+		"annotations": []
+	}
+}

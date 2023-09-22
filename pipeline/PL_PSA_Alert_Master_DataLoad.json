@@ -1,0 +1,66 @@
+{
+	"name": "PL_PSA_Alert_Master_DataLoad",
+	"properties": {
+		"activities": [
+			{
+				"name": "Exec PSA Alert Stage Data Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PSA_Alert_Adls_Stage_DataLoad",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Exec PSA Alert Cosmos DB Data Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Exec PSA Alert Stage Data Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PSA_Alert_Cosmos_DataLoad",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Exec PSA Alert Synapse Data Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Exec PSA Alert Stage Data Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PSA_Alert_Synapse_DataLoad",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "PosAPI/PSA"
+		},
+		"annotations": [
+			"PSA Alert Data Load"
+		]
+	}
+}

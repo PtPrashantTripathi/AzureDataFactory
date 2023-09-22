@@ -1,0 +1,16 @@
+appendCommitMessageToRunName: false
+
+variables:
+  - group: VG_${{ variables['Build.Repository.Name'] }}
+
+trigger: none
+
+resources:
+  repositories:
+    - repository: Apex_DevOps
+      name: Apex/Apex_DevOps
+      type: git
+      ref: 'main'
+
+extends:
+  template: templates/extends/adf/CICD_CERT_ReleaseCandidate.yml@Apex_DevOps

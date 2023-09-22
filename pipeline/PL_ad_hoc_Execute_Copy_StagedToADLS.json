@@ -1,0 +1,136 @@
+{
+	"name": "PL_ad_hoc_Execute_Copy_StagedToADLS",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FLTR_SRC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FLTR_SRC').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Staged_To_ADLS_On_Ad_Hoc_req",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ad_hoc_Generic_Copy_Staged_To_ADLS",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"domain": {
+										"value": "@item().Domain",
+										"type": "Expression"
+									},
+									"stagedContainerPath": {
+										"value": "@item().StagedContainerPath",
+										"type": "Expression"
+									},
+									"posContainerPath": {
+										"value": "@item().PosContainerPath",
+										"type": "Expression"
+									},
+									"sourceFolder": {
+										"value": "@item().SourceFolder",
+										"type": "Expression"
+									},
+									"date": {
+										"value": "@item().Date",
+										"type": "Expression"
+									},
+									"numberOfDates": {
+										"value": "@item().NumberOfDates",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "LKP_CONFIG_FILE",
+				"description": "This activity reads from a source file located in configuration in the Data Lake",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_TeraData_CONFIG_Promo_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "SERVE_ADLS_AD_HOC_CONFIGURATION.csv"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_SRC",
+				"description": "",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_CONFIG_FILE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_CONFIG_FILE').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().Domain,pipeline().parameters.domain)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"domain": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/DOB"
+		},
+		"annotations": []
+	}
+}

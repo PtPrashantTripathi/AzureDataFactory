@@ -1,0 +1,29 @@
+{
+	"name": "TRG_PROMO_TERADATA_INCL4",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl_Promo",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_DatabaseName": "VPROD_PR_PROMO_HST",
+					"p_SourceSystem": "PosPromo"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-07-14T05:00:00",
+				"endTime": "2022-07-30T00:01:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

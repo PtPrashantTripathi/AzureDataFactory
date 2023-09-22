@@ -1,0 +1,21 @@
+{
+	"name": "DS_UPC_LOC_Source_Data",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_NASFile_UPC_LOC_Serve",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "UPC_LOC_NAS"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"folderPath": "Pos\\UPC_LOC"
+			}
+		},
+		"schema": {}
+	}
+}

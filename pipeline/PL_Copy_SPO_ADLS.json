@@ -1,0 +1,234 @@
+{
+	"name": "PL_Copy_SPO_ADLS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy_Sharepoint_Stg_Adls",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Read Bearer Token From ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": true
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "GET",
+							"additionalHeaders": {
+								"value": "@{concat('Authorization: Bearer ', activity('Read Bearer Token From ADLS').output.firstRow.Prop_0)}",
+								"type": "Expression"
+							},
+							"requestTimeout": ""
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_SPO",
+						"type": "DatasetReference",
+						"parameters": {
+							"FilePath": {
+								"value": "@pipeline().parameters.FilePath",
+								"type": "Expression"
+							},
+							"SP_Site": {
+								"value": "@pipeline().parameters.SP_Site",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADLS_Staged",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": "staged",
+							"Directory": "datascience/Merch/DOB/Merch Override",
+							"FileName": "DOB Merchant Override.xlsx"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy_Stg_DS_Adls",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy_Sharepoint_Stg_Adls",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ExcelSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Stg_Adls",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": "staged",
+							"Directory": "datascience/Merch/DOB/Merch Override",
+							"FileName": "DOB Merchant Override.xlsx",
+							"SheetName": "Merch Override"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_DataScience_Adls",
+						"type": "DatasetReference",
+						"parameters": {
+							"Container": "datascience",
+							"Directory": "Merch/DOB/Merch Override",
+							"FileName": "Merch Override.csv"
+						}
+					}
+				]
+			},
+			{
+				"name": "Connect_SharePoint_Get_Access_Token",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SharePoint_Utility_Connectivity",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"KeyVaultDNSName": "https://kv-np-ea2-apex-etl-int.vault.azure.net",
+						"SecretName_TenantId": "TenantID",
+						"SecretName_SPClientId": "Apex-Data-Science-SharepointAccess-ClientId",
+						"SecretName_SPSecret": "Apex-Data-Science-SharepointAccess-ClientSecret"
+					}
+				}
+			},
+			{
+				"name": "Read Bearer Token From ADLS",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Connect_SharePoint_Get_Access_Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": false,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ADLS_ControlFile",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			}
+		],
+		"parameters": {
+			"FilePath": {
+				"type": "string",
+				"defaultValue": "/Shared%20Documents/Forecasting/DOB%20shared/DOB%20Merchant%20Override.xlsx"
+			},
+			"SP_Site": {
+				"type": "string",
+				"defaultValue": "advancedanalytics"
+			},
+			"SecretName_TenantId": {
+				"type": "string",
+				"defaultValue": "TenantID"
+			},
+			"SecretName_SPClientId": {
+				"type": "string",
+				"defaultValue": "Apex-Data-Science-SharepointAccess-ClientId"
+			},
+			"SecretName_SPSecret": {
+				"type": "string",
+				"defaultValue": "Apex-Data-Science-SharApex-Data-Science-SharepointAccess-ClientSecretepointAccess-ClientSecret"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/DOB"
+		},
+		"annotations": []
+	}
+}

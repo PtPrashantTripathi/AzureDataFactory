@@ -1,0 +1,49 @@
+{
+	"name": "PL_Common_NonADRM_PO",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_NonADRM_Entity",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/PO_TABLES/Master_Notebook_PO",
+					"baseParameters": {
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						},
+						"entity_name": {
+							"value": "@pipeline().parameters.entity_name",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"fullorincl": {
+				"type": "string"
+			},
+			"entity_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/PO"
+		},
+		"annotations": []
+	}
+}

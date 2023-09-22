@@ -1,0 +1,27 @@
+{
+	"name": "TRG_DataScienceToStage_DOB",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_DOB_DataScienceToADLS",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_Domain": "DOB_roq"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/datascience/blobs/Merch/DOB/control/eventbased_roq/",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/6ed3c07f-2f9c-4a7b-bee4-3ee8620d38d1/resourceGroups/rg-np-apex-etl-int/providers/Microsoft.Storage/storageAccounts/saea2grsnpapexdlakeint",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

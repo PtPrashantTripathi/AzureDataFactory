@@ -1,0 +1,376 @@
+{
+	"name": "UPC_LOC_NAS_To_Raw_IPOP",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Metadata1",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "LKP_Previous_Last_Modified_Timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_UPC_LOC_Source_Data",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"lastModified",
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"recursive": true,
+						"modifiedDatetimeStart": {
+							"value": "@activity('LKP_Previous_Last_Modified_Timestamp').output.firstRow.Last_Modified_Timestamp",
+							"type": "Expression"
+						},
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "LKP_Previous_Last_Modified_Timestamp",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "If Condition1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_UPC_LOC_POSTPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": "UPC_LOC",
+							"domain": "UPC_LOC"
+						}
+					}
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.is_first_time,'Y')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "SRC_Name",
+											"value": {
+												"value": "UPC_LOC",
+												"type": "Expression"
+											}
+										},
+										{
+											"name": "Last_Modified_Timestamp",
+											"value": {
+												"value": "@formatDateTime('2000-01-01T00:00:00','yyyy-MM-ddTHH:mm:ss')",
+												"type": "Expression"
+											}
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "SRC_Name",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SRC_Name"
+											}
+										},
+										{
+											"source": {
+												"name": "Last_Modified_Timestamp",
+												"type": "String"
+											},
+											"sink": {
+												"name": "Last_Modified_Timestamp"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_COMM_CONTROL_CSV",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_UPC_LOC_POSTPROCESS_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"tableName": "UPC_LOC",
+										"domain": "UPC_LOC"
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.store_list",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 15,
+					"activities": [
+						{
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "IPOP_Generic_Store_Ingestion",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"store_file_list": {
+										"value": "@activity('Get Metadata1').output.childItems",
+										"type": "Expression"
+									},
+									"storeid_val": {
+										"value": "@item()",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Update PostProcess File",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "SRC_Name",
+								"value": {
+									"value": "UPC_LOC",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Last_Modified_Timestamp",
+								"value": {
+									"value": "@addseconds(formatDateTime(activity('Get Metadata1').output.lastModified,'yyyy-MM-dd HH:mm:ss'),1)",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SRC_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Name"
+								}
+							},
+							{
+								"source": {
+									"name": "Last_Modified_Timestamp",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Last_Modified_Timestamp"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_UPC_LOC_POSTPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": "UPC_LOC",
+							"domain": "UPC_LOC"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"is_first_time": {
+				"type": "string"
+			},
+			"store_list": {
+				"type": "array"
+			}
+		},
+		"variables": {
+			"filename_modified": {
+				"type": "String"
+			},
+			"filepath_raw": {
+				"type": "String"
+			},
+			"storeid_val": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": []
+	}
+}

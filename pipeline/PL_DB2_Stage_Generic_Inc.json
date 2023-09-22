@@ -1,0 +1,723 @@
+{
+	"name": "PL_DB2_Stage_Generic_Inc",
+	"properties": {
+		"description": "Pipeline to load the data from DB2 to ADLS (Source to CLEANSE to STAGE)",
+		"activities": [
+			{
+				"name": "LKP_CONFIG_FILE_DB2",
+				"description": "Get the details of the table from DB2 Configuration file",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "v_DestinationFolderStructure",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "v_CurrentTS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_DB2_CONFIG_Generic",
+						"type": "DatasetReference",
+						"parameters": {
+							"Domain": {
+								"value": "@pipeline().parameters.Domain",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FIL_SRC_TBL_ENTRY",
+				"description": "Filter the records from configuration file based on Source Table Name",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_CONFIG_FILE_DB2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_CONFIG_FILE_DB2').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(equals(item().SourceTableName,pipeline().parameters.SourceTable),equals(item().LoadType,'delta'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach_GET_SRC_DATA",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FIL_SRC_TBL_ENTRY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FIL_SRC_TBL_ENTRY').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "GET_MAX_WATERMARK_VALUE",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "Db2Source",
+									"query": {
+										"value": "SELECT MAX(@{item().WatermarkColumnName}) FROM @{item().databasename}.@{item().SourceTableName} FOR FETCH ONLY WITH UR",
+										"type": "Expression"
+									}
+								},
+								"dataset": {
+									"referenceName": "Db2_Connectivity",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "UPDATE_PREPROCESS_FILE",
+							"description": "Copy the data from postprocess to preprocess file",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "CURR_TS",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "CURR_TS",
+												"type": "String",
+												"physicalType": "String"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_POSTPROCESS_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"Domain": {
+											"value": "@{item().Domain}",
+											"type": "Expression"
+										},
+										"SourceTableName": {
+											"value": "@{item().SourceTableName}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_PREPROCESS_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"Domain": {
+											"value": "@{item().Domain}",
+											"type": "Expression"
+										},
+										"SourceTableName": {
+											"value": "@{item().SourceTableName}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "LKP_GET_PREV_MAXDATE",
+							"description": "Get the previous maximum timestamp (watermark) from pre-process file",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "UPDATE_PREPROCESS_FILE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"dataset": {
+									"referenceName": "DS_PREPROCESS_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"Domain": {
+											"value": "@{item().Domain}",
+											"type": "Expression"
+										},
+										"SourceTableName": {
+											"value": "@{item().SourceTableName}",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "UPDATE_POSTPROCESS_FILE",
+							"description": "Update the POST PROCESS File with the MAX DATE processed from source",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "If Condition To Check Delta",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "SRC_MAX_WATERMARK",
+											"value": {
+												"value": "@{activity('GET_MAX_WATERMARK_VALUE').output.firstRow.COL1}",
+												"type": "Expression"
+											}
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "SRC_MAX_WATERMARK",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "CURR_TS",
+												"type": "String",
+												"physicalType": "String"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_POSTPROCESS_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"Domain": {
+											"value": "@{item().Domain}",
+											"type": "Expression"
+										},
+										"SourceTableName": {
+											"value": "@{item().SourceTableName}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_POSTPROCESS_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"Domain": {
+											"value": "@{item().Domain}",
+											"type": "Expression"
+										},
+										"SourceTableName": {
+											"value": "@{item().SourceTableName}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "If Condition To Check Delta",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "GET_MAX_WATERMARK_VALUE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "LKP_GET_PREV_MAXDATE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@greater(activity('GET_MAX_WATERMARK_VALUE').output.firstRow.COL1, activity('LKP_GET_PREV_MAXDATE').output.firstRow.CURR_TS)",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "CheckWaterMarColumnFalse",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "v_CheckFalse",
+											"value": {
+												"value": "'No records are updated after Previous run'",
+												"type": "Expression"
+											}
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "CheckWaterMarColumnTrue",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "v_CheckTrue",
+											"value": {
+												"value": "'Records are updated after Previous run.'",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "COPY_SRC_RAW",
+										"type": "Copy",
+										"dependsOn": [
+											{
+												"activity": "CheckWaterMarColumnTrue",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "Db2Source",
+												"query": {
+													"value": "@{item().Query} @{item().databasename}.@{item().SourceTableName} \nwhere \n(@{item().WatermarkColumnName} >= '@{activity('LKP_GET_PREV_MAXDATE').output.firstRow.CURR_TS}') and \n(@{item().WatermarkColumnName} <= '@{activity('GET_MAX_WATERMARK_VALUE').output.firstRow.COL1}')\nFOR FETCH ONLY WITH UR",
+													"type": "Expression"
+												}
+											},
+											"sink": {
+												"type": "DelimitedTextSink",
+												"storeSettings": {
+													"type": "AzureBlobFSWriteSettings"
+												},
+												"formatSettings": {
+													"type": "DelimitedTextWriteSettings",
+													"quoteAllText": true,
+													"fileExtension": ".txt"
+												}
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "Db2_Connectivity",
+												"type": "DatasetReference"
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_GENERIC_COPY_CSV",
+												"type": "DatasetReference",
+												"parameters": {
+													"fileName": {
+														"value": "@concat(item().SourceTableName,'_',variables('v_CurrentTS'),'.csv')",
+														"type": "Expression"
+													},
+													"folderPath": {
+														"value": "@concat(item().DestinationFolderName,'/',variables('v_DestinationFolderStructure'))",
+														"type": "Expression"
+													},
+													"fileSystem": {
+														"value": "raw",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "NB_getRawFiles",
+										"type": "DatabricksNotebook",
+										"dependsOn": [
+											{
+												"activity": "COPY_SRC_RAW",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"notebookPath": {
+												"value": "@{item().getRawFiles}",
+												"type": "Expression"
+											},
+											"baseParameters": {
+												"tableName": {
+													"value": "@item().SourceTableName",
+													"type": "Expression"
+												},
+												"sourceSystem": {
+													"value": "RewardAllocation",
+													"type": "Expression"
+												},
+												"domain": {
+													"value": "@item().Domain",
+													"type": "Expression"
+												},
+												"rowsCopied": {
+													"value": "@string(activity('COPY_SRC_RAW').output.rowsCopied)",
+													"type": "Expression"
+												},
+												"Watermark_Value": {
+													"value": "@{activity('GET_MAX_WATERMARK_VALUE').output.firstRow.COL1}",
+													"type": "Expression"
+												},
+												"timestampIngested": {
+													"value": "@utcnow()",
+													"type": "Expression"
+												},
+												"filePath": {
+													"value": "@concat(item().DestinationFolderName,'/',variables('v_DestinationFolderStructure'))",
+													"type": "Expression"
+												},
+												"fileName": {
+													"value": "@concat(item().SourceTableName,'_',variables('v_CurrentTS'),'.csv')",
+													"type": "Expression"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "AzureDatabricks_DS3",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "CleanseNotebook",
+										"type": "DatabricksNotebook",
+										"dependsOn": [
+											{
+												"activity": "NB_getRawFiles",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"notebookPath": {
+												"value": "@{item().CleanseNotebook}",
+												"type": "Expression"
+											},
+											"baseParameters": {
+												"tableName": {
+													"value": "@item().SourceTableName",
+													"type": "Expression"
+												},
+												"sourceSystem": {
+													"value": "RewardAllocation",
+													"type": "Expression"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "AzureDatabricks_DS3",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "StageNotebook",
+										"type": "DatabricksNotebook",
+										"dependsOn": [
+											{
+												"activity": "CleanseNotebook",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"notebookPath": {
+												"value": "@{item().StageNotebook}",
+												"type": "Expression"
+											},
+											"baseParameters": {
+												"tableName": {
+													"value": "@item().SourceTableName",
+													"type": "Expression"
+												},
+												"sourceSystem": {
+													"value": "RewardAllocation",
+													"type": "Expression"
+												},
+												"EntityName": {
+													"value": "@item().EntityName",
+													"type": "Expression"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "AzureDatabricks_DS3",
+											"type": "LinkedServiceReference"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "v_DestinationFolderStructure",
+				"description": "Set Destination Folder Structure",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "v_DestinationFolderStructure",
+					"value": {
+						"value": "Year=@{formatDateTime(utcnow(),'yyyy')}/Month=@{formatDateTime(utcnow(),'MM')}/Date=@{formatDateTime(utcnow(),'dd')}/Hour=@{formatDateTime(utcnow(),'hh')}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "v_CurrentTS",
+				"description": "Set current timestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "v_CurrentTS",
+					"value": {
+						"value": "@utcnow()",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Domain": {
+				"type": "string",
+				"defaultValue": "Pos"
+			},
+			"SourceTable": {
+				"type": "string",
+				"defaultValue": "SSK_INF"
+			}
+		},
+		"variables": {
+			"v_DestinationFolderStructure": {
+				"type": "String"
+			},
+			"v_CurrentTS": {
+				"type": "String"
+			},
+			"v_CompletionTS": {
+				"type": "String"
+			},
+			"v_CheckTrue": {
+				"type": "String"
+			},
+			"v_CheckFalse": {
+				"type": "String"
+			},
+			"v_CheckRowCountTrue": {
+				"type": "String"
+			},
+			"v_CheckRowCountFalse": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Digital-Merchandising/DB2/SalesKeyInfo"
+		},
+		"annotations": []
+	}
+}

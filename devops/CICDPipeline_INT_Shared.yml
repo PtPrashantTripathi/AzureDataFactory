@@ -1,0 +1,25 @@
+appendCommitMessageToRunName: false
+
+variables:
+  - group: VG_${{ variables['Build.Repository.Name'] }}
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - development
+  paths:
+    exclude: 
+    - devops/*
+    include:
+    - /
+
+resources:
+  repositories:
+    - repository: Apex_DevOps
+      name: Apex/Apex_DevOps
+      type: git
+      ref: 'main'
+
+extends:
+  template: templates/extends/adf/CICD_INT_Shared.yml@Apex_DevOps

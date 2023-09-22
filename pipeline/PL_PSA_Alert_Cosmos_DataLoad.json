@@ -1,0 +1,94 @@
+{
+	"name": "PL_PSA_Alert_Cosmos_DataLoad",
+	"properties": {
+		"activities": [
+			{
+				"name": "Save Stage to CosmosDB",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Execute Increase RU for UPC_LOC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "00.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/PSA/COSMOSDB/ExportOSAAlerttoCosmos",
+					"baseParameters": {
+						"fullorincl": {
+							"value": "F",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Execute Increase RU for UPC_LOC",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "OSAAlert",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "F",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute Decrease RU for UPC_LOC",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Save Stage to CosmosDB",
+						"dependencyConditions": [
+							"Succeeded",
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "OSAAlert",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "PosAPI/PSA"
+		},
+		"annotations": []
+	}
+}

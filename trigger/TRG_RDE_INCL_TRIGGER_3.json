@@ -1,0 +1,28 @@
+{
+	"name": "TRG_LDE_INCL_TRIGGER_3",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl_LDE",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_DatabaseName": "VPROD_OPTM_P",
+					"p_SourceSystem": "RDE"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-04-27T05:00:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

@@ -1,0 +1,155 @@
+{
+	"name": "PL_ad_hoc_Generic_Copy_Staged_To_ADLS",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetDates",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/DOB/GetDatesAdHoc",
+					"baseParameters": {
+						"domain": {
+							"value": "@pipeline().parameters.domain",
+							"type": "Expression"
+						},
+						"stagedContainerPath": {
+							"value": "@pipeline().parameters.stagedContainerPath",
+							"type": "Expression"
+						},
+						"posContainerPath": {
+							"value": "@pipeline().parameters.posContainerPath",
+							"type": "Expression"
+						},
+						"date": {
+							"value": "@pipeline().parameters.date",
+							"type": "Expression"
+						},
+						"numberOfDates": {
+							"value": "@pipeline().parameters.numberOfDates",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetDates",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetDates').output.runOutput",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Copy data",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "JsonSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"wildcardFolderPath": {
+											"value": "@concat(pipeline().parameters.stagedContainerPath,'/',pipeline().parameters.sourceFolder,'_',item().date_str)",
+											"type": "Expression"
+										},
+										"wildcardFileName": "*.json",
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "JsonReadSettings"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"copyBehavior": "PreserveHierarchy"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DOB_JSON_Staged",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DOB_JSON_Pos",
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": {
+											"value": "@concat(pipeline().parameters.posContainerPath,'/',item().date)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"domain": {
+				"type": "string"
+			},
+			"stagedContainerPath": {
+				"type": "string"
+			},
+			"posContainerPath": {
+				"type": "string"
+			},
+			"sourceFolder": {
+				"type": "string"
+			},
+			"date": {
+				"type": "string"
+			},
+			"numberOfDates": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/DOB"
+		},
+		"annotations": []
+	}
+}

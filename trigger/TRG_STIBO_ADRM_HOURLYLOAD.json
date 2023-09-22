@@ -1,0 +1,28 @@
+{
+	"name": "TRG_STIBO_ADRM_HOURLYLOAD",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Execute_STIBO_ADRM_Synapse",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"fullorincl": "I",
+					"level": "-4"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 1,
+				"startTime": "2022-04-06T10:01:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

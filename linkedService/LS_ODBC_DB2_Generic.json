@@ -1,0 +1,48 @@
+{
+	"name": "LS_ODBC_DB2_Generic",
+	"properties": {
+		"type": "Odbc",
+		"parameters": {
+			"DB2ConnStrName": {
+				"type": "string",
+				"defaultValue": "DB2ConnectionString",
+				"metadata": "DB2 Connection String"
+			},
+			"DB2userName": {
+				"type": "string",
+				"metadata": "DB2 App ID"
+			},
+			"DB2Password": {
+				"type": "string",
+				"defaultValue": "db2password"
+			}
+		},
+		"annotations": [],
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"value": "DSN=DEV_DST1",
+				"store": {
+					"referenceName": "AzureKeyVault01",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "@linkedService().DB2ConnStrName"
+			},
+			"authenticationType": "Basic",
+			"userName": "@linkedService().DB2userName",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault01",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "@linkedService().DB2Password",
+				"value": "bn21ford"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHosted-IR-BI-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

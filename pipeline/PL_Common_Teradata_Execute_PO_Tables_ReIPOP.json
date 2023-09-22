@@ -1,0 +1,136 @@
+{
+	"name": "PL_Common_Teradata_Execute_PO_Tables_ReIPOP",
+	"properties": {
+		"activities": [
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.p_TableName,'PO_HST')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Execute Pipeline1 source to cleansed",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Teradata_Execute_Fact_Table_Copies_Partition",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"p_SourceSystem": {
+										"value": "@pipeline().parameters.p_SourceSystem",
+										"type": "Expression"
+									},
+									"p_DatabaseName": {
+										"value": "@pipeline().parameters.p_DatabaseName",
+										"type": "Expression"
+									},
+									"p_TableName": {
+										"value": "@pipeline().parameters.p_TableName",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Execute Pipeline2 cleansed to Staged",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Execute Pipeline1 source to cleansed",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_NonADRM_Pricing_Competitive",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"entity_name": "PO_LI_HST",
+									"fullorincl": "F"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Execute Pipeline1 PO Tables till cleansed",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Full_Pricing_Competitive",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"p_DatabaseName": {
+										"value": "@pipeline().parameters.p_DatabaseName",
+										"type": "Expression"
+									},
+									"p_SourceSystem": {
+										"value": "@pipeline().parameters.p_SourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Execute Pipeline2 till staged",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Execute Pipeline1 PO Tables till cleansed",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_NonADRM_Pricing_Competitive",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"entity_name": "PO_HST",
+									"fullorincl": "F"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_SourceSystem": {
+				"type": "string"
+			},
+			"p_DatabaseName": {
+				"type": "string"
+			},
+			"p_TableName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/Pricing Competitive"
+		},
+		"annotations": []
+	}
+}

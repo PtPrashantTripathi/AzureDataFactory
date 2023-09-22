@@ -1,0 +1,31 @@
+{
+	"name": "PL_UPC_LOC_External_Count_Validation",
+	"properties": {
+		"activities": [
+			{
+				"name": "Delta_Table_Update",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/UPC_LOC_External_Count_validation/UPC_LOC_External_Count_Validation"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_UPC_LOC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "PosAPI/UPC_LOC/UPC_LOC_COUNT_VALIDATION"
+		},
+		"annotations": []
+	}
+}

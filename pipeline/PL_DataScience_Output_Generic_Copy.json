@@ -1,0 +1,94 @@
+{
+	"name": "PL_DataScience_Output_Generic_Copy",
+	"properties": {
+		"activities": [
+			{
+				"name": "DataScienceToStaged",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/DataScienceToStage/DataScience_toStage",
+					"baseParameters": {
+						"runId": {
+							"value": "@pipeline().parameters.runId",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@pipeline().parameters.domain",
+							"type": "Expression"
+						},
+						"dataSciencePath": {
+							"value": "@pipeline().parameters.dataSciencePath",
+							"type": "Expression"
+						},
+						"stagedPath": {
+							"value": "@pipeline().parameters.stagedPath",
+							"type": "Expression"
+						},
+						"logTable": {
+							"value": "@pipeline().parameters.logTable",
+							"type": "Expression"
+						},
+						"logTablePath": {
+							"value": "@pipeline().parameters.logTablePath",
+							"type": "Expression"
+						},
+						"eventFilePath": {
+							"value": "@pipeline().parameters.eventFilePath",
+							"type": "Expression"
+						},
+						"fullorIncl": {
+							"value": "@pipeline().parameters.fullOrIncl",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"runId": {
+				"type": "string"
+			},
+			"dataSciencePath": {
+				"type": "string"
+			},
+			"stagedPath": {
+				"type": "string"
+			},
+			"logTable": {
+				"type": "string",
+				"defaultValue": "NA"
+			},
+			"logTablePath": {
+				"type": "string",
+				"defaultValue": "NA"
+			},
+			"eventFilePath": {
+				"type": "string",
+				"defaultValue": "NA"
+			},
+			"fullOrIncl": {
+				"type": "string"
+			},
+			"domain": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/DSOutputGenericCopy"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,358 @@
+{
+	"name": "PL_ADRM_Execute_DataLoad_Level_Daily_Once",
+	"properties": {
+		"activities": [
+			{
+				"name": "Until1",
+				"description": "Until loop executes one level at a time",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "SET_INITIAL_LEVEL_VALUE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(int(variables('count_level')),int(activity('LKP_GET_MAXLEVEL').output.firstRow.max_level))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "SET_SUB_VALUE",
+							"description": "Set the sub value to hold the increment of the original count value",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "sub",
+								"value": {
+									"value": "@string(add(int(variables('count_level')),1))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "SET_COUNT_LEVEL_VALUE",
+							"description": "set the count value to the incremented value of itself",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "SET_SUB_VALUE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "count_level",
+								"value": {
+									"value": "@variables('sub')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "EXEC_PL_DataLoad_Order",
+							"description": "Execute the order pipeline for the corresponding level",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "SET_COUNT_LEVEL_VALUE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ADRM_Execute_DataLoad_Order",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"fullorincl": {
+										"value": "@pipeline().parameters.fullorincl",
+										"type": "Expression"
+									},
+									"level": {
+										"value": "@sub(int(variables('count_level')),1)",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "SET_INITIAL_LEVEL_VALUE",
+				"description": "Set the initial value of level to 2",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LKP_GET_MAXLEVEL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "count_level",
+					"value": "2"
+				}
+			},
+			{
+				"name": "LKP_GET_MAXLEVEL",
+				"description": "Get the maximum level value from the log table",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Until2",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureDatabricksDeltaLakeSource",
+						"query": {
+							"value": "select max(levelExec) as max_level from logadrmexecpos",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_AzureDatabricksDeltaLakeDataset",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Until2",
+				"type": "Until",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(variables('daily_load_completion_val'),'done')",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "LKP_Hourly_Load_Completion",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"dataset": {
+									"referenceName": "DS_Event_Blob",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": "Hourly_Load_Completed.blob"
+									}
+								}
+							}
+						},
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "LKP_Hourly_Load_Completion",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "daily_load_completion_val",
+								"value": {
+									"value": "done",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Wait1",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "LKP_Hourly_Load_Completion",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 90
+							}
+						}
+					],
+					"timeout": "0.02:00:00"
+				}
+			},
+			{
+				"name": "Generate Daily Once Completed File",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Until1",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Daily_Once_Completed.blob"
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete Previous Daily Once Completed file",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Until2",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Daily_Once_Completed.blob"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": false,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"parameters": {
+			"fullorincl": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"count_level": {
+				"type": "String"
+			},
+			"sub": {
+				"type": "String"
+			},
+			"daily_load_completion_val": {
+				"type": "String",
+				"defaultValue": "start"
+			}
+		},
+		"folder": {
+			"name": "Pos_Minibatch"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-01T09:17:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

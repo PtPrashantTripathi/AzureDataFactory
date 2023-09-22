@@ -1,0 +1,33 @@
+{
+	"name": "Copy_Storage_Account_Log_To_Log_Analytics",
+	"properties": {
+		"activities": [
+			{
+				"name": "copylogstologanalytics",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published/API/CopyLogToLogAnalytics"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "Digital-Merchandising/Log Analytics"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-03T12:30:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

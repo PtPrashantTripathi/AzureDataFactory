@@ -1,0 +1,52 @@
+{
+	"name": "PL_ExpCosmos",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_ADRM_ENTITY",
+				"description": "Master notebook to process each entity passed as parameter",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_CosmosDB/RunCosmosNotebook",
+					"baseParameters": {
+						"collectionname": {
+							"value": "@pipeline().parameters.collectionname",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"collectionname": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-03T10:55:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,509 @@
+{
+	"name": "PL_Common_Teradata_Fact_Generic_Copy_Partial",
+	"properties": {
+		"description": "Generic pipeline Partial load for Teradata source tables",
+		"activities": [
+			{
+				"name": "LKP_CONFIG_FILE",
+				"description": "This activity reads from a source file located in configuration in the Data Lake",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_TeraData_CONFIG_PricingCompetitive_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "TERADATA_DB_CONFIGURATION_PRICING_COMPETITIVE.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_ON_TBL",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_CONFIG_FILE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_CONFIG_FILE').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(and(equals(item().DatabaseName,pipeline().parameters.DatabaseName),equals(item().SourceSystem,pipeline().parameters.SourceSystem)), equals(item().SourceTableName,pipeline().parameters.TableName))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set Config Properties",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "FLTR_ON_TBL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ConfigProperties",
+					"value": {
+						"value": "@activity('FLTR_ON_TBL').output.value",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "CREATE_AUDIT_FILE",
+				"description": "Create audit file after partial copy ",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "COPY_SRC_TERADATA_TO_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "SRC_Table",
+								"value": {
+									"value": "@variables('ConfigProperties')[0]['SourceTableName']",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Watermark_Column",
+								"value": {
+									"value": "@variables('ConfigProperties')[0]['watermarkColumnName']",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Watermark_Start_Date",
+								"value": {
+									"value": "@pipeline().parameters.WatermarkStart",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Watermark_End_Date",
+								"value": {
+									"value": "@pipeline().parameters.WatermarkEnd",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "SRC_Name",
+								"value": {
+									"value": "@variables('ConfigProperties')[0]['SourceSystem']",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Rows_Read",
+								"value": {
+									"value": "@activity('COPY_SRC_TERADATA_TO_ADLS').output.rowsRead",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Rows_Copied",
+								"value": {
+									"value": "@activity('COPY_SRC_TERADATA_TO_ADLS').output.rowsCopied",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Pipeline_Name",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Pipeline_Runid",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Pipeline_Runtime_UTC",
+								"value": {
+									"value": "@utcnow()",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SRC_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Name"
+								}
+							},
+							{
+								"source": {
+									"name": "SRC_Table",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Table"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Column",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Column"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Start_Date",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Start_Date"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_End_Date",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_End_Date"
+								}
+							},
+							{
+								"source": {
+									"name": "Rows_Read",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Rows_Read"
+								}
+							},
+							{
+								"source": {
+									"name": "Rows_Copied",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Rows_Copied"
+								}
+							},
+							{
+								"source": {
+									"name": "Pipeline_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Pipeline_Name"
+								}
+							},
+							{
+								"source": {
+									"name": "Pipeline_Runid",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Pipeline_Runid"
+								}
+							},
+							{
+								"source": {
+									"name": "Pipeline_Runtime_UTC",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Pipeline_Runtime_UTC"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_COMM_AUDIT_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"sourceSystem": {
+								"value": "@variables('ConfigProperties')[0]['SourceSystem']",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "@variables('ConfigProperties')[0]['Domain']",
+								"type": "Expression"
+							},
+							"tableName": {
+								"value": "@variables('ConfigProperties')[0]['SourceTableName']",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@concat(variables('ConfigProperties')[0]['SourceTableName'],'-Partial-Load-',formatDateTime(utcnow()) )",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "COPY_SRC_TERADATA_TO_ADLS",
+				"description": "Copy Generic SQLServer Data to Data Lake",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set Config Properties",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 4,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "TeradataSource",
+						"query": {
+							"value": "SELECT @{variables('ConfigProperties')[0]['QueryPattern']} FROM @{variables('ConfigProperties')[0]['DatabaseName']}.@{variables('ConfigProperties')[0]['SourceTableName']} where ?AdfHashPartitionCondition @{if(equals(variables('ConfigProperties')[0]['WhereClause'],null),'',concat('and ',variables('ConfigProperties')[0]['WhereClause']))} @{if(equals(variables('ConfigProperties')[0]['Logic'],null),'',concat('and ',variables('ConfigProperties')[0]['Logic'],'=',pipeline().parameters.partitionval))}  and  @{variables('ConfigProperties')[0]['ExtractionColumn']} >= cast('@{pipeline().parameters.WatermarkStart}' as @{variables('ConfigProperties')[0]['ExtractionColumnDataType']}) and @{variables('ConfigProperties')[0]['ExtractionColumn']} <=cast('@{pipeline().parameters.WatermarkEnd}' as @{variables('ConfigProperties')[0]['ExtractionColumnDataType']})",
+							"type": "Expression"
+						},
+						"partitionOption": "Hash",
+						"partitionSettings": {
+							"partitionColumnName": {
+								"value": "@{variables('ConfigProperties')[0]['PartitionColumn']}",
+								"type": "Expression"
+							}
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"parallelCopies": 10
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Teradata_Generic",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_SINK_Generic_csv",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": {
+								"value": "@concat(pipeline().parameters.TableName,'_',pipeline().parameters.WatermarkStart,'_',pipeline().parameters.WatermarkEnd)",
+								"type": "Expression"
+							},
+							"folderName": {
+								"value": "@pipeline().parameters.FolderName",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "@variables('ConfigProperties')[0]['Domain']",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "@variables('ConfigProperties')[0]['SourceSystem']",
+								"type": "Expression"
+							},
+							"tableName": {
+								"value": "@variables('ConfigProperties')[0]['SourceTableName']",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "NB_TO_UPDATE_DELTA_LAKE_TABLE",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "CREATE_AUDIT_FILE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published/DATA/CLEANSE/getRawFiles",
+					"baseParameters": {
+						"tableName": {
+							"value": "@variables('ConfigProperties')[0]['SourceTableName']",
+							"type": "Expression"
+						},
+						"fileName": {
+							"value": "@concat(concat(pipeline().parameters.TableName,'_',pipeline().parameters.WatermarkStart,'_',pipeline().parameters.WatermarkEnd),'.csv')",
+							"type": "Expression"
+						},
+						"filePath": {
+							"value": "@concat('data/',variables('ConfigProperties')[0]['Domain'],'/',variables('ConfigProperties')[0]['SourceSystem'],'/',variables('ConfigProperties')[0]['SourceTableName'],'/',pipeline().parameters.folderName,'/')",
+							"type": "Expression"
+						},
+						"timestampIngested": {
+							"value": "@utcnow()",
+							"type": "Expression"
+						},
+						"rowsCopied": {
+							"value": "@string(activity('COPY_SRC_TERADATA_TO_ADLS').output.rowsCopied)",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@variables('ConfigProperties')[0]['Domain']",
+							"type": "Expression"
+						},
+						"sourceSystem": {
+							"value": "@variables('ConfigProperties')[0]['SourceSystem']",
+							"type": "Expression"
+						},
+						"Watermark_Value": {
+							"value": "@if(or(equals(variables('ConfigProperties')[0]['ExtractionColumnDataType'],'DATE'),equals(variables('ConfigProperties')[0]['ExtractionColumnDataType'],'TIMESTAMP')),pipeline().parameters.WatermarkEnd,utcnow())",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			},
+			"WatermarkStart": {
+				"type": "string"
+			},
+			"WatermarkEnd": {
+				"type": "string"
+			},
+			"FolderName": {
+				"type": "string"
+			},
+			"FileName": {
+				"type": "string"
+			},
+			"SourceSystem": {
+				"type": "string"
+			},
+			"DatabaseName": {
+				"type": "string"
+			},
+			"partitionval": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"ConfigProperties": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Digital-Merchandising/TERADATA"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-06-16T17:01:36Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

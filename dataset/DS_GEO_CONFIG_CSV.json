@@ -1,0 +1,37 @@
+{
+	"name": "DS_GEO_CONFIG_CSV",
+	"properties": {
+		"description": "This dataset is used for lookups and requires that you set the fileName Parm.",
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"fileName": {
+				"type": "string",
+				"defaultValue": "SQLSERVER_DB_CONFIGURATION_.CSV"
+			}
+		},
+		"folder": {
+			"name": "Common"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().fileName",
+					"type": "Expression"
+				},
+				"folderPath": "configuration/Geo",
+				"fileSystem": "raw"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

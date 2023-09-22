@@ -1,0 +1,30 @@
+{
+	"name": "DS_UPC_LOC_StageLayer_Data",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"team_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "UPC_LOC_NAS"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "UPC_LOC/@{dataset().team_name}",
+					"type": "Expression"
+				},
+				"fileSystem": "staged/Pos"
+			}
+		},
+		"schema": {}
+	}
+}

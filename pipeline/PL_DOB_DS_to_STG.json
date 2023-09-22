@@ -1,0 +1,44 @@
+{
+	"name": "PL_DOB_DS_to_STG",
+	"properties": {
+		"description": "Copies Incremental data from Data Science container to Staged Container ",
+		"activities": [
+			{
+				"name": "NB_DOB_DS_STG",
+				"description": "Copies Incremental Data from Data Science Container to Staged Container ",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/DOB/DOB_Incremental_Ds_To_Stg",
+					"baseParameters": {
+						"sourcetablename": {
+							"value": "@pipeline().parameters.sourcetablename",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"sourcetablename": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": []
+	}
+}

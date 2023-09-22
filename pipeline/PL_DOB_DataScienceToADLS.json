@@ -1,0 +1,61 @@
+{
+	"name": "PL_DOB_DataScienceToADLS",
+	"properties": {
+		"activities": [
+			{
+				"name": "DataScience_To_Staged",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_DataScienceToStage",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_Domain": {
+							"value": "@pipeline().parameters.p_Domain",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Staged_To_ADLS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DataScience_To_Staged",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_DataScience_Output_Execute_Copy_To_ADLS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"domain": {
+							"value": "@pipeline().parameters.p_Domain",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_Domain": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/DOB"
+		},
+		"annotations": []
+	}
+}

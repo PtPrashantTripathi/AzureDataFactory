@@ -1,0 +1,356 @@
+{
+	"name": "PL_Common_Teradata_Generic_Copy_Incl_Planogram",
+	"properties": {
+		"description": "Generic pipeline Incremental load for Teradata source tables",
+		"activities": [
+			{
+				"name": "CREATE_POSTPROCESS_FILE",
+				"description": "Get the max watermark date in a file",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Databricks Notebook for cleansing",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "SRC_Table",
+								"value": {
+									"value": "@pipeline().parameters.tableName",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Watermark_Column",
+								"value": {
+									"value": "@pipeline().parameters.WatermarkColumnName",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Watermark_Value",
+								"value": {
+									"value": "@formatDateTime(activity('LKP_GET_MAXDATE').output.firstRow.maxupdatedtime,'yyyy-MM-ddTHH:mm:ss:ffffff')",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "SRC_Name",
+								"value": {
+									"value": "@pipeline().parameters.sourceSystem",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SRC_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Name"
+								}
+							},
+							{
+								"source": {
+									"name": "SRC_Table",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Table"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Column",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Column"
+								}
+							},
+							{
+								"source": {
+									"name": "Watermark_Value",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Watermark_Value"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_COMM_POSTPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "@pipeline().parameters.tableName",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "@pipeline().parameters.domain",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "@pipeline().parameters.sourceSystem",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Databricks Notebook for cleansing",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "COPY_SRC_TERADATA_TO_ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published/DATA/CLEANSE/getRawFiles",
+					"baseParameters": {
+						"tableName": {
+							"value": "@pipeline().parameters.tableName",
+							"type": "Expression"
+						},
+						"fileName": {
+							"value": "@concat(pipeline().parameters.fileName,'.csv')",
+							"type": "Expression"
+						},
+						"filePath": {
+							"value": "@concat('data/',pipeline().parameters.domain,'/',pipeline().parameters.sourceSystem,'/',pipeline().parameters.tableName,'/',pipeline().parameters.folderName,'/')",
+							"type": "Expression"
+						},
+						"timestampIngested": {
+							"value": "@utcnow()",
+							"type": "Expression"
+						},
+						"rowsCopied": {
+							"value": "@string(activity('COPY_SRC_TERADATA_TO_ADLS').output.rowsCopied)",
+							"type": "Expression"
+						},
+						"sourceSystem": {
+							"value": "@pipeline().parameters.sourceSystem",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@pipeline().parameters.domain",
+							"type": "Expression"
+						},
+						"Watermark_Value": {
+							"value": "@utcnow()",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "COPY_SRC_TERADATA_TO_ADLS",
+				"description": "Copy Generic SQLServer Data to Data Lake",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "LKP_GET_MAXDATE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "TeradataSource",
+						"query": {
+							"value": "@{pipeline().parameters.InclPattern};",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"parallelCopies": 10
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Teradata_Generic",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_SINK_Generic_csv",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": {
+								"value": "@pipeline().parameters.fileName",
+								"type": "Expression"
+							},
+							"folderName": {
+								"value": "@pipeline().parameters.FolderName",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "@pipeline().parameters.domain",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "@pipeline().parameters.sourceSystem",
+								"type": "Expression"
+							},
+							"tableName": {
+								"value": "@pipeline().parameters.tableName",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "LKP_GET_MAXDATE",
+				"description": "Get the latest max watermark date from database",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "TeradataSource",
+						"query": {
+							"value": "select current_timestamp(0) as maxupdatedtime;",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_Teradata_Generic",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"tableName": {
+				"type": "string"
+			},
+			"WatermarkColumnName": {
+				"type": "string"
+			},
+			"sourceSystem": {
+				"type": "string"
+			},
+			"domain": {
+				"type": "string"
+			},
+			"folderName": {
+				"type": "string"
+			},
+			"fileName": {
+				"type": "string"
+			},
+			"databaseName": {
+				"type": "string"
+			},
+			"PartitionColumn": {
+				"type": "string"
+			},
+			"queryPattern": {
+				"type": "string"
+			},
+			"WhereClause": {
+				"type": "string"
+			},
+			"InclPattern": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/Planogram"
+		},
+		"annotations": []
+	}
+}

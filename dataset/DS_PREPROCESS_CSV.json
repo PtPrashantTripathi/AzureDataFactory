@@ -1,0 +1,39 @@
+{
+	"name": "DS_PREPROCESS_CSV",
+	"properties": {
+		"description": "Dataset to hold the value of the Watermark value of the table before the Process starts.",
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Domain": {
+				"type": "String"
+			},
+			"SourceTableName": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat(dataset().SourceTableName,'_PRE_PROCESS_TS.csv')",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@concat('configuration/',dataset().Domain,'/raw/',dataset().SourceTableName)",
+					"type": "Expression"
+				},
+				"fileSystem": "raw"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

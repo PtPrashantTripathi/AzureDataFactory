@@ -1,0 +1,19 @@
+{
+	"name": "DS_DOB_test",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "datascience/Merch/DOB/ROQ/dob_fcst_2022_08_19",
+				"fileSystem": "staged"
+			}
+		},
+		"schema": {}
+	}
+}

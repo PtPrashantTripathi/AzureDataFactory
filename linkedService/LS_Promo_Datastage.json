@@ -1,0 +1,31 @@
+{
+	"name": "LS_Promo_Datastage",
+	"properties": {
+		"parameters": {
+			"hostid": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Sftp",
+		"typeProperties": {
+			"host": "@{linkedService().hostid}",
+			"port": 22,
+			"skipHostKeyValidation": true,
+			"authenticationType": "Basic",
+			"userName": "azuredf",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault01",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "Datastage-pwd"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHosted-IR-BI-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

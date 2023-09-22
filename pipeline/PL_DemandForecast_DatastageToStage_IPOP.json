@@ -1,0 +1,84 @@
+{
+	"name": "PL_DemandForecast_DatastageToStage_IPOP",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Pipeline Datastage to Cleanse",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_DataStage_Execute_Table_Copy_Full",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_SourceTableName": "@pipeline().parameters.p_SourceTableName",
+						"p_DatabaseName": {
+							"value": "@pipeline().parameters.p_DatabaseName",
+							"type": "Expression"
+						},
+						"p_SourceSystem": {
+							"value": "@pipeline().parameters.p_SourceSystem",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute Pipeline Cleanse to Stage",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Pipeline Datastage to Cleanse",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_DemandForecast_CleanseToNonADRMStage",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_SourceTableName": "@pipeline().parameters.p_SourceTableName",
+						"p_DatabaseName": {
+							"value": "@pipeline().parameters.p_DatabaseName",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						},
+						"p_SourceSystem": {
+							"value": "@pipeline().parameters.p_SourceSystem",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_SourceSystem": {
+				"type": "string"
+			},
+			"p_SourceTableName": {
+				"type": "string"
+			},
+			"p_DatabaseName": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/Datastage"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"name": "TRG_LDE_TL_DF_INV",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_StageToServeADLS_DC_POH_Load",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_Domain": "PosDCPOH"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-06-06T07:00:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

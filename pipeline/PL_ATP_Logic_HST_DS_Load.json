@@ -1,0 +1,32 @@
+{
+	"name": "PL_ATP_Logic_HST_DS_Load",
+	"properties": {
+		"description": "Only for Incremental runs",
+		"activities": [
+			{
+				"name": "ATP_NEW_IS_AVAILABLE_LOGIC_HST_DS_Load",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/Pos/StoreItem/STAGE/ETP_DataSciencetoStage"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "PosAPI/StoreItem"
+		},
+		"annotations": []
+	}
+}

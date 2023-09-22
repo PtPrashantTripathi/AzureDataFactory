@@ -1,0 +1,64 @@
+{
+	"name": "PL_Common_Teradata_Generic_Copy_Promo_NonAdrmStage",
+	"properties": {
+		"activities": [
+			{
+				"name": "Notebook1",
+				"description": "Notebook for carrying out Promo Tables Incl and Stage(Non-Adrm) Data Merge.",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/PROMO_TABLES/Promo_Tables",
+					"baseParameters": {
+						"entity_name": {
+							"value": "@pipeline().parameters.entity_name",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						},
+						"source_table": {
+							"value": "@pipeline().parameters.source_table",
+							"type": "Expression"
+						},
+						"source_system": {
+							"value": "@pipeline().parameters.source_system",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"entity_name": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			},
+			"source_table": {
+				"type": "string"
+			},
+			"source_system": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Digital-Merchandising/TERADATA"
+		},
+		"annotations": []
+	}
+}

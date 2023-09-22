@@ -1,0 +1,63 @@
+{
+	"name": "PL_Weekly_Movement_DS_Terradata",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_Weekly_Movement",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/DOB/DOB_Merch_Weekly_Movement"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "PL_DS_Load_To_AIX",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "NB_Weekly_Movement",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_DSOutput_Load_To_AIX",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_SourceSystem": {
+							"value": "@pipeline().parameters.p_SourceSystem",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_SourceSystem": {
+				"type": "string",
+				"defaultValue": "DOB"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/DOB"
+		},
+		"annotations": []
+	}
+}

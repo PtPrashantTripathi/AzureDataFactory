@@ -1,0 +1,144 @@
+{
+	"name": "PL_ScaleCosmos_Decrease_RU",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKP_ScaleCosmos_Config",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ScaleCosmos_Pos",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_Collection_RU_Decrease",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_ScaleCosmos_Config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_ScaleCosmos_Config').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(and(equals(item().CollectionName,pipeline().parameters.p_CollectionName),equals(item().DataFactoryName,pipeline().DataFactory)),equals(item().OperationRUCount,'Decrease'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "GetCommonAPISecret",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "FLTR_Collection_RU_Decrease",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@activity('FLTR_Collection_RU_Decrease').output.value[0].p_GetCommonAPISecret_URL",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "ScaleCosmosDB",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "GetCommonAPISecret",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 5,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@activity('FLTR_Collection_RU_Decrease').output.value[0].p_ScaleCosmosDB_URL",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Ocp-Apim-Subscription-Key": {
+							"value": "@activity('GetCommonAPISecret').output.value",
+							"type": "Expression"
+						}
+					},
+					"body": {
+						"value": "@activity('FLTR_Collection_RU_Decrease').output.value[0].p_ScaleCosmosDB_Body",
+						"type": "Expression"
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://management.azure.com"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_CollectionName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-01T09:17:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

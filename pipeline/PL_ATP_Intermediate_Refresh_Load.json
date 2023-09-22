@@ -1,0 +1,188 @@
+{
+	"name": "PL_ATP_Intermediate_Refresh_Load",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKP_TABLE",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_COMMON_CONFIG_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "TERADATA_DB_CONFIGURATION.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_TABLE",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_TABLE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_TABLE').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().SourceTableName,pipeline().parameters.tableName)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Execute Pipeline Refresh Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "FLTR_TABLE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_Teradata_Generic_Copy_Full_ATP",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": {
+							"value": "@activity('FLTR_TABLE').output.value[0].SourceTableName",
+							"type": "Expression"
+						},
+						"sourceSystem": {
+							"value": "@activity('FLTR_TABLE').output.value[0].SourceSystem",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@activity('FLTR_TABLE').output.value[0].Domain",
+							"type": "Expression"
+						},
+						"folderName": {
+							"value": "FullRefreshATP",
+							"type": "Expression"
+						},
+						"fileName": {
+							"value": "@concat(pipeline().parameters.tableName,'-',formatDateTime(utcnow(),'yyyy'),'-',formatDateTime(utcnow(),'MM'),'-',formatDateTime(utcnow(),'dd'))",
+							"type": "Expression"
+						},
+						"databaseName": {
+							"value": "@activity('FLTR_TABLE').output.value[0].DatabaseName",
+							"type": "Expression"
+						},
+						"partitionColumn": {
+							"value": "@activity('FLTR_TABLE').output.value[0].PartitionColumn",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute Pipeline Cleanse Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Pipeline Refresh Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_Generic_Cleanse_Intermediate",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": {
+							"value": "@pipeline().parameters.tableName",
+							"type": "Expression"
+						},
+						"sourceSystem": {
+							"value": "@activity('FLTR_TABLE').output.value[0].SourceSystem",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "NB_StageLoad",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Execute Pipeline Cleanse Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Master_ADRM_Pos",
+					"baseParameters": {
+						"entity_name": {
+							"value": "@pipeline().parameters.tableName",
+							"type": "Expression"
+						},
+						"fullorincl": "F",
+						"level_exec": "-2"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_DS3",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"tableName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/StoreItem"
+		},
+		"annotations": []
+	}
+}

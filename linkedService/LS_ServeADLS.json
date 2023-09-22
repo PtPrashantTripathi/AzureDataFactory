@@ -1,0 +1,10 @@
+{
+	"name": "LS_ServeADLS",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://sanpea2lrssrvint.dfs.core.windows.net"
+		}
+	}
+}

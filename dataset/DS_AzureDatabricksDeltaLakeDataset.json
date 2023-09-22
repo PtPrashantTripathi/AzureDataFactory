@@ -1,0 +1,17 @@
+{
+	"name": "DS_AzureDatabricksDeltaLakeDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDatabricksDeltaLake01",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureDatabricksDeltaLakeDataset",
+		"typeProperties": {
+			"database": "default",
+			"table": "upc_loc_cleansed_consolidate"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

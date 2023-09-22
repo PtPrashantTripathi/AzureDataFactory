@@ -1,0 +1,53 @@
+{
+	"name": "PL_Run_Any_Notebook",
+	"properties": {
+		"description": "It will run any notebook based on the path given as parameter. You can also specify run notebook parameters if required.\nFor notebook_parameters input ex-\np1:value1,p2:value2",
+		"activities": [
+			{
+				"name": "Notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/Run_Notebook",
+					"baseParameters": {
+						"notebookPath": {
+							"value": "@pipeline().parameters.notebookPath",
+							"type": "Expression"
+						},
+						"parameters": {
+							"value": "@pipeline().parameters.notebook_parameters",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"notebookPath": {
+				"type": "string"
+			},
+			"notebook_parameters": {
+				"type": "string",
+				"defaultValue": " "
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-03T11:00:27Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

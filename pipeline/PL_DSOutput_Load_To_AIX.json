@@ -1,0 +1,278 @@
+{
+	"name": "PL_DSOutput_Load_To_AIX",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKP_CONFIG_FILE",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "00.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_COMMON_CONFIG_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "AIX_LOAD_CONFIGURATION.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_TBL",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_CONFIG_FILE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_CONFIG_FILE').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FLTR_TBL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FLTR_TBL').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Filter gzip",
+							"type": "Filter",
+							"dependsOn": [
+								{
+									"activity": "Get Metadata",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"items": {
+									"value": "@activity('Get Metadata').output.childItems",
+									"type": "Expression"
+								},
+								"condition": {
+									"value": "@and(equals(item().type,'File'),endswith(item().name,'.gz'))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Get Metadata",
+							"type": "GetMetadata",
+							"dependsOn": [
+								{
+									"activity": "Convert to gZip",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_COMMON_Load_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"filePath": {
+											"value": "@item().ServingADLSFilePath",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"childItems",
+									"itemType"
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "Copy data to AIX",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Filter gzip",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "SftpWriteSettings",
+										"operationTimeout": "01:00:00",
+										"useTempFileRename": true
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_COMMON_Load_Gzip_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": {
+											"value": "@activity('Filter gzip').output.Value[0].name",
+											"type": "Expression"
+										},
+										"filePath": "@item().ServingADLSFilePath"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_DataStage_Sink",
+									"type": "DatasetReference",
+									"parameters": {
+										"hostid": "@item().Host",
+										"filePath": "@item().AIXFilePath"
+									}
+								}
+							]
+						},
+						{
+							"name": "Convert to gZip",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published_Pos/PosAPI/GRC/LoadToTeradata/GZip_Transformation_Notebook",
+								"baseParameters": {
+									"LogTable": {
+										"value": "@item().LogTable",
+										"type": "Expression"
+									},
+									"InputFileFormat": {
+										"value": "@item().InputFileFormat",
+										"type": "Expression"
+									},
+									"ServingADLSFilePath": {
+										"value": "@item().ServingADLSFilePath",
+										"type": "Expression"
+									},
+									"SourceSystem": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_01",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_SourceSystem": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Load_To_Teradata"
+		},
+		"annotations": []
+	}
+}

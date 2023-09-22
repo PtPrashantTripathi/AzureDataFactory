@@ -1,0 +1,225 @@
+{
+	"name": "PL_Correction_Process",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_Level1_SCD1_Entities",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/Notebook_Correction_Level1",
+					"baseParameters": {
+						"date_start": {
+							"value": "@pipeline().parameters.date_start",
+							"type": "Expression"
+						},
+						"entities": {
+							"value": "@pipeline().parameters.entities",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "NB_Level1_SCD1_Entities",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('NB_Level1_SCD1_Entities').output.runOutput.processing_list",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "Execute PL_Common_Notebook",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "LKP_EntityDetails",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Notebook",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"entity": {
+										"value": "@activity('LKP_EntityDetails').output.firstRow.entityName",
+										"type": "Expression"
+									},
+									"fullorincl": {
+										"value": "I",
+										"type": "Expression"
+									},
+									"level_exec": {
+										"value": "@activity('LKP_EntityDetails').output.firstRow.levelExec",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "LKP_EntityDetails",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureDatabricksDeltaLakeSource",
+									"query": {
+										"value": "select entityName,levelExec from logadrmexecpos where entityName = '@{item()}'",
+										"type": "Expression"
+									}
+								},
+								"dataset": {
+									"referenceName": "DS_AzureDatabricksDeltaLakeDataset",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": true
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "NB_DependentTable_Base_check",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/Notebook_Correction_Level2_Master",
+					"baseParameters": {
+						"passed_entities": {
+							"value": "@pipeline().parameters.entities",
+							"type": "Expression"
+						},
+						"entities_dependent": {
+							"value": "@activity('NB_Level1_SCD1_Entities').output.runOutput.missing_list",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ForEach2",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "NB_DependentTable_Base_check",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('NB_DependentTable_Base_check').output.runOutput.unique_base_entities",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "NB_Dependententity_run",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published_Pos/PosAPI/Notebook_Correction_Level2",
+								"baseParameters": {
+									"date_start": {
+										"value": "@pipeline().parameters.date_start",
+										"type": "Expression"
+									},
+									"entity_name": {
+										"value": "@item()",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_01",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"date_start": {
+				"type": "string",
+				"defaultValue": "2021-01-01"
+			},
+			"entities": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-03T10:57:52Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

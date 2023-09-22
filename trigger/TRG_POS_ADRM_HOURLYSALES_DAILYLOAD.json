@@ -1,0 +1,28 @@
+{
+	"name": "TRG_POS_ADRM_HOURLYSALES_DAILYLOAD",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_ADRM_Execute_DataLoad_Level_HourlySales",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"fullorincl": "I"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/raw/blobs/EventBased/DataIngestion/Dim_SQL_DB2_Process_Check.txt",
+			"blobPathEndsWith": "Dim_SQL_DB2_Process_Check.txt",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/6ed3c07f-2f9c-4a7b-bee4-3ee8620d38d1/resourceGroups/rg-np-apex-etl-int/providers/Microsoft.Storage/storageAccounts/saea2grsnpapexdlakeint",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

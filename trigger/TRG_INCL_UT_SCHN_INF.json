@@ -1,0 +1,40 @@
+{
+	"name": "TRG_INCL_UT_SCHN_INF",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl_SAASRetirement",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_DatabaseName": "VPROD_DIM",
+					"p_SourceSystem": "ATP",
+					"p_TableName": "UT_SCHN_INF"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-02-01T00:00:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						0
+					],
+					"weekDays": [
+						"Sunday"
+					]
+				}
+			}
+		}
+	}
+}

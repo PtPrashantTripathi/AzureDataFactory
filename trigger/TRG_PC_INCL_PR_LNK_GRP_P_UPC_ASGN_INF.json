@@ -1,0 +1,29 @@
+{
+	"name": "TRG_PC_INCL_PR_LNK_GRP_P_UPC_ASGN_INF",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl_Pricing_Competitive",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_DatabaseName": "VPROD_DIM",
+					"p_SourceSystem": "PricingCompetitive",
+					"p_TableName": "PR_LNK_GRP_P_UPC_ASGN_INF"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-09-01T00:30:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

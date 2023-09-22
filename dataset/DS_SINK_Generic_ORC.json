@@ -1,0 +1,45 @@
+{
+	"name": "DS_SINK_Generic_ORC",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"folderName": {
+				"type": "string",
+				"defaultValue": "full"
+			},
+			"domain": {
+				"type": "string"
+			},
+			"sourceSystem": {
+				"type": "string"
+			},
+			"tableName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Common"
+		},
+		"annotations": [],
+		"type": "Orc",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@{dataset().folderName}/",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@{dataset().domain}/@{dataset().sourceSystem}/@{dataset().tableName}",
+					"type": "Expression"
+				},
+				"fileSystem": "raw/data"
+			}
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

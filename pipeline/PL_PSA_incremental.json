@@ -1,0 +1,86 @@
+{
+	"name": "PL_PSA_incremental",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_Common_Teradata_Execute_Table_Copies_Incl_PSA",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl_PSA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_DatabaseName": {
+							"value": "@pipeline().parameters.p_DatabaseName",
+							"type": "Expression"
+						},
+						"p_SourceSystem": {
+							"value": "@pipeline().parameters.p_SourceSystem",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute_CleanseToStage",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_Common_Teradata_Execute_Table_Copies_Incl_PSA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PSA_CleanseToStage",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_entity_name": {
+							"value": "@pipeline().parameters.p_SourceTableName",
+							"type": "Expression"
+						},
+						"p_fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						},
+						"p_source_table": {
+							"value": "@pipeline().parameters.p_SourceTableName",
+							"type": "Expression"
+						},
+						"p_source_system": {
+							"value": "@pipeline().parameters.p_SourceSystem",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_DatabaseName": {
+				"type": "string"
+			},
+			"p_SourceSystem": {
+				"type": "string"
+			},
+			"p_SourceTableName": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/PSA"
+		},
+		"annotations": []
+	}
+}

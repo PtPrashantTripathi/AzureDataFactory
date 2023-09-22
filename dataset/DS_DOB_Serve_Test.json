@@ -1,0 +1,19 @@
+{
+	"name": "DS_DOB_Serve_Test",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ServeADLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "DOB_Forecast/Current",
+				"fileSystem": "pos"
+			}
+		},
+		"schema": {}
+	}
+}

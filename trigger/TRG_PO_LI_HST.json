@@ -1,0 +1,34 @@
+{
+	"name": "TRG_PO_LI_HST",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_Teradata_Execute_PO_Tables_ReIPOP",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_SourceSystem": "PricingCompetitive",
+					"p_DatabaseName": "VPROD_PO_HST",
+					"p_TableName": "PO_LI_HST"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 2,
+				"startTime": "2022-10-02T12:00:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"weekDays": [
+						"Sunday"
+					]
+				}
+			}
+		}
+	}
+}

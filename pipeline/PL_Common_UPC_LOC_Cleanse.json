@@ -1,0 +1,49 @@
+{
+	"name": "PL_Common_UPC_LOC_Cleanse",
+	"properties": {
+		"activities": [
+			{
+				"name": "UPC_LOC Cleansing",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/CLEANSING/rawToCleanseDataload",
+					"baseParameters": {
+						"storeid": {
+							"value": "@pipeline().parameters.storeid_val",
+							"type": "Expression"
+						},
+						"deptval": {
+							"value": "@pipeline().parameters.dept_val",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_UPC_LOC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"storeid_val": {
+				"type": "string"
+			},
+			"dept_val": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": []
+	}
+}

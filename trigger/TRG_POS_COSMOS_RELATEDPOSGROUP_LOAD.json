@@ -1,0 +1,36 @@
+{
+	"name": "TRG_POS_COSMOS_RELATEDPOSGROUP_LOAD",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Export_To_Cosmos",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"collectionname": "RelatedPosGroup",
+					"fullorincl": "I"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2021-03-12T12:27:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						3
+					]
+				}
+			}
+		}
+	}
+}

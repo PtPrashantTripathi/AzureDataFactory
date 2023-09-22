@@ -1,0 +1,25 @@
+{
+	"name": "Log_Analytics",
+	"properties": {
+		"description": "This trigger will run Copy_Storage_Account_Log_TO_Log_Analytics pipeline once in every hour.",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Copy_Storage_Account_Log_To_Log_Analytics",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 30,
+				"startTime": "2020-10-07T08:18:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

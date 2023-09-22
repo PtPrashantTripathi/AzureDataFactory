@@ -1,0 +1,28 @@
+{
+	"name": "LS_ODBC_DB2_Generic_Test",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "Odbc",
+		"typeProperties": {
+			"connectionString": {
+				"type": "SecureString",
+				"value": "**********"
+			},
+			"authenticationType": "Basic",
+			"userName": "APEXQA",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault01",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "db2password"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHosted-IR-BI-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

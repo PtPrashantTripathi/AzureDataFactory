@@ -1,0 +1,186 @@
+{
+	"name": "PL_DS_ATP_ETP_Synapse_Load",
+	"properties": {
+		"activities": [
+			{
+				"name": "DW Synapse Load",
+				"description": "This activity will load data from stage schema to DWH schema",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "ADLS to Synape",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[APEX_ETL].[PROC_FCT_DS_ETP_ATP_DATA_LOAD]",
+					"storedProcedureParameters": {
+						"SRC_TABLE": {
+							"value": {
+								"value": "@pipeline().parameters.stageTableName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSynapseAnalytics01",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ADLS to Synape",
+				"description": "This activity load data from APEX Stage to synapse stage table load",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "DS To Stage Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/Pos/StoreItem/SYNAPSE/Ds_ETP_ATP_Delta_ToSynapse",
+					"baseParameters": {
+						"objectId": {
+							"value": "@pipeline().parameters.objectId",
+							"type": "Expression"
+						},
+						"dataSciencePath": {
+							"value": "@pipeline().parameters.dataSciencePath",
+							"type": "Expression"
+						},
+						"stagedPath": {
+							"value": "@pipeline().parameters.stagedPath",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@pipeline().parameters.domain",
+							"type": "Expression"
+						},
+						"stageTableName": {
+							"value": "@pipeline().parameters.stageTableName",
+							"type": "Expression"
+						},
+						"fullorIncl": {
+							"value": "@pipeline().parameters.fullorIncl",
+							"type": "Expression"
+						},
+						"runId": {
+							"value": "@pipeline().parameters.runId",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "DS To Stage Load",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/Pos/StoreItem/STAGE/Ds_ETP_ATP_Staged_copy",
+					"baseParameters": {
+						"objectId": {
+							"value": "@pipeline().parameters.objectId",
+							"type": "Expression"
+						},
+						"dataSciencePath": {
+							"value": "@pipeline().parameters.dataSciencePath",
+							"type": "Expression"
+						},
+						"stagedPath": {
+							"value": "@pipeline().parameters.stagedPath",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@pipeline().parameters.domain",
+							"type": "Expression"
+						},
+						"stageTableName": {
+							"value": "@pipeline().parameters.stageTableName",
+							"type": "Expression"
+						},
+						"fullorIncl": {
+							"value": "@pipeline().parameters.fullorIncl",
+							"type": "Expression"
+						},
+						"runId": {
+							"value": "@pipeline().parameters.runId",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"objectId": {
+				"type": "string",
+				"defaultValue": "9"
+			},
+			"dataSciencePath": {
+				"type": "string",
+				"defaultValue": "/Merch/ETP/is_item_eligible_hst/data"
+			},
+			"stagedPath": {
+				"type": "string",
+				"defaultValue": "/Merch/ETP/is_item_eligible_hst/data"
+			},
+			"stageTableName": {
+				"type": "string",
+				"defaultValue": "FCT_IS_ITEM_ELIGIBLE_HST"
+			},
+			"domain": {
+				"type": "string",
+				"defaultValue": "ETP"
+			},
+			"fullorIncl": {
+				"type": "string",
+				"defaultValue": "FULL"
+			},
+			"runId": {
+				"type": "string",
+				"defaultValue": "R07"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/StoreItem"
+		},
+		"annotations": []
+	}
+}

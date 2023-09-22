@@ -1,0 +1,59 @@
+{
+	"name": "PL_Common_Notebook",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_ADRM_ENTITY",
+				"description": "Master notebook to process each entity passed as parameter",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 4,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Master_ADRM_Pos",
+					"baseParameters": {
+						"entity_name": {
+							"value": "@pipeline().parameters.entity",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						},
+						"level_exec": {
+							"value": "@pipeline().parameters.level_exec",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"entity": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			},
+			"level_exec": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-03T12:16:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

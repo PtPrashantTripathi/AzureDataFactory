@@ -1,0 +1,29 @@
+{
+	"name": "TRG_StoreSalesKey",
+	"properties": {
+		"description": "StoreSalesKey to be loaded at 7PM EST everyday",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_DB2_Stage_Generic_Inc",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"Domain": "Pos",
+					"SourceTable": "SSK_INF"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 24,
+				"startTime": "2023-04-27T19:00:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

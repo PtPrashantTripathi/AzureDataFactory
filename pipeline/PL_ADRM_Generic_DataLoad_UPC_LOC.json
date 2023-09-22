@@ -1,0 +1,111 @@
+{
+	"name": "PL_ADRM_Generic_DataLoad_UPC_LOC",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKP_GET_RECORDS",
+				"description": "Lookup to get records of certain level and order ",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureDatabricksDeltaLakeSource",
+						"query": {
+							"value": "select * from logadrmexecpos where levelExec=@{pipeline().parameters.level}  and orderExec=@{pipeline().parameters.order} order by orderExec",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_AzureDatabricksDeltaLakeDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"description": "ForEach loop for processing every record",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LKP_GET_RECORDS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_GET_RECORDS').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 20,
+					"activities": [
+						{
+							"name": "EXEC_PL_Common_Notebook",
+							"description": "Execute the common notebook pipeline for processing each entity",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Notebook_UPC_LOC",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"entity": {
+										"value": "@item().entityName",
+										"type": "Expression"
+									},
+									"fullorincl": {
+										"value": "@pipeline().parameters.fullorincl",
+										"type": "Expression"
+									},
+									"level_exec": {
+										"value": "@item().levelExec",
+										"type": "Expression"
+									},
+									"start_Timestamp": {
+										"value": "@pipeline().parameters.start_Timestamp",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"level": {
+				"type": "int"
+			},
+			"fullorincl": {
+				"type": "string"
+			},
+			"order": {
+				"type": "int"
+			},
+			"start_Timestamp": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-01T09:17:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

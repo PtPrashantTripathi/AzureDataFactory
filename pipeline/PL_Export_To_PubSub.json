@@ -1,0 +1,124 @@
+{
+	"name": "PL_Export_To_PubSub",
+	"properties": {
+		"activities": [
+			{
+				"name": "Run PubSub Notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "PL_ScaleCosmos_Increase_RU",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "00.00:45:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@concat('/Published_Pos/PosAPI/GRC/Pos_ServiceBus/Export',pipeline().parameters.collectionname,'toServiceBus')",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Increase_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "@pipeline().parameters.collectionname",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Decrease_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Run PubSub Notebook",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "@pipeline().parameters.collectionname",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Decrease_RU_Fail",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Run PubSub Notebook",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "@pipeline().parameters.collectionname",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"collectionname": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/PubSub"
+		},
+		"annotations": []
+	}
+}

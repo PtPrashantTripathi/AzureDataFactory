@@ -1,0 +1,61 @@
+{
+	"name": "DS_COMMON_CONFIG_CSV",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"fileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Common"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().fileName",
+					"type": "Expression"
+				},
+				"folderPath": "configuration",
+				"fileSystem": "raw"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Domain",
+				"type": "String"
+			},
+			{
+				"name": "SourceSystem",
+				"type": "String"
+			},
+			{
+				"name": "ConnectionString",
+				"type": "String"
+			},
+			{
+				"name": "EntityName",
+				"type": "String"
+			},
+			{
+				"name": "SourceTableName",
+				"type": "String"
+			},
+			{
+				"name": "WatermarkColumnName",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

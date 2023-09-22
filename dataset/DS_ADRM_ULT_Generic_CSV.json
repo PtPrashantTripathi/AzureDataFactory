@@ -1,0 +1,42 @@
+{
+	"name": "DS_ADRM_ULT_Generic_CSV",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Sourcefolder": {
+				"type": "string"
+			},
+			"Subfolder": {
+				"type": "string"
+			},
+			"SourceFileName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@{dataset().SourceFileName}.csv",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@{dataset().Sourcefolder}/@{dataset().Subfolder}/@{dataset().SourceFileName}",
+					"type": "Expression"
+				},
+				"fileSystem": "raw"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

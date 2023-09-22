@@ -1,0 +1,24 @@
+appendCommitMessageToRunName: false
+
+variables:
+  - group: VG_${{ variables['Build.Repository.Name'] }}
+
+trigger: none
+
+resources:
+  repositories:
+    - repository: Apex_DevOps
+      name: Apex/Apex_DevOps
+      type: git
+      ref: 'main'
+  pipelines:
+    - pipeline: INT_Shared_Apex_df-np-ea2-apex-pos-etl-int
+      source: INT_Shared_Apex_df-np-ea2-apex-pos-etl-int
+      trigger:
+        branches: 
+          include:
+            - development
+        enabled: true
+
+extends:
+  template: templates/extends/adf/CICD_CERT_Shared.yml@Apex_DevOps

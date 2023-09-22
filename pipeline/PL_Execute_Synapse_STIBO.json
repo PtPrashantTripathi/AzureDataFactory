@@ -1,0 +1,133 @@
+{
+	"name": "PL_Execute_Synapse_STIBO",
+	"properties": {
+		"description": "Loads the data from the adrm stage layer to the synapse layer",
+		"activities": [
+			{
+				"name": "NB_Ingredient",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/Ingredient_Synapse_Load"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "NB_ItemIngredient",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "NB_Ingredient",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/Item_Ingredient_Synapse_Load"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "NB_LabelMark",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/LabelMark_Synapse_Load"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "NB_ItemLabelMark",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "NB_LabelMark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/ItemLabelMark_Synapse_Load"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "NB_labelMarkGroup",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "NB_LabelMark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/LabelMarkGroup_Synapse_Load"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "PosAPI/stibo"
+		},
+		"annotations": []
+	}
+}

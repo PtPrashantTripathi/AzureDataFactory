@@ -1,0 +1,36 @@
+{
+	"name": "TRG_COSMOS_DimensionDate_load",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Export_To_Cosmos",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"collectionname": "DateDim",
+					"fullorincl": "I"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 365,
+				"startTime": "2024-01-01T01:30:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						1
+					]
+				}
+			}
+		}
+	}
+}

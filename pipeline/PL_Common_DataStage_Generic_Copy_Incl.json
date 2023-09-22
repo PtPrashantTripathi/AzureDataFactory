@@ -1,0 +1,548 @@
+{
+	"name": "PL_Common_DataStage_Generic_Copy_Incl",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get FileNames",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "LKP_POSTPROCESS_TS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "00.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_DataStage_Generic_Filepath",
+						"type": "DatasetReference",
+						"parameters": {
+							"datastage_filepath": {
+								"value": "@pipeline().parameters.filepath",
+								"type": "Expression"
+							},
+							"hostid": {
+								"value": "@pipeline().parameters.hostid",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"lastModified",
+						"itemName",
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "SftpReadSettings",
+						"recursive": true,
+						"modifiedDatetimeStart": {
+							"value": "@substring(activity('LKP_POSTPROCESS_TS').output.firstRow.Last_Modified_Timestamp,0,lastindexof(activity('LKP_POSTPROCESS_TS').output.firstRow.Last_Modified_Timestamp,':'))",
+							"type": "Expression"
+						},
+						"enablePartitionDiscovery": false,
+						"disableChunking": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FLTR_TABLE_FILES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FLTR_TABLE_FILES').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "COPY_SRC_DATA_TO_ADLS",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 2,
+								"retryIntervalInSeconds": 120,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "SftpReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false,
+										"disableChunking": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Datastage_Generic_Zip",
+									"type": "DatasetReference",
+									"parameters": {
+										"datastage_filepath": {
+											"value": "@pipeline().parameters.filepath",
+											"type": "Expression"
+										},
+										"hostid": {
+											"value": "@pipeline().parameters.hostid",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_DATASTAGE_Unzip",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": "@concat(item().name,'-',formatDateTime(pipeline().parameters.utcnow))",
+										"folderName": "@pipeline().parameters.folderName",
+										"domain": "@pipeline().parameters.domain",
+										"sourceSystem": "@pipeline().parameters.sourceSystem",
+										"tableName": "@pipeline().parameters.tableName"
+									}
+								}
+							]
+						},
+						{
+							"name": "Databricks Notebook for Cleansing",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "Return Count value",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "00.05:00:00",
+								"retry": 2,
+								"retryIntervalInSeconds": 120,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published/DATA/CLEANSE/getRawFiles",
+								"baseParameters": {
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@concat(item().name,'-',formatDateTime(pipeline().parameters.utcnow),'.gz')",
+										"type": "Expression"
+									},
+									"filePath": {
+										"value": "@concat('data/',pipeline().parameters.domain,'/',pipeline().parameters.sourceSystem,'/',pipeline().parameters.tableName,'/',pipeline().parameters.folderName,'/')",
+										"type": "Expression"
+									},
+									"timestampIngested": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									},
+									"rowsCopied": {
+										"value": "@{activity('Return Count value').output.runOutput.count}",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"Watermark_Value": {
+										"value": "@utcnow()",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_01",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Return Count value",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "COPY_SRC_DATA_TO_ADLS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "00.05:00:00",
+								"retry": 2,
+								"retryIntervalInSeconds": 120,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Raw_file_count_DataStage",
+								"baseParameters": {
+									"fileName": {
+										"value": "@concat(item().name,'-',formatDateTime(pipeline().parameters.utcnow))",
+										"type": "Expression"
+									},
+									"folderName": {
+										"value": "@pipeline().parameters.folderName",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@pipeline().parameters.domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									},
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_01",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "NB_CLNSNG",
+							"description": "Notebook for carrying out the cleansing activity",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "Databricks Notebook for Cleansing",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 3,
+								"retryIntervalInSeconds": 120,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published/DATA/CLEANSE/rawToCleanseDataloadDataStage",
+								"baseParameters": {
+									"tableName": {
+										"value": "@pipeline().parameters.tableName",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.sourceSystem",
+										"type": "Expression"
+									},
+									"rawFileName": {
+										"value": "@concat(item().name,'-',formatDateTime(pipeline().parameters.utcnow),'.gz')",
+										"type": "Expression"
+									},
+									"rawFilePath": {
+										"value": "@concat('data/',pipeline().parameters.domain,'/',pipeline().parameters.sourceSystem,'/',pipeline().parameters.tableName,'/',pipeline().parameters.folderName,'/')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_Connector",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "FLTR_TABLE_FILES",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Get FileNames",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get FileNames').output.childItems",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(startswith(toLower(item().name),toLower(pipeline().parameters.tableName)),equals(item().type,'File'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "LKP_POSTPROCESS_TS",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "00.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_COMM_POSTPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "@pipeline().parameters.tableName",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "@pipeline().parameters.domain",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "@pipeline().parameters.sourceSystem",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Update PostProcess File",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "SRC_Name",
+								"value": {
+									"value": "@pipeline().parameters.sourceSystem",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "SRC_Table",
+								"value": {
+									"value": "@pipeline().parameters.tableName",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Last_Modified_Timestamp",
+								"value": {
+									"value": "@addseconds(formatDateTime(activity('Get FileNames').output.lastModified,'yyyy-MM-dd HH:mm:ss'),1)",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SRC_Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Name"
+								}
+							},
+							{
+								"source": {
+									"name": "SRC_Table",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SRC_Table"
+								}
+							},
+							{
+								"source": {
+									"name": "Last_Modified_Timestamp",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Last_Modified_Timestamp"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_COMM_POSTPROCESS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "@pipeline().parameters.tableName",
+								"type": "Expression"
+							},
+							"domain": {
+								"value": "@pipeline().parameters.domain",
+								"type": "Expression"
+							},
+							"sourceSystem": {
+								"value": "@pipeline().parameters.sourceSystem",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"tableName": {
+				"type": "string"
+			},
+			"filepath": {
+				"type": "string"
+			},
+			"folderName": {
+				"type": "string"
+			},
+			"sourceSystem": {
+				"type": "string"
+			},
+			"domain": {
+				"type": "string"
+			},
+			"fileName": {
+				"type": "string"
+			},
+			"hostid": {
+				"type": "string"
+			},
+			"utcnow": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/Datastage"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,199 @@
+{
+	"name": "PL_Generic_ADRM_ULT_Load",
+	"properties": {
+		"description": "Generic Copy pipeline Full load for PMM (Sqlserver) and DRAdmin",
+		"activities": [
+			{
+				"name": "Lookup_ult1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ADRM_ULT",
+						"type": "DatasetReference",
+						"parameters": {
+							"tableName": {
+								"value": "@pipeline().parameters.p_tableName",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Insert record for raw file_1",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Lookup_ult1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published/DATA/CLEANSE/getRawFiles",
+					"baseParameters": {
+						"tableName": {
+							"value": "@pipeline().parameters.p_tableName",
+							"type": "Expression"
+						},
+						"fileName": {
+							"value": "@concat(pipeline().parameters.p_tableName,'.csv')",
+							"type": "Expression"
+						},
+						"filePath": {
+							"value": "ULT/ADRMLookup/",
+							"type": "Expression"
+						},
+						"timestampIngested": {
+							"value": "@utcnow()",
+							"type": "Expression"
+						},
+						"rowsCopied": {
+							"value": "@string(activity('Lookup_ult1').output.count)",
+							"type": "Expression"
+						},
+						"sourceSystem": {
+							"value": "@pipeline().parameters.p_sourceSystem",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@pipeline().parameters.p_domain",
+							"type": "Expression"
+						},
+						"Watermark_Value": {
+							"value": "@utcnow()",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "NB_CLNSNG_1",
+				"description": "Notebook for carrying out the cleansing activity",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Insert record for raw file_1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published/DATA/CLEANSE/rawToCleanseDataload",
+					"baseParameters": {
+						"tableName": {
+							"value": "@pipeline().parameters.p_tableName",
+							"type": "Expression"
+						},
+						"sourceSystem": {
+							"value": "@pipeline().parameters.p_sourceSystem",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "PL_Common_Notebook_1_copy1",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "NB_CLNSNG_1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_Notebook",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"entity": {
+							"value": "@pipeline().parameters.p_tableName",
+							"type": "Expression"
+						},
+						"fullorincl": "F",
+						"level_exec": {
+							"value": "@pipeline().parameters.p_LevelExec",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_tableName": {
+				"type": "string"
+			},
+			"p_sourceSystem": {
+				"type": "string"
+			},
+			"p_domain": {
+				"type": "string"
+			},
+			"p_LevelExec": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"tableName": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-01T09:17:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

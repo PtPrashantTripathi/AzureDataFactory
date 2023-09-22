@@ -1,0 +1,48 @@
+{
+	"name": "PL_UPC_LOC_Count_Validation",
+	"properties": {
+		"activities": [
+			{
+				"name": "Wait after getting file from Merch",
+				"description": "Wait after getting the file from Merch to load the data to delta table.",
+				"type": "Wait",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 30
+				}
+			},
+			{
+				"name": "Show_Delta_Count",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Wait after getting file from Merch",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 5,
+					"retryIntervalInSeconds": 180,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/UPC_LOC_Count_Validation"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": []
+	}
+}

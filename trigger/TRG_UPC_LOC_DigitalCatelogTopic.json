@@ -1,0 +1,24 @@
+{
+	"name": "TRG_UPC_LOC_DigitalCatelogTopic",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_UPC_LOC_DigitalCatalogTopic_Daily_Load",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-03-13T05:30:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

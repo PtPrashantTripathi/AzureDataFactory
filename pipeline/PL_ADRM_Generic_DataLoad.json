@@ -1,0 +1,142 @@
+{
+	"name": "PL_ADRM_Generic_DataLoad",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKP_GET_RECORDS",
+				"description": "Lookup to get records of certain level and order ",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureDatabricksDeltaLakeSource",
+						"query": {
+							"value": "select * from logadrmexecpos where levelExec=@{pipeline().parameters.level}  and orderExec=@{pipeline().parameters.order} order by orderExec",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_AzureDatabricksDeltaLakeDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"description": "ForEach loop for processing every record",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LKP_GET_RECORDS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_GET_RECORDS').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 20,
+					"activities": [
+						{
+							"name": "EXEC_PL_Common_Notebook",
+							"description": "Execute the common notebook pipeline for processing each entity",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Notebook",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"entity": {
+										"value": "@item().entityName",
+										"type": "Expression"
+									},
+									"fullorincl": {
+										"value": "@pipeline().parameters.fullorincl",
+										"type": "Expression"
+									},
+									"level_exec": {
+										"value": "@item().levelExec",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "SP_Synapse_Load",
+							"description": "Loads the below synapse DW tables\n\nPromotionAdvertisementBlock,\nPromotionPosHistory,\nPromotionAdvertisementSampleDocumentFact,\nPromotionStorePosHistory,\nPromotionVehicle",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "EXEC_PL_Common_Notebook",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[APEX_ETL].[PROC_FCT_PROMO_TB_LOAD]",
+								"storedProcedureParameters": {
+									"ENTITY_NAME": {
+										"value": "@item().entityName",
+										"type": "String"
+									},
+									"FULL_OR_INCL": {
+										"value": "@pipeline().parameters.fullorincl",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureSynapseAnalytics01",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"level": {
+				"type": "int"
+			},
+			"fullorincl": {
+				"type": "string"
+			},
+			"order": {
+				"type": "int"
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-01T09:17:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

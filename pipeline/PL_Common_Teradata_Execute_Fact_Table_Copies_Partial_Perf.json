@@ -1,0 +1,173 @@
+{
+	"name": "PL_Common_Teradata_Execute_Fact_Table_Copies_Partial_Perf",
+	"properties": {
+		"description": "Master pipeline Partial load for Teradata source tables",
+		"activities": [
+			{
+				"name": "FOR_EACH_ENTRY",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.p_Tablelist",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "ExecutePL_Common_Teradata_Fact_Generic_Copy_Partial",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Teradata_Fact_Generic_Copy_Partial_Perf",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"TableName": {
+										"value": "@item().TableName",
+										"type": "Expression"
+									},
+									"WatermarkStart": {
+										"value": "@item().WatermarkStart",
+										"type": "Expression"
+									},
+									"WatermarkEnd": {
+										"value": "@item().WatermarkEnd",
+										"type": "Expression"
+									},
+									"FolderName": {
+										"value": "@concat('full/','Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Day=',formatDateTime(utcnow(),'dd'))",
+										"type": "Expression"
+									},
+									"SourceSystem": {
+										"value": "@pipeline().parameters.p_SourceSystem",
+										"type": "Expression"
+									},
+									"DatabaseName": {
+										"value": "@pipeline().parameters.p_DatabaseName",
+										"type": "Expression"
+									},
+									"domain": "SAASRetirement",
+									"WatermarkColumnName": "WatermarkColumnName"
+								}
+							}
+						},
+						{
+							"name": "Append Table Name",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "TableList1",
+								"value": {
+									"value": "@item().TableName",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Unique Tables",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "FOR_EACH_ENTRY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "UniqueTables",
+					"value": {
+						"value": "@union(variables('TableList1'),variables('TableList2'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FOR_EACH_UNIQUE_TBL",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Unique Tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('UniqueTables')",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Execute PL_Common_Generic_Cleanse",
+							"description": "Execute cleanse notebook pipeline",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Generic_Cleanse",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"tableName": {
+										"value": "@item()",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@pipeline().parameters.p_SourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_SourceSystem": {
+				"type": "string"
+			},
+			"p_DatabaseName": {
+				"type": "string"
+			},
+			"p_Tablelist": {
+				"type": "array"
+			}
+		},
+		"variables": {
+			"TableList1": {
+				"type": "Array"
+			},
+			"TableList2": {
+				"type": "Array"
+			},
+			"UniqueTables": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Digital-Merchandising/TERADATA"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-07-27T16:37:44Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

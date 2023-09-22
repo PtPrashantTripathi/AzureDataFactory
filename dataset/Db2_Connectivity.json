@@ -1,0 +1,12 @@
+{
+	"name": "Db2_Connectivity",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_DB2connectivity",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Db2Table",
+		"schema": []
+	}
+}

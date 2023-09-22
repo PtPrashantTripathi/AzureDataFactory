@@ -1,0 +1,183 @@
+{
+	"name": "PL_Common_Teradata_Execute_Table_Copies_Full_Promo",
+	"properties": {
+		"description": "Master pipeline Full load for Teradata source tables",
+		"activities": [
+			{
+				"name": "LKP_CONFIG_FILE",
+				"description": "This activity reads from a source file located in configuration in the Data Lake",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_TeraData_CONFIG_Promo_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "TERADATA_DB_CONFIGURATION_PROMO.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_SRC",
+				"description": "",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_CONFIG_FILE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_CONFIG_FILE').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(and(equals(item().DatabaseName,pipeline().parameters.p_DatabaseName),equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)),equals(item().WatermarkColumnName,null))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FOREACH_SRC_Tables",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FLTR_SRC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FLTR_SRC').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Execute PL_Common_Generic_Cleanse",
+							"description": "Execute cleanse notebook pipeline",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Execute PL_SRC_Teradata_Generic_Copy_Full",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Generic_Cleanse",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"tableName": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Execute PL_SRC_Teradata_Generic_Copy_Full",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Teradata_Generic_Copy_Full_Promo",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"tableName": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"WatermarkColumnName": {
+										"value": "@item().WatermarkColumnName",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@item().Domain",
+										"type": "Expression"
+									},
+									"folderName": {
+										"value": "@concat('full/','Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Day=',formatDateTime(utcnow(),'dd'))",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@concat(item().SourceTableName,'-',formatDateTime(utcnow()) )",
+										"type": "Expression"
+									},
+									"databaseName": {
+										"value": "@item().DatabaseName",
+										"type": "Expression"
+									},
+									"PartitionColumn": {
+										"value": "@item().PartitionColumn",
+										"type": "Expression"
+									},
+									"queryPattern": {
+										"value": "@item().QueryPattern",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_DatabaseName": {
+				"type": "string"
+			},
+			"p_SourceSystem": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Digital-Merchandising/TERADATA"
+		},
+		"annotations": []
+	}
+}

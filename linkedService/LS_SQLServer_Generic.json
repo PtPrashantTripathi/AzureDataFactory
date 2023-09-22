@@ -1,0 +1,39 @@
+{
+	"name": "LS_SQLServer_Generic",
+	"properties": {
+		"description": "Generic linked service for connecting to any On-Premise SQL Server",
+		"parameters": {
+			"serverInstance": {
+				"type": "string"
+			},
+			"databaseName": {
+				"type": "string"
+			},
+			"sqlserverusername": {
+				"type": "string"
+			},
+			"sqlserverpassword": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "Integrated Security=True;Data Source=@{linkedService().serverInstance};Initial Catalog=@{linkedService().databaseName}",
+			"userName": "@{linkedService().sqlserverusername}",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault01",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "sqlserverpassword"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHosted-IR-BI-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

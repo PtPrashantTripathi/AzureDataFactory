@@ -1,0 +1,84 @@
+{
+	"name": "PL_ADLS_DataValidator",
+	"properties": {
+		"activities": [
+			{
+				"name": "DataValidator_Master",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/QA_DataValidator/DataValidator_Master",
+					"baseParameters": {
+						"configuration": {
+							"value": "@pipeline().parameters.configuration",
+							"type": "Expression"
+						},
+						"entityName": {
+							"value": "@pipeline().parameters.entityName",
+							"type": "Expression"
+						},
+						"sourcePath": {
+							"value": "@pipeline().parameters.sourcePath",
+							"type": "Expression"
+						},
+						"targetPath": {
+							"value": "@pipeline().parameters.targetPath",
+							"type": "Expression"
+						},
+						"sourceQuery": {
+							"value": "@pipeline().parameters.sourceQuery",
+							"type": "Expression"
+						},
+						"targetQuery": {
+							"value": "@pipeline().parameters.targetQuery",
+							"type": "Expression"
+						},
+						"primaryKeys": {
+							"value": "@string(pipeline().parameters.primaryKeys)",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"configuration": {
+				"type": "string"
+			},
+			"entityName": {
+				"type": "string"
+			},
+			"sourcePath": {
+				"type": "string"
+			},
+			"targetPath": {
+				"type": "string"
+			},
+			"sourceQuery": {
+				"type": "string"
+			},
+			"targetQuery": {
+				"type": "string"
+			},
+			"primaryKeys": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/QA Data Validator"
+		},
+		"annotations": []
+	}
+}

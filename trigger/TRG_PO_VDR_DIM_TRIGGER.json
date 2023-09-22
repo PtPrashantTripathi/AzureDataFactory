@@ -1,0 +1,33 @@
+{
+	"name": "TRG_PO_VDR_DIM_TRIGGER",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Full_PO",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_SourceSystem": "PO",
+					"p_DatabaseName": "VPROD_VDR_PFRM"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-05-15T05:00:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"weekDays": [
+						"Monday"
+					]
+				}
+			}
+		}
+	}
+}

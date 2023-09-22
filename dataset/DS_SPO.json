@@ -1,0 +1,35 @@
+{
+	"name": "DS_SPO",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SharePoint_Generic",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"SP_Domain_Name": "https://apex365.sharepoint.com",
+				"FilePath": {
+					"value": "@dataset().FilePath",
+					"type": "Expression"
+				},
+				"SP_Site": {
+					"value": "@dataset().SP_Site",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"FilePath": {
+				"type": "string"
+			},
+			"SP_Site": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation"
+			}
+		}
+	}
+}

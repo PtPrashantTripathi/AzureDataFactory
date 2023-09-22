@@ -1,0 +1,98 @@
+{
+	"name": "PL_ScaleRU",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetCommonAPISecret",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@pipeline().parameters.p_GetCommonAPISecret_URL",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "GetCommonAPISecret",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@pipeline().parameters.p_ScaleCosmosDB_URL",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Ocp-Apim-Subscription-Key": {
+							"value": "@activity('GetCommonAPISecret').output.value",
+							"type": "Expression"
+						}
+					},
+					"body": {
+						"value": "@pipeline().parameters.p_ScaleCosmosDB_Body",
+						"type": "Expression"
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://management.azure.com"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_GetCommonAPISecret_URL": {
+				"type": "string",
+				"defaultValue": "https://kv-np-ea2-apex-etl-int.vault.azure.net/secrets/APIManagerSubscriptionKey/609d70826d904dc49856eb7295423c96?api-version=7.0"
+			},
+			"p_ScaleCosmosDB_URL": {
+				"type": "string",
+				"defaultValue": "https://api.apex.com/cert/azurecommon/ScaleCosmosDatabase"
+			},
+			"p_ScaleCosmosDB_Body": {
+				"type": "string",
+				"defaultValue": {
+					"CosmosAccount": "cosmosdb-np-ea2-apex-apis-int",
+					"CosmosServer": "ServePos",
+					"RUs": 800,
+					"ResourceGroupName": "rg-np-apex-apis-int",
+					"SubscriptionName": "Enterprise Data NonProduction"
+				}
+			}
+		},
+		"folder": {
+			"name": "PosAPI"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-01T09:17:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

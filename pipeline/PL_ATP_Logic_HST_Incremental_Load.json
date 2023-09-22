@@ -1,0 +1,112 @@
+{
+	"name": "PL_ATP_Logic_HST_Incremental_Load",
+	"properties": {
+		"description": "Only for Incremental runs",
+		"activities": [
+			{
+				"name": "Excecute_ATP_Incremental_Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_DatabaseName": "DL_MKT_MPK",
+						"p_SourceSystem": "ATP"
+					}
+				}
+			},
+			{
+				"name": "ATP_NEW_IS_SELLABLE_LOGIC_HST_Non_ADRM_Load",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Excecute_ATP_Incremental_Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Master_ADRM_Pos",
+					"baseParameters": {
+						"fullorincl": "I",
+						"entity_name": {
+							"value": "@pipeline().parameters.entityName",
+							"type": "Expression"
+						},
+						"level_exec": "-2"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "If Condition1",
+				"description": "For run the notebook ExportDigitalPosEligibilityToServiceBus",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "ATP_NEW_IS_SELLABLE_LOGIC_HST_Non_ADRM_Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.entityName,'NEW_IS_SELLABLE_LOGIC_HST')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "ExportDigitalPosEligibilityToServiceBus",
+							"description": "It will run only ExportDigitalPosEligibilityToServiceBus notebook",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/SERVICEBUS/ExportDigitalPosEligibilityToServiceBus"
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_Connector",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"entityName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/StoreItem"
+		},
+		"annotations": []
+	}
+}

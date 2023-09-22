@@ -1,0 +1,693 @@
+{
+	"name": "PL_Copy_Cosmos_To_NAS_Email",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data for all stores",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Execute Decrease RU for UPC_LOC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set folderpath",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.store_list",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "If Condition1",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(activity('Save Cosmos Data to Stage').output.runOutput[item()],1)",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Append variable for unavailable stores",
+										"type": "AppendVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "stores_unavailable",
+											"value": {
+												"value": "@item()",
+												"type": "Expression"
+											}
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "Copy ADLS To NAS",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 5,
+											"retryIntervalInSeconds": 60,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "JsonSource",
+												"storeSettings": {
+													"type": "AzureBlobFSReadSettings",
+													"recursive": true,
+													"wildcardFolderPath": {
+														"value": "UPC_LOC/@{pipeline().parameters.requestor}",
+														"type": "Expression"
+													},
+													"wildcardFileName": {
+														"value": "@concat('APEX_IPOP_',item(),'*.json')",
+														"type": "Expression"
+													},
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "JsonReadSettings"
+												}
+											},
+											"sink": {
+												"type": "JsonSink",
+												"storeSettings": {
+													"type": "FileServerWriteSettings"
+												},
+												"formatSettings": {
+													"type": "JsonWriteSettings"
+												}
+											},
+											"enableStaging": false
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_UPC_LOC_StageLayer_Data",
+												"type": "DatasetReference",
+												"parameters": {
+													"team_name": {
+														"value": "@pipeline().parameters.requestor",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_UPC_LOC_Sink_Data",
+												"type": "DatasetReference",
+												"parameters": {
+													"foldername": {
+														"value": "@variables('folderpath')",
+														"type": "Expression"
+													},
+													"root_foldername": {
+														"value": "@activity('FLTR_TEAM_DETAILS').output.value[0].NAS_folder",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Append variable on success",
+										"type": "AppendVariable",
+										"dependsOn": [
+											{
+												"activity": "Copy ADLS To NAS",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "stores_passed",
+											"value": {
+												"value": "@item()",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Append variable on failure",
+										"type": "AppendVariable",
+										"dependsOn": [
+											{
+												"activity": "Copy ADLS To NAS",
+												"dependencyConditions": [
+													"Failed"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "stores_failed",
+											"value": {
+												"value": "@item()",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Save Cosmos Data to Stage",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Execute Increase RU for UPC_LOC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "FLTR_TEAM_DETAILS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "00.02:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/SaveIPOPToStage",
+					"baseParameters": {
+						"stores": {
+							"value": "@string(pipeline().parameters.store_list)",
+							"type": "Expression"
+						},
+						"requestor": {
+							"value": "@pipeline().parameters.requestor",
+							"type": "Expression"
+						},
+						"filter_cond": {
+							"value": "@coalesce(activity('FLTR_TEAM_DETAILS').output.value[0].filter_cond,'')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_UPC_LOC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Execute Increase RU for UPC_LOC",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Process Start Timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "UPC_LOCLocationLevel",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "F",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute Decrease RU for UPC_LOC",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Save Cosmos Data to Stage",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "UPC_LOCLocationLevel",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "If Condition2",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Copy data for all stores",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(add(add(length(variables('stores_passed')),length(variables('stores_failed'))),length(variables('stores_unavailable'))),length(pipeline().parameters.store_list))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Send Email on Success",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Get Secret",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "https://api.sendgrid.com/v3/mail/send",
+								"method": "POST",
+								"headers": {
+									"Authorization": {
+										"value": "@concat('Bearer ',activity('Get Secret').output.value)",
+										"type": "Expression"
+									},
+									"Content-Type": "application/json"
+								},
+								"body": {
+									"value": "{\n\"personalizations\": [\n{\n\"to\": [\n@{activity('FLTR_TEAM_DETAILS').output.value[0].to}\n],\n\"cc\":[\n@{activity('FLTR_TEAM_DETAILS').output.value[0].cc}\n]\n\n}\n],\n\"from\": @{activity('FLTR_TEAM_DETAILS').output.value[0].from}\n,\n\"subject\": \"Incident No. @{pipeline().parameters.incident_no}, Requestor - @{pipeline().parameters.requestor} - UPC_LOC IPOP load to NAS location - Status\",\n\"content\": [\n{\n\"type\": \"text/html\",\n\"value\":\"@{concat('Parameters passed in pipeline :-','<br>','1. store_list - ',concat('[',join(pipeline().parameters.store_list,','),']'),'<br>','2. requestor - ',pipeline().parameters.requestor,'<br>','3. incident_no - ',pipeline().parameters.incident_no,'<br>',\n   '4. additionalrecipient_email - ',if(equals(pipeline().parameters.additionalrecipient_email,null),'Blank - No additional recipient id passed',join(createArray(pipeline().parameters.additionalrecipient_email),' , ')),'<br>',\n   if(equals(length(variables('stores_passed')),0),'Out of the required StoreNumbers none of them have gone to NAS location.',concat('IPOP load for stores ',join(variables('stores_passed'),' , '),' has been done successfully till NAS location. The loading folderpath is mjrdata\\\\Apex\\\\',concat(replace(activity('FLTR_TEAM_DETAILS').output.value[0].NAS_folder,'\\','\\\\'),replace(variables('folderpath'),'/','\\\\'),'.'))),'<br>',\nif(equals(length(variables('stores_unavailable')),0),'',concat('Data is unavailable for stores ',join(variables('stores_unavailable'),' , '),' in UPC_LOC Cosmos collection.')),'<br>',\nif(equals(length(variables('stores_failed')),0),'',concat('IPOP load for stores ',join(variables('stores_failed'),' , '),' has failed while loading till NAS location.')))}\"\n}\n]\n}",
+									"type": "Expression"
+								},
+								"datasets": [
+									{
+										"referenceName": "DS_UPC_LOC_Store_Email",
+										"type": "DatasetReference",
+										"parameters": {
+											"filename": "UPC_LOC_StoreLoad_Status_Email.txt"
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "Get Secret",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@if(endswith(pipeline().DataFactory,'etl'),'https://kv-ea2-apexmonitor.vault.azure.net/secrets/SendGridAPIKey/5b26cedd8b2e4d849dd089bbc0afa784?api-version=7.0',if(endswith(pipeline().DataFactory,'etl-cert'),'https://kv-np-ea2-apexmonitor.vault.azure.net/secrets/SendGridAPIKey/8e9582cc472b4c12a500bdec3e4cedfa?api-version=7.0','https://kv-np-ea2-apexmonitor.vault.azure.net/secrets/SendGridAPIKey/8e9582cc472b4c12a500bdec3e4cedfa?api-version=7.0'))",
+									"type": "Expression"
+								},
+								"method": "GET",
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://vault.azure.net"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup Email Addresses",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_UPC_LOC_Store_Email",
+						"type": "DatasetReference",
+						"parameters": {
+							"filename": "UPC_LOC_StoreLoad_Status_Email.txt"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_TEAM_DETAILS",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Lookup Email Addresses",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup Email Addresses').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().requestor,pipeline().parameters.requestor)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Genarate Log File",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "If Condition2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "incident_no",
+								"value": {
+									"value": "@pipeline().parameters.incident_no",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "store_list",
+								"value": {
+									"value": "@replace(concat('[',join(pipeline().parameters.store_list,','),']'),'\\','')",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "pipeline_runid",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "exec_start",
+								"value": {
+									"value": "@variables('start_timestamp')",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "exec_end",
+								"value": {
+									"value": "@utcnow()",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "NAS_folderpath",
+								"value": {
+									"value": "@if(equals(length(variables('stores_passed')),0),'',replace(concat(activity('FLTR_TEAM_DETAILS').output.value[0].NAS_folder,'\\',replace(variables('folderpath'),'/','\\')),'\\\\','\\'))",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "successful_stores_loaded",
+								"value": {
+									"value": "@concat('[',join(variables('stores_passed'),','),']')",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "incident_no",
+									"type": "String"
+								},
+								"sink": {
+									"name": "incident_no"
+								}
+							},
+							{
+								"source": {
+									"name": "store_list",
+									"type": "String"
+								},
+								"sink": {
+									"name": "store_list"
+								}
+							},
+							{
+								"source": {
+									"name": "pipeline_runid",
+									"type": "String"
+								},
+								"sink": {
+									"name": "pipeline_runid"
+								}
+							},
+							{
+								"source": {
+									"name": "exec_start",
+									"type": "String"
+								},
+								"sink": {
+									"name": "exec_start"
+								}
+							},
+							{
+								"source": {
+									"name": "exec_end",
+									"type": "String"
+								},
+								"sink": {
+									"name": "exec_end"
+								}
+							},
+							{
+								"source": {
+									"name": "NAS_folderpath",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NAS_folderpath"
+								}
+							},
+							{
+								"source": {
+									"name": "successful_stores_loaded",
+									"type": "String"
+								},
+								"sink": {
+									"name": "successful_stores_loaded"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_UPC_LOC_IPOP_AUDIT_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderpath": {
+								"value": "Pos/UPC_LOC",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@concat('UPC_LOC_OnDemand_IPOP_',pipeline().parameters.requestor,'_',variables('start_timestamp'))",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "Set Process Start Timestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "start_timestamp",
+					"value": {
+						"value": "@utcnow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set folderpath",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "folderpath",
+					"value": {
+						"value": "@concat('/Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Date=',formatDateTime(utcnow(),'dd'))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"store_list": {
+				"type": "array"
+			},
+			"requestor": {
+				"type": "string"
+			},
+			"incident_no": {
+				"type": "string"
+			},
+			"additionalrecipient_email": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"stores_passed": {
+				"type": "Array"
+			},
+			"stores_failed": {
+				"type": "Array"
+			},
+			"stores_unavailable": {
+				"type": "Array"
+			},
+			"len": {
+				"type": "String"
+			},
+			"start_timestamp": {
+				"type": "String"
+			},
+			"folderpath": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": []
+	}
+}

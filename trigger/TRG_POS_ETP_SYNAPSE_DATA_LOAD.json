@@ -1,0 +1,27 @@
+{
+	"name": "TRG_POS_ETP_SYNAPSE_DATA_LOAD",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_DS_ATP_ETP_Stage_Load_Master",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"RunId": "R07"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-08-22T09:00:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

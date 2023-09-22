@@ -1,0 +1,33 @@
+{
+	"name": "DS_DB2_CONFIG_Generic",
+	"properties": {
+		"description": "Generic DB2 Configuration file ",
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Domain": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Generic_DB2_CONFIG.csv",
+				"folderPath": {
+					"value": "@concat('configuration/',dataset().Domain,'/raw')",
+					"type": "Expression"
+				},
+				"fileSystem": "raw"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

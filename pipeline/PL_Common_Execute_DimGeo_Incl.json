@@ -1,0 +1,192 @@
+{
+	"name": "PL_Common_Execute_DimensionGeo_Incl",
+	"properties": {
+		"activities": [
+			{
+				"name": "Check ADRM Generated File Count",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Common_Folder",
+						"type": "DatasetReference",
+						"parameters": {
+							"FolderName": "EventBased/Geo/ADRMProcess/"
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Run the Pipeline when file Count grt 1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Check ADRM Generated File Count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(activity('Check ADRM Generated File Count').output.childItems),0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute Geo_Common_Generic_Stage_dimension_Load",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Geo_Common_Generic_Stage_dimension_Load",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "Reset the Generated File Count",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "On-Success Generate Cosmos Check File",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Common_Folder",
+									"type": "DatasetReference",
+									"parameters": {
+										"FolderName": "EventBased/Geo/ADRMProcess/"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.*",
+									"enablePartitionDiscovery": false
+								}
+							}
+						},
+						{
+							"name": "On-Success Generate Cosmos Check File",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Execute Geo_Common_Generic_Stage_dimension_Load",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_COMMON_GenerateFile",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": "GeoDimensionLoadEventBased_DummyFile/Dummy.txt"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_COMMON_GenerateFile",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileName": "Geo/CosmosLoad/DIM_GEO_CosmosLoad_Check.txt"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"fullorincl": {
+				"type": "string",
+				"defaultValue": "I"
+			}
+		},
+		"folder": {
+			"name": "Geo/Eventbased"
+		},
+		"annotations": []
+	}
+}

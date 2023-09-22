@@ -1,0 +1,29 @@
+{
+	"name": "DS_JSON_Config_LookUp",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "UPC_LOC_FileCheck_JSON_Configuration.txt",
+				"folderPath": "configuration/SRE/Alert_JSON_Configuration",
+				"fileSystem": "raw"
+			},
+			"columnDelimiter": "|",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Assigned_Group|Support_Group|CI_Name",
+				"type": "String"
+			}
+		]
+	}
+}

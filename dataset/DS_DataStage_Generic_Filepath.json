@@ -1,0 +1,43 @@
+{
+	"name": "DS_DataStage_Generic_Filepath",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_Promo_Datastage",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"hostid": {
+					"value": "@dataset().hostid",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"datastage_filepath": {
+				"type": "string",
+				"defaultValue": "/Apex_work/Ascential/Work/FEbi02/Seq"
+			},
+			"hostid": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "DataStage"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "SftpLocation",
+				"folderPath": {
+					"value": "@dataset().datastage_filepath",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

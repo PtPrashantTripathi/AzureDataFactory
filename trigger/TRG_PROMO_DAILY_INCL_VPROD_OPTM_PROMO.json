@@ -1,0 +1,28 @@
+{
+	"name": "TRG_PROMO_DAILY_INCL_VPROD_OPTM_PROMO",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl_Promo_Daily",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_DatabaseName": "VPROD_OPTM_PROMO",
+					"p_SourceSystem": "PosPromo"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-08-17T01:30:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

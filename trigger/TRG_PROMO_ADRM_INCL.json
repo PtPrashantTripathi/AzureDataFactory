@@ -1,0 +1,28 @@
+{
+	"name": "TRG_PROMO_ADRM_INCL",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_ADRM_Execute_DataLoad_Order_Promo",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"fullorincl": "I",
+					"level": "-5"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-08-24T07:00:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

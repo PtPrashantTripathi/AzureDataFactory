@@ -1,0 +1,414 @@
+{
+	"name": "PL_Export_POH_To_Cosmos",
+	"properties": {
+		"activities": [
+			{
+				"name": "Run PL_ExportToCosmos Pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Run ATP ATP_NEW_IS_SELLABLE_LOGIC_HST Incremental Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Run_ADRM_StoreItem",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Export_To_Cosmos_StoreItem",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"collectionname": {
+							"value": "@pipeline().parameters.collectioname",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "If Full or Incremental",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Filter_POH",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.fullorincl,'F')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Excecute Incremental Load",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_DB2_Generic_Copy_Incl",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"tableName": {
+										"value": "@activity('Filter_POH').output.value[0].SourceTableName",
+										"type": "Expression"
+									},
+									"databaseName": {
+										"value": "@activity('Filter_POH').output.value[0].ConnectionString",
+										"type": "Expression"
+									},
+									"dbvalue": " ",
+									"domain": {
+										"value": "@activity('Filter_POH').output.value[0].Domain",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@activity('Filter_POH').output.value[0].SourceSystem",
+										"type": "Expression"
+									},
+									"folderName": {
+										"value": "@concat('delta/','Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Day=',formatDateTime(utcnow(),'dd'))",
+										"type": "Expression"
+									},
+									"watermarkColumnName": {
+										"value": "@activity('Filter_POH').output.value[0].WatermarkColumnName",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@concat(activity('Filter_POH').output.value[0].SourceTableName,'-',formatDateTime(utcnow()) )",
+										"type": "Expression"
+									},
+									"userName": {
+										"value": "@activity('Filter_POH').output.value[0].UserName",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Execcute_Full_Load",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_DB2_Generic_Copy_Full",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"tableName": {
+										"value": "@activity('Filter_POH').output.value[0].SourceTableName",
+										"type": "Expression"
+									},
+									"databaseName": {
+										"value": "@activity('Filter_POH').output.value[0].ConnectionString",
+										"type": "Expression"
+									},
+									"dbvalue": " ",
+									"WatermarkColumnName": {
+										"value": "@activity('Filter_POH').output.value[0].WatermarkColumnName",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@activity('Filter_POH').output.value[0].SourceSystem",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@activity('Filter_POH').output.value[0].Domain",
+										"type": "Expression"
+									},
+									"folderName": {
+										"value": "@concat('full/','Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Day=',formatDateTime(utcnow(),'dd'))",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@concat(activity('Filter_POH').output.value[0].SourceTableName,'-',formatDateTime(utcnow()) )",
+										"type": "Expression"
+									},
+									"userName": {
+										"value": "@activity('Filter_POH').output.value[0].UserName",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Execute Cleansing PL_Common_Generic_Cleanse",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "If Full or Incremental",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_Generic_Cleanse",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "STO_UPC",
+						"sourceSystem": "PMM"
+					}
+				}
+			},
+			{
+				"name": "Lookup_Config_file",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Delete the Event File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_DB2_CONFIG_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "DB2_CONFIGURATION.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Filter_POH",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Lookup_Config_file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup_Config_file').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().EntityName,'POH')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Delete the Event File",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "STO_UPC_event.blob"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "Run ATP ATP_NEW_IS_SELLABLE_LOGIC_HST Incremental Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Delete the Event File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ATP_Logic_HST_Incremental_Load",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"entityName": "NEW_IS_SELLABLE_LOGIC_HST"
+					}
+				}
+			},
+			{
+				"name": "Run_ADRM_StoreItem",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Execute Cleansing PL_Common_Generic_Cleanse",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos/StoreItem",
+					"baseParameters": {
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Generate Event for Next Run",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Run PL_ExportToCosmos Pipeline",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "STO_UPC_event.blob"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"collectioname": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/POH"
+		},
+		"annotations": []
+	}
+}

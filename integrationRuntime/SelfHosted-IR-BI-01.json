@@ -1,0 +1,12 @@
+{
+	"name": "SelfHosted-IR-BI-01",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/d35870bd-730b-49b8-b011-9ce2aba09b5f/resourcegroups/rg-np-DataFactoryAgents/providers/Microsoft.DataFactory/factories/df-np-ea2-SharedAgents/integrationruntimes/NP-SelfHosted-IR-BI-01",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}

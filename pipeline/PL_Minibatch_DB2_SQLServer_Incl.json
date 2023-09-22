@@ -1,0 +1,221 @@
+{
+	"name": "PL_Minibatch_DB2_SQLServer_Incl",
+	"properties": {
+		"activities": [
+			{
+				"name": "Check for hourly load completion file",
+				"type": "Validation",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Hourly_Load_Completed.blob"
+						}
+					},
+					"timeout": "0.00:10:00",
+					"sleep": 10
+				}
+			},
+			{
+				"name": "Execute PMM DB2",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Delete Hourly Load completion file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_DB2_Execute_Table_Copies_HourlyIncl",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_EntityName": "Pos",
+						"p_SourceSystem": "PMM"
+					}
+				}
+			},
+			{
+				"name": "Execute PMM SQLServer",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Delete Hourly Load completion file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_SQLServer_Execute_Table_Copies_HourlyIncl",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_SourceSystem": "PMM",
+						"p_DatabaseName": "Pos"
+					}
+				}
+			},
+			{
+				"name": "Execute CFD DB2",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Delete Hourly Load completion file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_DB2_CFD_Execute_Table_Copies_Incl",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_EntityName": "Pos",
+						"p_SourceSystem": "CFD"
+					}
+				}
+			},
+			{
+				"name": "Generate Hourly ADRM Load Start file",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Execute PMM DB2",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "Execute PMM SQLServer",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "Execute CFD DB2",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_COMM_CONTROL_CSV",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Hourly_Load_Start.blob"
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete Hourly Load completion file",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Check for hourly load completion file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Hourly_Load_Completed.blob"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"variables": {
+			"status_val": {
+				"type": "String",
+				"defaultValue": "start"
+			}
+		},
+		"folder": {
+			"name": "Digital-Merchandising/POS_MINIBATCH_INGESTION"
+		},
+		"annotations": []
+	}
+}

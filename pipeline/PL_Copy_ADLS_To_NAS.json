@@ -1,0 +1,98 @@
+{
+	"name": "PL_Copy_ADLS_To_NAS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data for all stores",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.store_list",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "Copy ADLS To NAS",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 5,
+								"retryIntervalInSeconds": 60,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "JsonSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"wildcardFolderPath": "UPC_LOC/STME",
+										"wildcardFileName": {
+											"value": "@concat('APEX_IPOP_',item(),'*.json')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "JsonReadSettings"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "FileServerWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_UPC_LOC_StageLayer_Data",
+									"type": "DatasetReference",
+									"parameters": {
+										"team_name": "STME"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_UPC_LOC_Sink_Data",
+									"type": "DatasetReference",
+									"parameters": {
+										"foldername": {
+											"value": "@concat('/Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Date=',formatDateTime(utcnow(),'dd'))",
+											"type": "Expression"
+										},
+										"root_foldername": {
+											"value": "Serve\\Pos\\UPC_LOC",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"store_list": {
+				"type": "array"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": []
+	}
+}

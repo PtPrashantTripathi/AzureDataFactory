@@ -1,0 +1,346 @@
+{
+	"name": "IPOP_Generic_Store_Ingestion",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FLTR_StoreId_Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FLTR_StoreId_Files').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "LKP_Same_File",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureDatabricksDeltaLakeSource",
+									"query": {
+										"value": "select count(*) as cnt from logupc_locfilemovetocleanse where rawfilename = '@{item().name}' ",
+										"type": "Expression"
+									}
+								},
+								"dataset": {
+									"referenceName": "DS_AzureDatabricksDeltaLakeDataset",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "If Condition1",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "LKP_Same_File",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(int(activity('LKP_Same_File').output.firstRow.cnt),0)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Copy NAS To ADLS",
+										"type": "Copy",
+										"dependsOn": [
+											{
+												"activity": "Set filename",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											},
+											{
+												"activity": "Set filepath",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 5,
+											"retryIntervalInSeconds": 60,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "JsonSource",
+												"storeSettings": {
+													"type": "FileServerReadSettings",
+													"recursive": true,
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "JsonReadSettings"
+												}
+											},
+											"sink": {
+												"type": "JsonSink",
+												"storeSettings": {
+													"type": "AzureBlobFSWriteSettings"
+												},
+												"formatSettings": {
+													"type": "JsonWriteSettings"
+												}
+											},
+											"enableStaging": false
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_UPC_LOC_Source_Data_copy",
+												"type": "DatasetReference",
+												"parameters": {
+													"filename": {
+														"value": "@item().name",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_UPC_LOC_RawLayer_Data",
+												"type": "DatasetReference",
+												"parameters": {
+													"domain": {
+														"value": "UPC_LOC",
+														"type": "Expression"
+													},
+													"filename": {
+														"value": "@concat(variables('filename_modified'),'.json')",
+														"type": "Expression"
+													},
+													"filepath": {
+														"value": "@variables('filepath_raw')",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Set filename",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "filename_modified",
+											"value": {
+												"value": "@concat(split(item().name,'.')[0])",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Databricks Notebook for cleansing",
+										"description": "Registering the log details in a delta table using databricks activity",
+										"type": "DatabricksNotebook",
+										"dependsOn": [
+											{
+												"activity": "Copy NAS To ADLS",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 3,
+											"retryIntervalInSeconds": 120,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/CLEANSING/getRawFiles",
+											"baseParameters": {
+												"domain": "UPC_LOC",
+												"fileName": {
+													"value": "@concat(variables('filename_modified'),'.json')",
+													"type": "Expression"
+												},
+												"filePath": {
+													"value": "@concat('data/Pos/UPC_LOC/',variables('filepath_raw'),'/')",
+													"type": "Expression"
+												},
+												"timestampIngested": {
+													"value": "@utcnow()",
+													"type": "Expression"
+												},
+												"rowsCopied": {
+													"value": "''",
+													"type": "Expression"
+												}
+											}
+										},
+										"linkedServiceName": {
+											"referenceName": "AzureDatabricks_UPC_LOC",
+											"type": "LinkedServiceReference"
+										}
+									},
+									{
+										"name": "Set filepath",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "filepath_raw",
+											"value": {
+												"value": "@concat('IPOP/',pipeline().parameters.storeid_val,'/Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Date=',formatDateTime(utcnow(),'dd'))",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "LKP_Departments",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureDatabricksDeltaLakeSource",
+						"query": {
+							"value": "select distinct split(split(rawfilename,' ')[0],'_')[2] as dpt from logupc_locfilemovetocleanse where rawfilename like 'IPOP_@{pipeline().parameters.storeid_val}%' and flagcleansed = 'N'",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_AzureDatabricksDeltaLakeDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach2",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LKP_Departments",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_Departments').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 4,
+					"activities": [
+						{
+							"name": "Execute Cleanse for all the Ingested Files",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_UPC_LOC_Cleanse",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"storeid_val": {
+										"value": "@pipeline().parameters.storeid_val",
+										"type": "Expression"
+									},
+									"dept_val": {
+										"value": "@item().dpt",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "FLTR_StoreId_Files",
+				"type": "Filter",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.store_file_list",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@startswith(item().name,concat('IPOP_',pipeline().parameters.storeid_val,'_'))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"store_file_list": {
+				"type": "array"
+			},
+			"storeid_val": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"filename_modified": {
+				"type": "String"
+			},
+			"filepath_raw": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/UPC_LOC"
+		},
+		"annotations": []
+	}
+}

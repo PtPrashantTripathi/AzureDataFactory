@@ -1,0 +1,12 @@
+{
+	"name": "LS_AzureDataLakeStorage01",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Linked Service for DataLake Storage",
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://saea2grsnpapexdlakeint.dfs.core.windows.net"
+		}
+	}
+}

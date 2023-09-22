@@ -1,0 +1,27 @@
+{
+	"name": "DS_DB2_Generic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ODBC_DB2_Generic_Test",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"databaseName": {
+				"type": "string"
+			},
+			"tableName": {
+				"type": "string"
+			},
+			"userName": {
+				"type": "string",
+				"defaultValue": "APEXQA"
+			}
+		},
+		"folder": {
+			"name": "DB2"
+		},
+		"annotations": [],
+		"type": "OdbcTable",
+		"schema": []
+	}
+}

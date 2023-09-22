@@ -1,0 +1,64 @@
+{
+	"name": "PL_Execute_STIBO_ADRM_Synapse",
+	"properties": {
+		"description": "Triggers adrm and synapse pipeline",
+		"activities": [
+			{
+				"name": "PL_Execute_Synapse_STIBO",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_Execute_ADRM_STIBO",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Execute_Synapse_STIBO",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PL_Execute_ADRM_STIBO",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Execute_ADRM_STIBO",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						},
+						"level": {
+							"value": "@pipeline().parameters.level",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"fullorincl": {
+				"type": "string"
+			},
+			"level": {
+				"type": "string",
+				"defaultValue": "-4"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/stibo"
+		},
+		"annotations": []
+	}
+}

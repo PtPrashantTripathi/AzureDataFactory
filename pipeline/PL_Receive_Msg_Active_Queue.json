@@ -1,0 +1,43 @@
+{
+	"name": "PL_Receive_Msg_Active_Queue",
+	"properties": {
+		"description": "This Pipeline will trigger the databricks notebook which will read data from Azure Service Bus Active Queue and store in the ADLS delta table.",
+		"activities": [
+			{
+				"name": "Run_Consume_ActiveQueue_Notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_ServiceBus/ConsumeActiveQueuetoADLS",
+					"baseParameters": {
+						"topic_name": {
+							"value": "@pipeline().parameters.topic_name",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"topic_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/PubSub"
+		},
+		"annotations": []
+	}
+}

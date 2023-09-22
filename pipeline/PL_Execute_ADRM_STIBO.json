@@ -1,0 +1,195 @@
+{
+	"name": "PL_Execute_ADRM_STIBO",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKP_GET_MAXORDER",
+				"description": "Get the maximum order value from the log table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureDatabricksDeltaLakeSource",
+						"query": {
+							"value": "select max(orderExec) as max_order from logadrmexecpos where levelExec = @{pipeline().parameters.level}",
+							"type": "Expression"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_AzureDatabricksDeltaLakeDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "Until1",
+				"description": "Until loop executes one order at a time",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "SET_INITIAL_ORDER_VALUE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set variable Timestamp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(int(variables('count_order')),int(activity('LKP_GET_MAXORDER').output.firstRow.max_order))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "SET_SUB_VALUE",
+							"description": "Set the sub value to hold the increment of the original count value",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "sub",
+								"value": {
+									"value": "@string(add(int(variables('count_order')),1))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "SET_COUNT_ORDER_VALUE",
+							"description": "set the count value to the incremented value of itself",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "SET_SUB_VALUE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "count_order",
+								"value": {
+									"value": "@variables('sub')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "EXEC_PL_Generic_DataLoad",
+							"description": "Execute the generic pipeline for the corresponding level and order",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "SET_COUNT_ORDER_VALUE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_ADRM_Generic_DataLoad_Stibo",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"level": {
+										"value": "@pipeline().parameters.level",
+										"type": "Expression"
+									},
+									"fullorincl": {
+										"value": "@pipeline().parameters.fullorincl",
+										"type": "Expression"
+									},
+									"order": {
+										"value": "@sub(int(variables('count_order')),1)",
+										"type": "Expression"
+									},
+									"start_Timestamp": {
+										"value": "@variables('start_Timestamp')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "SET_INITIAL_ORDER_VALUE",
+				"description": "Set the initial value of order to 1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LKP_GET_MAXORDER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "count_order",
+					"value": "1"
+				}
+			},
+			{
+				"name": "Set variable Timestamp",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "start_Timestamp",
+					"value": {
+						"value": "@utcnow()",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"fullorincl": {
+				"type": "string"
+			},
+			"level": {
+				"type": "string",
+				"defaultValue": "-4"
+			}
+		},
+		"variables": {
+			"count_order": {
+				"type": "String"
+			},
+			"sub": {
+				"type": "String"
+			},
+			"start_Timestamp": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/stibo"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-01T09:17:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

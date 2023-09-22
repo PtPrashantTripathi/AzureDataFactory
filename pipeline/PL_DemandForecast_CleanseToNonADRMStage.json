@@ -1,0 +1,143 @@
+{
+	"name": "PL_DemandForecast_CleanseToNonADRMStage",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKP_CONFIG_FILE",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "00.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_TeraData_CONFIG_Promo_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "TERADATA_DB_CONFIGURATION_DATASTAGE.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_TBL",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_CONFIG_FILE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_CONFIG_FILE').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(and(equals(item().SourceTableName,pipeline().parameters.p_SourceTableName),equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)),equals(item().DatabaseName,pipeline().parameters.p_DatabaseName))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FLTR_TBL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FLTR_TBL').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "DemandForecast_CleansedToStage",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "00.10:00:00",
+								"retry": 3,
+								"retryIntervalInSeconds": 120,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Published_Pos/PosAPI/GRC/DemandForecast/CleansedToStage",
+								"baseParameters": {
+									"entity_name": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"fullorincl": {
+										"value": "@pipeline().parameters.fullorincl",
+										"type": "Expression"
+									},
+									"source_system": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									},
+									"source_table": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_AzureDatabricks_Connector",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_SourceTableName": {
+				"type": "string"
+			},
+			"p_DatabaseName": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			},
+			"p_SourceSystem": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PosAPI/Datastage"
+		},
+		"annotations": []
+	}
+}

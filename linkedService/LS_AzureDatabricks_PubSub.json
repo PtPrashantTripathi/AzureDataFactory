@@ -1,0 +1,19 @@
+{
+	"name": "LS_AzureDatabricks_PubSub",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-6491328476070712.12.azuredatabricks.net",
+			"accessToken": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault01",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "DataBricksPAT"
+			},
+			"existingClusterId": "0219-151027-watch278"
+		}
+	}
+}
