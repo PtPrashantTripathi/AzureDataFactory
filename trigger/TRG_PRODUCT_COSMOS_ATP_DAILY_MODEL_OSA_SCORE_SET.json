@@ -1,0 +1,35 @@
+{
+	"name": "TRG_PRODUCT_COSMOS_ATP_DAILY_MODEL_OSA_SCORE_SET",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_ATP_Intermediate_Refresh_Load",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"tableName": "DAILY_MODEL_OSA_SCORE_SET"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-02-15T14:24:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						0
+					]
+				}
+			}
+		}
+	}
+}

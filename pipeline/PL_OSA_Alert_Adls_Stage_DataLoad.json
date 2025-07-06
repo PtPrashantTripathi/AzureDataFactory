@@ -1,0 +1,34 @@
+{
+	"name": "PL_OSA_Alert_Adls_Stage_DataLoad",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load Data From DS to Stage",
+				"description": "NB_OSA_Alert_Data_load",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 900,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/GRC/OSA/OSA_alerts_Adls_Stage_incl_load"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_01",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "ProductAPI/OSA"
+		},
+		"annotations": [
+			"OSA Alert Data Load"
+		]
+	}
+}

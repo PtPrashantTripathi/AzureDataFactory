@@ -1,7 +1,7 @@
 {
 	"name": "PL_Common_SQLServer_Execute_Table_Copies_HourlyIncl",
 	"properties": {
-		"description": "Master pipeline Incremental load for PMM (Sqlserver) and DRAdmin for Pos Minibatch Implementation which will run hourly. ",
+		"description": "Master pipeline Incremental load for PMM (Sqlserver) and DRAdmin for Product Minibatch Implementation which will run hourly. ",
 		"activities": [
 			{
 				"name": "FOREACH_SRC_TABLES",
@@ -136,7 +136,7 @@
 						"referenceName": "DS_SQL_CONFIG_CSV",
 						"type": "DatasetReference",
 						"parameters": {
-							"fileName": "POS_HOURLY_SQLSERVER_DB_CONFIGURATION.CSV"
+							"fileName": "PRODUCT_HOURLY_SQLSERVER_DB_CONFIGURATION.CSV"
 						}
 					},
 					"firstRowOnly": false
@@ -150,11 +150,11 @@
 			},
 			"p_DatabaseName": {
 				"type": "string",
-				"defaultValue": "Pos"
+				"defaultValue": "Product"
 			}
 		},
 		"folder": {
-			"name": "Digital-Merchandising/POS_MINIBATCH_INGESTION"
+			"name": "Digital-Merchandising/PRODUCT_MINIBATCH_INGESTION"
 		},
 		"annotations": []
 	}

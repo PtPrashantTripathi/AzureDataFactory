@@ -16,12 +16,12 @@
 						"ItemDocumentType",
 						"Language",
 						"PartyType",
-						"PosNameType",
-						"PosGroupRelationshipType",
-						"PosAddOnProgram",
+						"ProductNameType",
+						"ProductGroupRelationshipType",
+						"ProductAddOnProgram",
 						"ScentType",
-						"PosTaxonomyLevel",
-						"PosPackagingType",
+						"ProductTaxonomyLevel",
+						"ProductPackagingType",
 						"FixtureCategory",
 						"FixtureType",
 						"FloorplanMerchandiseArea",
@@ -224,7 +224,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-01T09:17:17Z"

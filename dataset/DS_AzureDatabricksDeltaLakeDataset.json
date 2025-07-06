@@ -9,7 +9,7 @@
 		"type": "AzureDatabricksDeltaLakeDataset",
 		"typeProperties": {
 			"database": "default",
-			"table": "upc_loc_cleansed_consolidate"
+			"table": "ilc_cleansed_consolidate"
 		},
 		"schema": []
 	},

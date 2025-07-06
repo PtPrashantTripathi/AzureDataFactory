@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/Notebook_Correction_Level1",
+					"notebookPath": "/Published_Product/ProductAPI/Notebook_Correction_Level1",
 					"baseParameters": {
 						"date_start": {
 							"value": "@pipeline().parameters.date_start",
@@ -102,7 +102,7 @@
 								"source": {
 									"type": "AzureDatabricksDeltaLakeSource",
 									"query": {
-										"value": "select entityName,levelExec from logadrmexecpos where entityName = '@{item()}'",
+										"value": "select entityName,levelExec from logadrmexecproduct where entityName = '@{item()}'",
 										"type": "Expression"
 									}
 								},
@@ -136,7 +136,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/Notebook_Correction_Level2_Master",
+					"notebookPath": "/Published_Product/ProductAPI/Notebook_Correction_Level2_Master",
 					"baseParameters": {
 						"passed_entities": {
 							"value": "@pipeline().parameters.entities",
@@ -185,7 +185,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/Notebook_Correction_Level2",
+								"notebookPath": "/Published_Product/ProductAPI/Notebook_Correction_Level2",
 								"baseParameters": {
 									"date_start": {
 										"value": "@pipeline().parameters.date_start",
@@ -216,7 +216,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-03T10:57:52Z"

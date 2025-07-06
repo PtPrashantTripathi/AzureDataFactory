@@ -1,0 +1,110 @@
+{
+	"name": "PL_Cosmos_DataLoad_Stibo_VIM",
+	"properties": {
+		"description": "Movement of Stibo VIM+ staged layer NonADRMData to CosmosDB\nfor all the 3 stibo vim schema\n1. Vendor\n2. ShipPoint\n3. Facility\n",
+		"activities": [
+			{
+				"name": "Run Stage to CosmosDB notebook",
+				"description": "### Notebook to run Full or Incremental Load for Sibo VIM+ Cosmos Load\n#### Description:\n> -  This notebook populates the Facility,Vendor and ShipPoint Details information in Cosmos collection.\n> -  Mapping Document: [StiboVIM+_SourcetoTargetMappingSheet](https://meijer365.sharepoint.com/:x:/r/sites/EDaA2/_layouts/15/doc2.aspx?sourcedoc=%7BD345B3D4-080E-429C-961D-9A0CF67EB4EA%7D&file=STIBO_VIM_SourceToTargetMappingSheet.xlsx&action=default&mobileredirect=true&CID=bc7b701a-2abc-5d08-571e-50c951b8a6c8)\n\n#### source ADLS Location / Synapse Table :\n> - \"/mnt/staged/NonADRMData/Vendor/STIBOFacilityRecordStage/delta\"\n> - \"/mnt/staged/NonADRMData/Vendor/STIBOVendorRecordStage/delta\"\n> - \"/mnt/staged/NonADRMData/Vendor/STIBOShipPointRecordStage/delta\"\n\n#### Target :\n> - Cosmos\n\n#### Sources:\n> - StiboVIM+\n\n#### Logic :\n> - 1.Filtering all the Facility,Vendor,ShipPoint records from Non ADRM tables.\n",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Execute Increase RU for Vendor",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "00.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/GRC/STIBO_VIM/COSMOS/ExportStiboVIMToCosmos",
+					"baseParameters": {
+						"collectionname": {
+							"value": "@pipeline().parameters.collectionname",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Execute Increase RU for Vendor",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "@pipeline().parameters.collectionname",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute Decrease RU for Vendor",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Run Stage to CosmosDB notebook",
+						"dependencyConditions": [
+							"Succeeded",
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": {
+							"value": "@pipeline().parameters.collectionname",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"collectionname": {
+				"type": "string",
+				"defaultValue": "Vendor"
+			},
+			"fullorincl": {
+				"type": "string",
+				"defaultValue": "I"
+			}
+		},
+		"folder": {
+			"name": "ProductAPI/STIBO_VIM/COSMOS"
+		},
+		"annotations": []
+	}
+}

@@ -10,7 +10,7 @@
 				"value": "**********"
 			},
 			"authenticationType": "Basic",
-			"userName": "APEXQA",
+			"userName": "EDAAQA",
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {

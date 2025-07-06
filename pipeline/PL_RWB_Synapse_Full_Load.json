@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/SAASRetirement/Rwb_Ut_P_Fcst_Hst_Synapse_Full_Load",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/SASRetirement/Rwb_Ut_P_Fcst_Hst_Synapse_Full_Load",
 					"baseParameters": {
 						"entity_name": {
 							"value": "@pipeline().parameters.entity_name",
@@ -34,7 +34,7 @@
 			},
 			{
 				"name": "SP_Synapse_Load",
-				"description": "Loads the below synapse DW tables\n\nPromotionAdvertisementBlock,\nPromotionPosHistory,\nPromotionAdvertisementSampleDocumentFact,\nPromotionStorePosHistory,\nPromotionVehicle",
+				"description": "Loads the below synapse DW tables\n\nPromotionAdvertisementBlock,\nPromotionProductHistory,\nPromotionAdvertisementSampleDocumentFact,\nPromotionStoreProductHistory,\nPromotionVehicle",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
@@ -53,7 +53,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[APEX_ETL].[PROC_FCT_PROMO_TB_LOAD]",
+					"storedProcedureName": "[EDAA_ETL].[PROC_FCT_PROMO_TB_LOAD]",
 					"storedProcedureParameters": {
 						"ENTITY_NAME": {
 							"value": {
@@ -88,7 +88,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/SAASRetirement"
+			"name": "ProductAPI/SASRetirement"
 		},
 		"annotations": []
 	}

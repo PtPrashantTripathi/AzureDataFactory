@@ -11,7 +11,7 @@
 				},
 				"parameters": {
 					"p_DatabaseName": "VPROD_INT_STGG",
-					"p_SourceSystem": "PosPromo"
+					"p_SourceSystem": "ProductPromo"
 				}
 			}
 		],

@@ -11,7 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"folderPath": "DOB_Forecast/Current",
-				"fileSystem": "pos"
+				"fileSystem": "product"
 			}
 		},
 		"schema": {}

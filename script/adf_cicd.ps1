@@ -60,7 +60,7 @@ function Get-SortedPipelines {
     $pipelines | ForEach-Object{ $ppDict[$_.Name] = $_ }
     $pipelines | ForEach-Object{ pipelineSortUtil -pipeline $_ -pipelineNameResourceDict $ppDict -visited $visited -sortedList $stack }
     $sortedList = new-object Collections.Generic.List[Microsoft.Azure.Commands.DataFactoryV2.Models.PSPipeline]
-    
+
     while ($stack.Count -gt 0) {
         $sortedList.Add($stack.Pop())
     }
@@ -94,7 +94,7 @@ function Get-SortedTriggers {
     $triggers | ForEach-Object{ $triggerDict[$_.Name] = $_ }
     $triggers | ForEach-Object{ triggerSortUtil -trigger $_ -triggerNameResourceDict $triggerDict -visited $visited -sortedList $stack }
     $sortedList = new-object Collections.Generic.List[Microsoft.Azure.Commands.DataFactoryV2.Models.PSTrigger]
-    
+
     while ($stack.Count -gt 0) {
         $sortedList.Add($stack.Pop())
     }
@@ -135,26 +135,26 @@ function Get-SortedLinkedServices {
 $templateJson = Get-Content $armTemplate | ConvertFrom-Json
 $resources = $templateJson.resources
 
-#Triggers 
+#Triggers
 Write-Host "Getting triggers"
 $triggersInTemplate = $resources | Where-Object { $_.type -eq "Microsoft.DataFactory/factories/triggers" }
 $triggerNamesInTemplate = $triggersInTemplate | ForEach-Object {$_.name.Substring(37, $_.name.Length-40)}
 
 $triggersDeployed = Get-SortedTriggers -DataFactoryName $DataFactoryName -ResourceGroupName $ResourceGroupName
 
-$triggersToStop = $triggersDeployed | Where-Object { $triggerNamesInTemplate -contains $_.Name } | ForEach-Object { 
+$triggersToStop = $triggersDeployed | Where-Object { $triggerNamesInTemplate -contains $_.Name } | ForEach-Object {
     New-Object PSObject -Property @{
         Name = $_.Name
-        TriggerType = $_.Properties.GetType().Name 
+        TriggerType = $_.Properties.GetType().Name
     }
 }
-$triggersToDelete = $triggersDeployed | Where-Object { $triggerNamesInTemplate -notcontains $_.Name } | ForEach-Object { 
+$triggersToDelete = $triggersDeployed | Where-Object { $triggerNamesInTemplate -notcontains $_.Name } | ForEach-Object {
     New-Object PSObject -Property @{
         Name = $_.Name
-        TriggerType = $_.Properties.GetType().Name 
+        TriggerType = $_.Properties.GetType().Name
     }
 }
-$triggersToStart = $triggersInTemplate | Where-Object { $_.properties.runtimeState -eq "Started" -and ($_.properties.pipelines.Count -gt 0 -or $_.properties.pipeline.pipelineReference -ne $null)} | ForEach-Object { 
+$triggersToStart = $triggersInTemplate | Where-Object { $_.properties.runtimeState -eq "Started" -and ($_.properties.pipelines.Count -gt 0 -or $_.properties.pipeline.pipelineReference -ne $null)} | ForEach-Object {
     New-Object PSObject -Property @{
         Name = $_.name.Substring(37, $_.name.Length-40)
         TriggerType = $_.Properties.type
@@ -211,7 +211,7 @@ else {
 
     #Delete resources
     Write-Host "Deleting triggers"
-    $triggersToDelete | ForEach-Object { 
+    $triggersToDelete | ForEach-Object {
         Write-Host "Deleting trigger "  $_.Name
         $trig = Get-AzDataFactoryV2Trigger -name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName
         if ($trig.RuntimeState -eq "Started") {
@@ -223,34 +223,34 @@ else {
                     $status = Get-AzDataFactoryV2TriggerSubscriptionStatus -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $_.Name
                 }
             }
-            Stop-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $_.Name -Force 
+            Stop-AzDataFactoryV2Trigger -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $_.Name -Force
         }
-        Remove-AzDataFactoryV2Trigger -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force 
+        Remove-AzDataFactoryV2Trigger -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force
     }
     Write-Host "Deleting pipelines"
-    $deletedpipelines | ForEach-Object { 
+    $deletedpipelines | ForEach-Object {
         Write-Host "Deleting pipeline " $_.Name
-        Remove-AzDataFactoryV2Pipeline -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force 
+        Remove-AzDataFactoryV2Pipeline -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force
     }
     Write-Host "Deleting dataflows"
-    $deleteddataflow | ForEach-Object { 
+    $deleteddataflow | ForEach-Object {
         Write-Host "Deleting dataflow " $_.Name
-        Remove-AzDataFactoryV2DataFlow -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force 
+        Remove-AzDataFactoryV2DataFlow -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force
     }
     Write-Host "Deleting datasets"
-    $deleteddataset | ForEach-Object { 
+    $deleteddataset | ForEach-Object {
         Write-Host "Deleting dataset " $_.Name
-        Remove-AzDataFactoryV2Dataset -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force 
+        Remove-AzDataFactoryV2Dataset -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force
     }
     Write-Host "Deleting linked services"
-    $deletedlinkedservices | ForEach-Object { 
+    $deletedlinkedservices | ForEach-Object {
         Write-Host "Deleting Linked Service " $_.Name
-        Remove-AzDataFactoryV2LinkedService -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force 
+        Remove-AzDataFactoryV2LinkedService -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force
     }
     Write-Host "Deleting integration runtimes"
-    $deletedintegrationruntimes | ForEach-Object { 
+    $deletedintegrationruntimes | ForEach-Object {
         Write-Host "Deleting integration runtime " $_.Name
-        Remove-AzDataFactoryV2IntegrationRuntime -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force 
+        Remove-AzDataFactoryV2IntegrationRuntime -Name $_.Name -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Force
     }
 
     if ($deleteDeployment -eq $true) {
@@ -263,7 +263,7 @@ else {
         $deploymentOperations = Get-AzResourceGroupDeploymentOperation -DeploymentName $deploymentName -ResourceGroupName $ResourceGroupName
         $deploymentsToDelete = $deploymentOperations | Where { $_.properties.targetResource.id -like "*Microsoft.Resources/deployments*" }
 
-        $deploymentsToDelete | ForEach-Object { 
+        $deploymentsToDelete | ForEach-Object {
             Write-host "Deleting inner deployment: " $_.properties.targetResource.id
             Remove-AzResourceGroupDeployment -Id $_.properties.targetResource.id
         }
@@ -273,7 +273,7 @@ else {
 
     #Start active triggers - after cleanup efforts
     Write-Host "Starting active triggers"
-    $triggersToStart | ForEach-Object { 
+    $triggersToStart | ForEach-Object {
         if ($_.TriggerType -eq "BlobEventsTrigger") {
             Write-Host "Subscribing" $_.Name "to events"
             $status = Add-AzDataFactoryV2TriggerSubscription -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -Name $_.Name

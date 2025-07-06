@@ -4,7 +4,7 @@
 		"parameters": {
 			"SP_Domain_Name": {
 				"type": "string",
-				"defaultValue": "https://apex365.sharepoint.com"
+				"defaultValue": "https://meijer365.sharepoint.com"
 			},
 			"FilePath": {
 				"type": "string"

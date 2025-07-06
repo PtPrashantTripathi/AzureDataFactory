@@ -5,7 +5,7 @@
 			"referenceName": "LS_SharePoint_Generic",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"SP_Domain_Name": "https://apex365.sharepoint.com",
+				"SP_Domain_Name": "https://meijer365.sharepoint.com",
 				"FilePath": {
 					"value": "@dataset().FilePath",
 					"type": "Expression"

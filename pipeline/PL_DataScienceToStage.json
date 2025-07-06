@@ -28,10 +28,10 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "DS_Raw_DataScience_Config",
+						"referenceName": "DS_TeraData_CONFIG_Promo_CSV",
 						"type": "DatasetReference",
 						"parameters": {
-							"fileName": "DS_APEX_CONFIGURATION.csv"
+							"fileName": "DATASCIENCE_CONTAINER_CONFIGURATION.csv"
 						}
 					},
 					"firstRowOnly": false
@@ -56,7 +56,7 @@
 						"type": "Expression"
 					},
 					"condition": {
-						"value": "@equals(item().RunId,pipeline().parameters.RunId)",
+						"value": "@equals(item().Domain,pipeline().parameters.p_Domain)",
 						"type": "Expression"
 					}
 				}
@@ -93,16 +93,16 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"runId": {
-										"value": "@item().RunId",
+									"domain": {
+										"value": "@item().Domain",
 										"type": "Expression"
 									},
-									"dataSciencePath": {
-										"value": "@item().DataSciencePath",
+									"dataScienceContainerPath": {
+										"value": "@item().DataScienceContainerPath",
 										"type": "Expression"
 									},
-									"stagedPath": {
-										"value": "@item().StagedPath",
+									"stagedContainerPath": {
+										"value": "@item().StagedContainerPath",
 										"type": "Expression"
 									},
 									"logTable": {
@@ -116,14 +116,6 @@
 									"eventFilePath": {
 										"value": "@item().EventFilePath",
 										"type": "Expression"
-									},
-									"fullOrIncl": {
-										"value": "@item().FullOrIncl",
-										"type": "Expression"
-									},
-									"domain": {
-										"value": "@item().Domain",
-										"type": "Expression"
 									}
 								}
 							}
@@ -133,13 +125,12 @@
 			}
 		],
 		"parameters": {
-			"RunId": {
-				"type": "string",
-				"defaultValue": "R01"
+			"p_Domain": {
+				"type": "string"
 			}
 		},
 		"folder": {
-			"name": "PosAPI/DSOutputGenericCopy"
+			"name": "ProductAPI/DSOutputGenericCopy"
 		},
 		"annotations": []
 	}

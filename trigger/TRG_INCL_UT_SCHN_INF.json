@@ -6,7 +6,7 @@
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl_SAASRetirement",
+					"referenceName": "PL_Common_Teradata_Execute_Table_Copies_Incl_SASRetirement",
 					"type": "PipelineReference"
 				},
 				"parameters": {

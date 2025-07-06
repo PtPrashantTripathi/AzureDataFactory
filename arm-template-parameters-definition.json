@@ -21,7 +21,7 @@
             }
           },
           "customSetupScriptProperties": {
-            "saasToken": {
+            "sasToken": {
               "value": "-::secureString"
             }
           }
@@ -88,12 +88,12 @@
           "functionAppUrl": "=",
           "environmentUrl": "=",
           "aadResourceId": "=",
-          "saasUri": "|:-saasUri:secureString",
-          "saasToken": "|",
+          "sasUri": "|:-sasUri:secureString",
+          "sasToken": "|",
           "connectionString": "|:-connectionString:secureString",
-          "domain": "=",
-          "existingClusterId": "=",
-          "clusterId": "=",
+          "domain": "-",
+          "existingClusterId": "-",
+          "clusterId": "-",
           "instancePoolId": "-"
         }
       }

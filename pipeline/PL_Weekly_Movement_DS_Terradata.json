@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/DOB/DOB_Merch_Weekly_Movement"
+					"notebookPath": "/Published_Product/ProductAPI/GRC/DOB/DOB_Merch_Weekly_Movement"
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_AzureDatabricks_01",
@@ -56,7 +56,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/DOB"
+			"name": "ProductAPI/DOB"
 		},
 		"annotations": []
 	}

@@ -94,7 +94,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/GRC/RDE/StageToServeADLS_IPOP_INCL",
+								"notebookPath": "/Published_Product/ProductAPI/GRC/LDE/StageToServeADLS_IPOP_INCL",
 								"baseParameters": {
 									"entity_name": {
 										"value": "@item().Entity",
@@ -121,55 +121,6 @@
 						}
 					]
 				}
-			},
-			{
-				"name": "If Condition1",
-				"type": "IfCondition",
-				"dependsOn": [
-					{
-						"activity": "FOREACH_SRC_Tables",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"expression": {
-						"value": "@equals(pipeline().parameters.p_Domain,'PosUPCSales')",
-						"type": "Expression"
-					},
-					"ifTrueActivities": [
-						{
-							"name": "Delete1",
-							"type": "Delete",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"dataset": {
-									"referenceName": "DS_Common_Event_blob",
-									"type": "DatasetReference",
-									"parameters": {
-										"fileName": "UPCSales_fileCreation.blob"
-									}
-								},
-								"enableLogging": false,
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								}
-							}
-						}
-					]
-				}
 			}
 		],
 		"parameters": {
@@ -181,7 +132,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/RDE"
+			"name": "ProductAPI/LDE"
 		},
 		"annotations": []
 	}

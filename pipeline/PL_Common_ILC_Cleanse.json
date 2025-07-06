@@ -1,0 +1,49 @@
+{
+	"name": "PL_Common_ILC_Cleanse",
+	"properties": {
+		"activities": [
+			{
+				"name": "ILC Cleansing",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ILC/CLEANSING/rawToCleanseDataload",
+					"baseParameters": {
+						"storeid": {
+							"value": "@pipeline().parameters.storeid_val",
+							"type": "Expression"
+						},
+						"deptval": {
+							"value": "@pipeline().parameters.dept_val",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_ILC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"storeid_val": {
+				"type": "string"
+			},
+			"dept_val": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ProductAPI/ILC"
+		},
+		"annotations": []
+	}
+}

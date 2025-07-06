@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/ADRM_Migration/ADRMSchema_Update",
+					"notebookPath": "/Published_Product/ADRM_Migration/ADRMSchema_Update",
 					"baseParameters": {
 						"entity_name": {
 							"value": "@pipeline().parameters.Entity",
@@ -36,7 +36,7 @@
 		"parameters": {
 			"Domain": {
 				"type": "string",
-				"defaultValue": "Pos"
+				"defaultValue": "Product"
 			},
 			"Entity": {
 				"type": "string",

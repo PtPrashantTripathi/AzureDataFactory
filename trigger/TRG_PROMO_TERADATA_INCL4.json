@@ -11,7 +11,7 @@
 				},
 				"parameters": {
 					"p_DatabaseName": "VPROD_PR_PROMO_HST",
-					"p_SourceSystem": "PosPromo"
+					"p_SourceSystem": "ProductPromo"
 				}
 			}
 		],

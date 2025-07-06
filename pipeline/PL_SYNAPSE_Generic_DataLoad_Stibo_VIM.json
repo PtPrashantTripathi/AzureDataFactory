@@ -1,0 +1,62 @@
+{
+	"name": "PL_SYNAPSE_Generic_DataLoad_Stibo_VIM",
+	"properties": {
+		"activities": [
+			{
+				"name": "Master_SYNAPSE_Product_Stibo_VIM",
+				"description": "Master notebook to process each entity passed as parameter",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.05:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/GRC/STIBO_VIM/SYNAPSE/STIBO_VIM_Master_SYNAPSE/Master_SYNAPSE_Product_Stibo_VIM",
+					"baseParameters": {
+						"entity_name": {
+							"value": "@pipeline().parameters.entity",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						},
+						"level_exec": {
+							"value": "@pipeline().parameters.level_exec",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"entity": {
+				"type": "string",
+				"defaultValue": "all"
+			},
+			"fullorincl": {
+				"type": "string",
+				"defaultValue": "F"
+			},
+			"level_exec": {
+				"type": "string",
+				"defaultValue": "-9"
+			}
+		},
+		"folder": {
+			"name": "ProductAPI/STIBO_VIM/SYNAPSE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-03T12:16:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

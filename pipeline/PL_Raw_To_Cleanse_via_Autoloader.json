@@ -15,16 +15,16 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/CLEANSING/AutoLoader"
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ILC/CLEANSING/AutoLoader"
 				},
 				"linkedServiceName": {
-					"referenceName": "AzureDatabricks_UPC_LOC",
+					"referenceName": "AzureDatabricks_ILC",
 					"type": "LinkedServiceReference"
 				}
 			}
 		],
 		"folder": {
-			"name": "PosAPI/UPC_LOC"
+			"name": "ProductAPI/ILC"
 		},
 		"annotations": []
 	}

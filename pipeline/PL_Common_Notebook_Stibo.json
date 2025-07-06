@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/ADRM/STIBO_Master_ADRM/Master_ADRM_Pos_STIBO",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/STIBO/ADRM/STIBO_Master_ADRM/Master_ADRM_Product_STIBO",
 					"baseParameters": {
 						"entity_name": {
 							"value": "@pipeline().parameters.entity",
@@ -57,7 +57,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/stibo"
+			"name": "ProductAPI/stibo"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-03T12:16:45Z"

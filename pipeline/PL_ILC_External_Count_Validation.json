@@ -1,0 +1,31 @@
+{
+	"name": "PL_ILC_External_Count_Validation",
+	"properties": {
+		"activities": [
+			{
+				"name": "Delta_Table_Update",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ILC/ILC_External_Count_validation/ILC_External_Count_Validation"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_ILC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "ProductAPI/ILC/ILC_COUNT_VALIDATION"
+		},
+		"annotations": []
+	}
+}

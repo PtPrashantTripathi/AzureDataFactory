@@ -6,7 +6,7 @@
 		"annotations": [],
 		"type": "AzureBlobFS",
 		"typeProperties": {
-			"url": "https://saea2grsnpapexdlakeint.dfs.core.windows.net"
+			"url": "https://saea2grsnpedaadlakeint.dfs.core.windows.net"
 		}
 	}
 }

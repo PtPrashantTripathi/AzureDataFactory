@@ -139,7 +139,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/Datastage"
+			"name": "ProductAPI/Datastage"
 		},
 		"annotations": []
 	}

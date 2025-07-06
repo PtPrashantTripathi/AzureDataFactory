@@ -19,7 +19,7 @@
 					"source": {
 						"type": "AzureDatabricksDeltaLakeSource",
 						"query": {
-							"value": "select * from logadrmexecpos where levelExec=@{pipeline().parameters.level}  and orderExec=@{pipeline().parameters.order} order by orderExec",
+							"value": "select * from logadrmexecproduct where levelExec=@{pipeline().parameters.level}  and orderExec=@{pipeline().parameters.order} order by orderExec",
 							"type": "Expression"
 						}
 					},
@@ -81,7 +81,7 @@
 						},
 						{
 							"name": "SP_Synapse_Load",
-							"description": "Loads the below synapse DW tables\n\nPromotionAdvertisementBlock,\nPromotionPosHistory,\nPromotionAdvertisementSampleDocumentFact,\nPromotionStorePosHistory,\nPromotionVehicle",
+							"description": "Loads the below synapse DW tables\n\nPromotionAdvertisementBlock,\nPromotionProductHistory,\nPromotionAdvertisementSampleDocumentFact,\nPromotionStoreProductHistory,\nPromotionVehicle",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
@@ -100,7 +100,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[APEX_ETL].[PROC_FCT_PROMO_TB_LOAD]",
+								"storedProcedureName": "[EDAA_ETL].[PROC_FCT_PROMO_TB_LOAD]",
 								"storedProcedureParameters": {
 									"ENTITY_NAME": {
 										"value": "@item().entityName",
@@ -133,7 +133,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-01T09:17:14Z"

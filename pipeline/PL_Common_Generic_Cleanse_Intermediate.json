@@ -17,7 +17,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/Pos/StoreItem/CLEANSE/rawToCleanseDataload",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ATP_Cleanse/rawToCleanseDataload",
 					"baseParameters": {
 						"tableName": {
 							"value": "@pipeline().parameters.tableName",
@@ -44,7 +44,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/StoreItem"
+			"name": "ProductAPI/ATP_REFRESH"
 		},
 		"annotations": []
 	}

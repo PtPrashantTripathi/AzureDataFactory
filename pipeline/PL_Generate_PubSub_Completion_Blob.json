@@ -65,7 +65,7 @@
 			}
 		],
 		"folder": {
-			"name": "PosAPI/PubSub"
+			"name": "ProductAPI/PubSub"
 		},
 		"annotations": []
 	}

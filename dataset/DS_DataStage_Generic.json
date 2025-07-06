@@ -14,7 +14,7 @@
 		"parameters": {
 			"datastage_filepath": {
 				"type": "string",
-				"defaultValue": "/Apex_work/Ascential/Work/FEbi02/Seq"
+				"defaultValue": "/Meijer_work/Ascential/Work/FEbi02/Seq"
 			},
 			"datastage_filename": {
 				"type": "string"

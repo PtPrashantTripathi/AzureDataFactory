@@ -4,7 +4,7 @@
 		"activities": [
 			{
 				"name": "LKP_GET_MAXORDER",
-				"description": "Get the maximum order value from the log table for promo tables",
+				"description": "Get the maximum order value from the log table",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -19,7 +19,7 @@
 					"source": {
 						"type": "AzureDatabricksDeltaLakeSource",
 						"query": {
-							"value": "select max(orderExec) as max_order from logadrmexecpos where levelExec = @{pipeline().parameters.level}",
+							"value": "select max(orderExec) as max_order from logadrmexecproduct where levelExec = @{pipeline().parameters.level}",
 							"type": "Expression"
 						}
 					},
@@ -54,10 +54,6 @@
 							"description": "Set the sub value to hold the increment of the original count value",
 							"type": "SetVariable",
 							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "sub",
@@ -79,10 +75,6 @@
 									]
 								}
 							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "count_order",
@@ -143,10 +135,6 @@
 						]
 					}
 				],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "count_order",
@@ -172,7 +160,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/Promo Tables"
+			"name": "ProductAPI/Promo Tables"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-01T09:17:14Z"

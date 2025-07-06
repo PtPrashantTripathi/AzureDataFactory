@@ -92,7 +92,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/GRC/DemandForecast/CleansedToStage",
+								"notebookPath": "/Published_Product/ProductAPI/GRC/DemandForecast/CleansedToStage",
 								"baseParameters": {
 									"entity_name": {
 										"value": "@item().SourceTableName",
@@ -136,7 +136,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/Datastage"
+			"name": "ProductAPI/Datastage"
 		},
 		"annotations": []
 	}

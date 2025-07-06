@@ -34,7 +34,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/GRC/DOB/GetStagedPath",
+								"notebookPath": "/Published_Product/ProductAPI/GRC/DOB/GetStagedPath",
 								"baseParameters": {
 									"domain": {
 										"value": "@item().Domain",
@@ -111,11 +111,11 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "DOB_JSON_Pos",
+									"referenceName": "DOB_JSON_Product",
 									"type": "DatasetReference",
 									"parameters": {
 										"folderPath": {
-											"value": "@item().PosContainerPath",
+											"value": "@item().ProductContainerPath",
 											"type": "Expression"
 										}
 									}
@@ -192,7 +192,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"EventFilePath": {
-											"value": "@item().EventFilePathInPos",
+											"value": "@item().EventFilePathInProduct",
 											"type": "Expression"
 										}
 									}
@@ -267,7 +267,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/DOB"
+			"name": "ProductAPI/DOB"
 		},
 		"annotations": []
 	}

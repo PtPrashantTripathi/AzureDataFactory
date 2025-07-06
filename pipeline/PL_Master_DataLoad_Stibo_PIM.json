@@ -79,7 +79,7 @@
             }
         },
         "folder": {
-            "name": "PosAPI/STIBO_PIM"
+            "name": "ProductAPI/STIBO_PIM"
         },
         "annotations": []
     }

@@ -365,7 +365,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/PO"
+			"name": "ProductAPI/PO"
 		},
 		"annotations": []
 	}

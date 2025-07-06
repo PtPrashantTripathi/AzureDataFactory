@@ -5,7 +5,7 @@
 		"annotations": [],
 		"type": "AzureKeyVault",
 		"typeProperties": {
-			"baseUrl": "https://kv-np-ea2-apex-etl-int.vault.azure.net/"
+			"baseUrl": "https://kv-np-ea2-edaa-etl-int.vault.azure.net/"
 		}
 	}
 }

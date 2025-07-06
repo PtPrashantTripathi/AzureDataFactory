@@ -38,7 +38,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"p_EntityName": "Pos",
+						"p_EntityName": "Product",
 						"p_SourceSystem": "PMM"
 					}
 				}
@@ -63,7 +63,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"p_SourceSystem": "PMM",
-						"p_DatabaseName": "Pos"
+						"p_DatabaseName": "Product"
 					}
 				}
 			},
@@ -86,7 +86,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"p_EntityName": "Pos",
+						"p_EntityName": "Product",
 						"p_SourceSystem": "CFD"
 					}
 				}
@@ -214,7 +214,7 @@
 			}
 		},
 		"folder": {
-			"name": "Digital-Merchandising/POS_MINIBATCH_INGESTION"
+			"name": "Digital-Merchandising/PRODUCT_MINIBATCH_INGESTION"
 		},
 		"annotations": []
 	}

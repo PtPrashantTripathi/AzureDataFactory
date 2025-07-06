@@ -238,7 +238,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Raw_file_count_DataStage",
+								"notebookPath": "/Published_Product/ProductAPI/GRC/ADRM_one_To_one/Raw_file_count_DataStage",
 								"baseParameters": {
 									"fileName": {
 										"value": "@concat(item().name,'-',formatDateTime(pipeline().parameters.utcnow))",
@@ -498,7 +498,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/Datastage"
+			"name": "ProductAPI/Datastage"
 		},
 		"annotations": []
 	}

@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/Run_Notebook",
+					"notebookPath": "/Published_Product/ProductAPI/Run_Notebook",
 					"baseParameters": {
 						"notebookPath": {
 							"value": "@pipeline().parameters.notebookPath",
@@ -44,7 +44,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-03T11:00:27Z"

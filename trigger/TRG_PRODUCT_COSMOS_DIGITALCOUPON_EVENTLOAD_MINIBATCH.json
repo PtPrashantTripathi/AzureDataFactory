@@ -1,0 +1,30 @@
+{
+	"name": "TRG_PRODUCT_COSMOS_DIGITALCOUPON_EVENTLOAD_MINIBATCH",
+	"properties": {
+		"description": "DigitalCoupon Collection load starts just after hourly load gets completed and daily load completion file is placed in ADLS",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Export_To_Cosmos_MiniBatch",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"collectionname": "DigitalCoupon",
+					"fullorincl": "I"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/raw/blobs/data/event/Hourly_Load_Completed.blob",
+			"blobPathEndsWith": "Hourly_Load_Completed.blob",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/6ed3c07f-2f9c-4a7b-bee4-3ee8620d38d1/resourceGroups/rg-np-edaa-etl-int/providers/Microsoft.Storage/storageAccounts/saea2grsnpedaadlakeint",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

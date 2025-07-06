@@ -7,7 +7,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Execute Decrease RU for UPC_LOC",
+						"activity": "Execute Decrease RU for ILC",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -73,11 +73,11 @@
 													"type": "AzureBlobFSReadSettings",
 													"recursive": true,
 													"wildcardFolderPath": {
-														"value": "UPC_LOC/@{pipeline().parameters.requestor}",
+														"value": "ILC/@{pipeline().parameters.requestor}",
 														"type": "Expression"
 													},
 													"wildcardFileName": {
-														"value": "@concat('APEX_IPOP_',item(),'*.json')",
+														"value": "@concat('EDAA_IPOP_',item(),'*.json')",
 														"type": "Expression"
 													},
 													"enablePartitionDiscovery": false
@@ -99,7 +99,7 @@
 										},
 										"inputs": [
 											{
-												"referenceName": "DS_UPC_LOC_StageLayer_Data",
+												"referenceName": "DS_ILC_StageLayer_Data",
 												"type": "DatasetReference",
 												"parameters": {
 													"team_name": {
@@ -111,7 +111,7 @@
 										],
 										"outputs": [
 											{
-												"referenceName": "DS_UPC_LOC_Sink_Data",
+												"referenceName": "DS_ILC_Sink_Data",
 												"type": "DatasetReference",
 												"parameters": {
 													"foldername": {
@@ -177,7 +177,7 @@
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "Execute Increase RU for UPC_LOC",
+						"activity": "Execute Increase RU for ILC",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -198,7 +198,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/SaveIPOPToStage",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ILC/SaveIPOPToStage",
 					"baseParameters": {
 						"stores": {
 							"value": "@string(pipeline().parameters.store_list)",
@@ -215,12 +215,12 @@
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "AzureDatabricks_UPC_LOC",
+					"referenceName": "AzureDatabricks_ILC",
 					"type": "LinkedServiceReference"
 				}
 			},
 			{
-				"name": "Execute Increase RU for UPC_LOC",
+				"name": "Execute Increase RU for ILC",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -239,7 +239,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"p_CollectionName": {
-							"value": "UPC_LOCLocationLevel",
+							"value": "ILCLocationLevel",
 							"type": "Expression"
 						},
 						"fullorincl": {
@@ -250,7 +250,7 @@
 				}
 			},
 			{
-				"name": "Execute Decrease RU for UPC_LOC",
+				"name": "Execute Decrease RU for ILC",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -269,7 +269,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"p_CollectionName": {
-							"value": "UPC_LOCLocationLevel",
+							"value": "ILCLocationLevel",
 							"type": "Expression"
 						}
 					}
@@ -323,15 +323,15 @@
 									"Content-Type": "application/json"
 								},
 								"body": {
-									"value": "{\n\"personalizations\": [\n{\n\"to\": [\n@{activity('FLTR_TEAM_DETAILS').output.value[0].to}\n],\n\"cc\":[\n@{activity('FLTR_TEAM_DETAILS').output.value[0].cc}\n]\n\n}\n],\n\"from\": @{activity('FLTR_TEAM_DETAILS').output.value[0].from}\n,\n\"subject\": \"Incident No. @{pipeline().parameters.incident_no}, Requestor - @{pipeline().parameters.requestor} - UPC_LOC IPOP load to NAS location - Status\",\n\"content\": [\n{\n\"type\": \"text/html\",\n\"value\":\"@{concat('Parameters passed in pipeline :-','<br>','1. store_list - ',concat('[',join(pipeline().parameters.store_list,','),']'),'<br>','2. requestor - ',pipeline().parameters.requestor,'<br>','3. incident_no - ',pipeline().parameters.incident_no,'<br>',\n   '4. additionalrecipient_email - ',if(equals(pipeline().parameters.additionalrecipient_email,null),'Blank - No additional recipient id passed',join(createArray(pipeline().parameters.additionalrecipient_email),' , ')),'<br>',\n   if(equals(length(variables('stores_passed')),0),'Out of the required StoreNumbers none of them have gone to NAS location.',concat('IPOP load for stores ',join(variables('stores_passed'),' , '),' has been done successfully till NAS location. The loading folderpath is mjrdata\\\\Apex\\\\',concat(replace(activity('FLTR_TEAM_DETAILS').output.value[0].NAS_folder,'\\','\\\\'),replace(variables('folderpath'),'/','\\\\'),'.'))),'<br>',\nif(equals(length(variables('stores_unavailable')),0),'',concat('Data is unavailable for stores ',join(variables('stores_unavailable'),' , '),' in UPC_LOC Cosmos collection.')),'<br>',\nif(equals(length(variables('stores_failed')),0),'',concat('IPOP load for stores ',join(variables('stores_failed'),' , '),' has failed while loading till NAS location.')))}\"\n}\n]\n}",
+									"value": "{\n\"personalizations\": [\n{\n\"to\": [\n@{activity('FLTR_TEAM_DETAILS').output.value[0].to}\n],\n\"cc\":[\n@{activity('FLTR_TEAM_DETAILS').output.value[0].cc}\n]\n\n}\n],\n\"from\": @{activity('FLTR_TEAM_DETAILS').output.value[0].from}\n,\n\"subject\": \"Incident No. @{pipeline().parameters.incident_no}, Requestor - @{pipeline().parameters.requestor} - ILC IPOP load to NAS location - Status\",\n\"content\": [\n{\n\"type\": \"text/html\",\n\"value\":\"@{concat('Parameters passed in pipeline :-','<br>','1. store_list - ',concat('[',join(pipeline().parameters.store_list,','),']'),'<br>','2. requestor - ',pipeline().parameters.requestor,'<br>','3. incident_no - ',pipeline().parameters.incident_no,'<br>',\n   '4. additionalrecipient_email - ',if(equals(pipeline().parameters.additionalrecipient_email,null),'Blank - No additional recipient id passed',join(createArray(pipeline().parameters.additionalrecipient_email),' , ')),'<br>',\n   if(equals(length(variables('stores_passed')),0),'Out of the required StoreNumbers none of them have gone to NAS location.',concat('IPOP load for stores ',join(variables('stores_passed'),' , '),' has been done successfully till NAS location. The loading folderpath is mjrdata\\\\EDaA\\\\',concat(replace(activity('FLTR_TEAM_DETAILS').output.value[0].NAS_folder,'\\','\\\\'),replace(variables('folderpath'),'/','\\\\'),'.'))),'<br>',\nif(equals(length(variables('stores_unavailable')),0),'',concat('Data is unavailable for stores ',join(variables('stores_unavailable'),' , '),' in ILC Cosmos collection.')),'<br>',\nif(equals(length(variables('stores_failed')),0),'',concat('IPOP load for stores ',join(variables('stores_failed'),' , '),' has failed while loading till NAS location.')))}\"\n}\n]\n}",
 									"type": "Expression"
 								},
 								"datasets": [
 									{
-										"referenceName": "DS_UPC_LOC_Store_Email",
+										"referenceName": "DS_ILC_Store_Email",
 										"type": "DatasetReference",
 										"parameters": {
-											"filename": "UPC_LOC_StoreLoad_Status_Email.txt"
+											"filename": "ILC_StoreLoad_Status_Email.txt"
 										}
 									}
 								]
@@ -350,10 +350,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"url": {
-									"value": "@if(endswith(pipeline().DataFactory,'etl'),'https://kv-ea2-apexmonitor.vault.azure.net/secrets/SendGridAPIKey/5b26cedd8b2e4d849dd089bbc0afa784?api-version=7.0',if(endswith(pipeline().DataFactory,'etl-cert'),'https://kv-np-ea2-apexmonitor.vault.azure.net/secrets/SendGridAPIKey/8e9582cc472b4c12a500bdec3e4cedfa?api-version=7.0','https://kv-np-ea2-apexmonitor.vault.azure.net/secrets/SendGridAPIKey/8e9582cc472b4c12a500bdec3e4cedfa?api-version=7.0'))",
-									"type": "Expression"
-								},
+								"url": "https://kv-np-ea2-edaamonitor.vault.azure.net/secrets/SendGridAPIKey/8e9582cc472b4c12a500bdec3e4cedfa?api-version=7.0",
 								"method": "GET",
 								"authentication": {
 									"type": "MSI",
@@ -389,10 +386,10 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "DS_UPC_LOC_Store_Email",
+						"referenceName": "DS_ILC_Store_Email",
 						"type": "DatasetReference",
 						"parameters": {
-							"filename": "UPC_LOC_StoreLoad_Status_Email.txt"
+							"filename": "ILC_StoreLoad_Status_Email.txt"
 						}
 					},
 					"firstRowOnly": false
@@ -597,15 +594,15 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DS_UPC_LOC_IPOP_AUDIT_CSV",
+						"referenceName": "DS_ILC_IPOP_AUDIT_CSV",
 						"type": "DatasetReference",
 						"parameters": {
 							"folderpath": {
-								"value": "Pos/UPC_LOC",
+								"value": "Product/ILC",
 								"type": "Expression"
 							},
 							"fileName": {
-								"value": "@concat('UPC_LOC_OnDemand_IPOP_',pipeline().parameters.requestor,'_',variables('start_timestamp'))",
+								"value": "@concat('ILC_OnDemand_IPOP_',pipeline().parameters.requestor,'_',variables('start_timestamp'))",
 								"type": "Expression"
 							}
 						}
@@ -616,12 +613,6 @@
 				"name": "Set Process Start Timestamp",
 				"type": "SetVariable",
 				"dependsOn": [],
-				"policy": {
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "start_timestamp",
@@ -635,12 +626,6 @@
 				"name": "Set folderpath",
 				"type": "SetVariable",
 				"dependsOn": [],
-				"policy": {
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "folderpath",
@@ -686,7 +671,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/UPC_LOC"
+			"name": "ProductAPI/ILC"
 		},
 		"annotations": []
 	}

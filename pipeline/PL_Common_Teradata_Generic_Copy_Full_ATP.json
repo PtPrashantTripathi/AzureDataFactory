@@ -453,7 +453,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/StoreItem"
+			"name": "ProductAPI/ATP_REFRESH"
 		},
 		"annotations": []
 	}

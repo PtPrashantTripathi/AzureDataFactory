@@ -15,22 +15,18 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/DataScienceToStage/DataScience_toStage",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/DataScienceToStage/DataScience_toStage",
 					"baseParameters": {
-						"runId": {
-							"value": "@pipeline().parameters.runId",
-							"type": "Expression"
-						},
 						"domain": {
 							"value": "@pipeline().parameters.domain",
 							"type": "Expression"
 						},
-						"dataSciencePath": {
-							"value": "@pipeline().parameters.dataSciencePath",
+						"dataScienceContainerPath": {
+							"value": "@pipeline().parameters.dataScienceContainerPath",
 							"type": "Expression"
 						},
-						"stagedPath": {
-							"value": "@pipeline().parameters.stagedPath",
+						"stagedContainerPath": {
+							"value": "@pipeline().parameters.stagedContainerPath",
 							"type": "Expression"
 						},
 						"logTable": {
@@ -44,10 +40,6 @@
 						"eventFilePath": {
 							"value": "@pipeline().parameters.eventFilePath",
 							"type": "Expression"
-						},
-						"fullorIncl": {
-							"value": "@pipeline().parameters.fullOrIncl",
-							"type": "Expression"
 						}
 					}
 				},
@@ -58,36 +50,27 @@
 			}
 		],
 		"parameters": {
-			"runId": {
+			"domain": {
 				"type": "string"
 			},
-			"dataSciencePath": {
+			"dataScienceContainerPath": {
 				"type": "string"
 			},
-			"stagedPath": {
+			"stagedContainerPath": {
 				"type": "string"
 			},
 			"logTable": {
-				"type": "string",
-				"defaultValue": "NA"
-			},
-			"logTablePath": {
-				"type": "string",
-				"defaultValue": "NA"
-			},
-			"eventFilePath": {
-				"type": "string",
-				"defaultValue": "NA"
-			},
-			"fullOrIncl": {
 				"type": "string"
 			},
-			"domain": {
+			"logTablePath": {
+				"type": "string"
+			},
+			"eventFilePath": {
 				"type": "string"
 			}
 		},
 		"folder": {
-			"name": "PosAPI/DSOutputGenericCopy"
+			"name": "ProductAPI/DSOutputGenericCopy"
 		},
 		"annotations": []
 	}

@@ -94,7 +94,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/GRC/RDE/StageToServeADLS",
+								"notebookPath": "/Published_Product/ProductAPI/GRC/LDE/StageToServeADLS",
 								"baseParameters": {
 									"entity_name": {
 										"value": "@item().Entity",
@@ -125,7 +125,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/RDE"
+			"name": "ProductAPI/LDE"
 		},
 		"annotations": []
 	}

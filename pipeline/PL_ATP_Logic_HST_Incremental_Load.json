@@ -40,7 +40,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Master_ADRM_Pos",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ADRM_one_To_one/Master_ADRM_Product",
 					"baseParameters": {
 						"fullorincl": "I",
 						"entity_name": {
@@ -57,7 +57,7 @@
 			},
 			{
 				"name": "If Condition1",
-				"description": "For run the notebook ExportDigitalPosEligibilityToServiceBus",
+				"description": "For run the notebook ExportDigitalProductEligibilityToServiceBus",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -75,8 +75,8 @@
 					},
 					"ifTrueActivities": [
 						{
-							"name": "ExportDigitalPosEligibilityToServiceBus",
-							"description": "It will run only ExportDigitalPosEligibilityToServiceBus notebook",
+							"name": "ExportDigitalProductEligibilityToServiceBus",
+							"description": "It will run only ExportDigitalProductEligibilityToServiceBus notebook",
 							"type": "DatabricksNotebook",
 							"dependsOn": [],
 							"policy": {
@@ -88,7 +88,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/SERVICEBUS/ExportDigitalPosEligibilityToServiceBus"
+								"notebookPath": "/Published_Product/ProductAPI/GRC/ILC/SERVICEBUS/ExportDigitalProductEligibilityToServiceBus"
 							},
 							"linkedServiceName": {
 								"referenceName": "LS_AzureDatabricks_Connector",
@@ -105,7 +105,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/StoreItem"
+			"name": "ProductAPI/ATP"
 		},
 		"annotations": []
 	}

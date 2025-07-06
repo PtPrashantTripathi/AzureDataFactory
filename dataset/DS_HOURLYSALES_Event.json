@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "ADRMPosAPI_Check.txt",
+				"fileName": "ADRMProductAPI_Check.txt",
 				"folderPath": "EventBased/ADRMProcess",
 				"fileSystem": "raw"
 			},

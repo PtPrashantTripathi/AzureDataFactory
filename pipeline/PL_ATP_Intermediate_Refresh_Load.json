@@ -159,7 +159,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Master_ADRM_Pos",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ADRM_one_To_one/Master_ADRM_Product",
 					"baseParameters": {
 						"entity_name": {
 							"value": "@pipeline().parameters.tableName",
@@ -181,7 +181,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/StoreItem"
+			"name": "ProductAPI/ATP_REFRESH"
 		},
 		"annotations": []
 	}

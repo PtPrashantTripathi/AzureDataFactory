@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_ServiceBus/ConsumeActiveQueuetoADLS",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/Product_ServiceBus/ConsumeActiveQueuetoADLS",
 					"baseParameters": {
 						"topic_name": {
 							"value": "@pipeline().parameters.topic_name",
@@ -36,7 +36,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/PubSub"
+			"name": "ProductAPI/PubSub"
 		},
 		"annotations": []
 	}

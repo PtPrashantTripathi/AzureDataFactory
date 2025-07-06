@@ -42,8 +42,8 @@
 										"value": "@item().StagedContainerPath",
 										"type": "Expression"
 									},
-									"posContainerPath": {
-										"value": "@item().PosContainerPath",
+									"productContainerPath": {
+										"value": "@item().ProductContainerPath",
 										"type": "Expression"
 									},
 									"sourceFolder": {
@@ -129,7 +129,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/DOB"
+			"name": "ProductAPI/DOB"
 		},
 		"annotations": []
 	}

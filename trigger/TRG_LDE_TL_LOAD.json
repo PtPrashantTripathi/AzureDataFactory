@@ -1,0 +1,27 @@
+{
+	"name": "TRG_LDE_TL_LOAD",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_StagedToServeADLS_Full",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_Domain": "ProductTL"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-04-28T06:00:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

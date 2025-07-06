@@ -1,0 +1,47 @@
+{
+	"name": "PL_DemandForcast_DLY_UT_P_ANLT_FCST_DTL_HST_Incremental",
+	"properties": {
+		"activities": [
+			{
+				"name": "Databricks Notebook for Incremental",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.2:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/GRC/DemandForecast/DLY_UT_P_ANLT_FCST_DTL_HST_Incremental",
+					"baseParameters": {
+						"entity_name": "DLY_UT_P_ANLT_FCST_DTL_HST",
+						"source_table": "DLY_UT_P_ANLT_FCST_DTL_HST",
+						"source_system": "DemandForecast",
+						"ad_hoc_date": {
+							"value": "@string(pipeline().parameters.ad_hoc_date)",
+							"type": "Expression"
+						},
+						"fullorincl": "I",
+						"domain": "DemandForecast"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_Connector",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"ad_hoc_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ProductAPI/Datastage"
+		},
+		"annotations": []
+	}
+}

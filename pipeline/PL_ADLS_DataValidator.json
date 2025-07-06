@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/QA_DataValidator/DataValidator_Master",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/QA_DataValidator/DataValidator_Master",
 					"baseParameters": {
 						"configuration": {
 							"value": "@pipeline().parameters.configuration",
@@ -77,7 +77,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/QA Data Validator"
+			"name": "ProductAPI/QA Data Validator"
 		},
 		"annotations": []
 	}

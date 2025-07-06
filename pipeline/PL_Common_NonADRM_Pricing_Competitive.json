@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/PricingCompetitive/Master_Notebook_Pricing_Competitive",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/PricingCompetitive/Master_Notebook_Pricing_Competitive",
 					"baseParameters": {
 						"fullorincl": {
 							"value": "@pipeline().parameters.fullorincl",
@@ -42,7 +42,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/Pricing Competitive"
+			"name": "ProductAPI/Pricing Competitive"
 		},
 		"annotations": []
 	}

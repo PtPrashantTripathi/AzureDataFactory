@@ -1,0 +1,30 @@
+{
+	"name": "TRG_ILC_ADRM_TO_COSMOS_HOURLYLOAD",
+	"properties": {
+		"description": "Trigger for processing ILC data to populate ADRM entities and load the ServeILC collections",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Execute_ADRM_and_Cosmos_ServeILC",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"fullorincl": "I",
+					"level": "-3",
+					"cosmos_load": "I"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 1,
+				"startTime": "2022-01-20T11:00:00",
+				"timeZone": "Eastern Standard Time"
+			}
+		}
+	}
+}

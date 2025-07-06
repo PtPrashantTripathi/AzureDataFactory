@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "UPC_LOC_FileCheck_JSON_Configuration.txt",
+				"fileName": "ILC_FileCheck_JSON_Configuration.txt",
 				"folderPath": "configuration/SRE/Alert_JSON_Configuration",
 				"fileSystem": "raw"
 			},

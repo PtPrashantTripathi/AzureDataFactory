@@ -19,7 +19,7 @@
 					"source": {
 						"type": "AzureDatabricksDeltaLakeSource",
 						"query": {
-							"value": "select * from logadrmexecpos where levelExec=@{pipeline().parameters.level}  and orderExec=@{pipeline().parameters.order} order by orderExec",
+							"value": "select * from logadrmexecproduct where levelExec=@{pipeline().parameters.level}  and orderExec=@{pipeline().parameters.order} order by orderExec",
 							"type": "Expression"
 						}
 					},
@@ -94,7 +94,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-01T09:17:14Z"

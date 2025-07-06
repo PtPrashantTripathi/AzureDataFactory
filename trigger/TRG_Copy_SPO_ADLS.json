@@ -13,8 +13,8 @@
 					"FilePath": "/Shared%20Documents/Forecasting/DOB%20shared/DOB%20Merchant%20Override.xlsx",
 					"SP_Site": "advancedanalytics",
 					"SecretName_TenantId": "TenantID",
-					"SecretName_SPClientId": "Apex-Data-Science-SharepointAccess-ClientId",
-					"SecretName_SPSecret": "Apex-Data-Science-SharepointAccess-ClientSecret"
+					"SecretName_SPClientId": "EDaA-Data-Science-SharepointAccess-ClientId",
+					"SecretName_SPSecret": "EDaA-Data-Science-SharepointAccess-ClientSecret"
 				}
 			}
 		],

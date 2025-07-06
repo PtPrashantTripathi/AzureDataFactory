@@ -56,7 +56,7 @@
 						"type": "Expression"
 					},
 					"condition": {
-						"value": "@or(and(and(equals(pipeline().parameters.p_SourceSystem,'PosPromo'),equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)),equals(item().DatabaseName,pipeline().parameters.p_DatabaseName)), and(and(and(equals(pipeline().parameters.p_SourceSystem, 'PosPromo'),equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)),not(equals(item().SourceTableName,'dgtl_cpn_ofr_hub'))),not(equals(item().SourceTableName,'dgtl_cpn_trm_cdtn'))))",
+						"value": "@or(and(and(equals(pipeline().parameters.p_SourceSystem,'ProductPromo'),equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)),equals(item().DatabaseName,pipeline().parameters.p_DatabaseName)), and(and(and(equals(pipeline().parameters.p_SourceSystem, 'ProductPromo'),equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)),not(equals(item().SourceTableName,'dgtl_cpn_ofr_hub'))),not(equals(item().SourceTableName,'dgtl_cpn_trm_cdtn'))))",
 						"type": "Expression"
 					}
 				}
@@ -174,7 +174,7 @@
 			},
 			"p_SourceSystem": {
 				"type": "string",
-				"defaultValue": "PosPromo"
+				"defaultValue": "ProductPromo"
 			}
 		},
 		"folder": {

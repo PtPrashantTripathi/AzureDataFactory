@@ -126,7 +126,7 @@
 					"source": {
 						"type": "AzureDatabricksDeltaLakeSource",
 						"query": {
-							"value": "select max(levelExec) as max_level from logadrmexecpos",
+							"value": "select max(levelExec) as max_level from logadrmexecproduct",
 							"type": "Expression"
 						}
 					},
@@ -151,7 +151,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-01T09:17:14Z"

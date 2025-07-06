@@ -37,7 +37,7 @@
 								"source": {
 									"type": "AzureDatabricksDeltaLakeSource",
 									"query": {
-										"value": "select count(*) as cnt from logupc_locfilemovetocleanse where rawfilename = '@{item().name}' ",
+										"value": "select count(*) as cnt from logilcfilemovetocleanse where rawfilename = '@{item().name}' ",
 										"type": "Expression"
 									}
 								},
@@ -115,7 +115,7 @@
 										},
 										"inputs": [
 											{
-												"referenceName": "DS_UPC_LOC_Source_Data_copy",
+												"referenceName": "DS_ILC_Source_Data_copy",
 												"type": "DatasetReference",
 												"parameters": {
 													"filename": {
@@ -127,11 +127,11 @@
 										],
 										"outputs": [
 											{
-												"referenceName": "DS_UPC_LOC_RawLayer_Data",
+												"referenceName": "DS_ILC_RawLayer_Data",
 												"type": "DatasetReference",
 												"parameters": {
 													"domain": {
-														"value": "UPC_LOC",
+														"value": "ILC",
 														"type": "Expression"
 													},
 													"filename": {
@@ -180,15 +180,15 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
-											"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/CLEANSING/getRawFiles",
+											"notebookPath": "/Published_Product/ProductAPI/GRC/ILC/CLEANSING/getRawFiles",
 											"baseParameters": {
-												"domain": "UPC_LOC",
+												"domain": "ILC",
 												"fileName": {
 													"value": "@concat(variables('filename_modified'),'.json')",
 													"type": "Expression"
 												},
 												"filePath": {
-													"value": "@concat('data/Pos/UPC_LOC/',variables('filepath_raw'),'/')",
+													"value": "@concat('data/Product/ILC/',variables('filepath_raw'),'/')",
 													"type": "Expression"
 												},
 												"timestampIngested": {
@@ -202,7 +202,7 @@
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "AzureDatabricks_UPC_LOC",
+											"referenceName": "AzureDatabricks_ILC",
 											"type": "LinkedServiceReference"
 										}
 									},
@@ -248,7 +248,7 @@
 					"source": {
 						"type": "AzureDatabricksDeltaLakeSource",
 						"query": {
-							"value": "select distinct split(split(rawfilename,' ')[0],'_')[2] as dpt from logupc_locfilemovetocleanse where rawfilename like 'IPOP_@{pipeline().parameters.storeid_val}%' and flagcleansed = 'N'",
+							"value": "select distinct split(split(rawfilename,' ')[0],'_')[2] as dpt from logilcfilemovetocleanse where rawfilename like 'IPOP_@{pipeline().parameters.storeid_val}%' and flagcleansed = 'N'",
 							"type": "Expression"
 						}
 					},
@@ -286,7 +286,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "PL_Common_UPC_LOC_Cleanse",
+									"referenceName": "PL_Common_ILC_Cleanse",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
@@ -339,7 +339,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/UPC_LOC"
+			"name": "ProductAPI/ILC"
 		},
 		"annotations": []
 	}

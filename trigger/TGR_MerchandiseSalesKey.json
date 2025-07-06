@@ -11,7 +11,7 @@
 					"type": "PipelineReference"
 				},
 				"parameters": {
-					"Domain": "Pos",
+					"Domain": "Product",
 					"SourceTable": "MRC_SK_INF"
 				}
 			}

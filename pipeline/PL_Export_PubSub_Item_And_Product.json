@@ -1,0 +1,239 @@
+{
+	"name": "PL_Export_PubSub_Item_And_Product",
+	"properties": {
+		"activities": [
+			{
+				"name": "Export_Product_Merged_With_Item",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "PL_ScaleCosmos_Increase_Product_RU",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PL_ScaleCosmos_Increase_Item_RU",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/GRC/Product_ServiceBus/Export_Product_Item_toServiceBus"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Export_Item_Merged_With_Product",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "PL_ScaleCosmos_Increase_Item_RU",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PL_ScaleCosmos_Increase_Product_RU",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/GRC/Product_ServiceBus/Export_Item_Product_toServiceBus"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AzureDatabricks_PubSub",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Increase_Product_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Delete the Product Collection Event File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": "Product",
+						"fullorincl": "I"
+					}
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Increase_Item_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Delete the Item Collection Event File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Increase_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": "Item",
+						"fullorincl": "I"
+					}
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Decrease_Product_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Export_Product_Merged_With_Item",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "Export_Item_Merged_With_Product",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": "Product"
+					}
+				}
+			},
+			{
+				"name": "PL_ScaleCosmos_Decrease_Item_RU",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Export_Item_Merged_With_Product",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "Export_Product_Merged_With_Item",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ScaleCosmos_Decrease_RU",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"p_CollectionName": "Item"
+					}
+				}
+			},
+			{
+				"name": "Delete the Product Collection Event File",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Product_Collection_Completion.blob"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "Delete the Item Collection Event File",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_Event_Blob",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "Item_Collection_Completion.blob"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "ProductAPI/PubSub"
+		},
+		"annotations": []
+	}
+}

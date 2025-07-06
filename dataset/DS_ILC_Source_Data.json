@@ -1,0 +1,21 @@
+{
+	"name": "DS_ILC_Source_Data",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_NASFile_ILC_Serve",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ILC_NAS"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"folderPath": "Product\\ILC"
+			}
+		},
+		"schema": {}
+	}
+}

@@ -685,7 +685,7 @@
 		"parameters": {
 			"Domain": {
 				"type": "string",
-				"defaultValue": "Pos"
+				"defaultValue": "Product"
 			},
 			"SourceTable": {
 				"type": "string",

@@ -1,7 +1,7 @@
 {
 	"name": "PL_Common_DB2_Execute_Table_Copies_HourlyIncl",
 	"properties": {
-		"description": "Master pipeline Incremental load for PMM (DB2) and CFD for Pos Minibatch Implementation which will run hourly. ",
+		"description": "Master pipeline Incremental load for PMM (DB2) and CFD for Product Minibatch Implementation which will run hourly. ",
 		"activities": [
 			{
 				"name": "LKP_CONFIG_FILE",
@@ -31,7 +31,7 @@
 						"referenceName": "DS_DB2_CONFIG_CSV",
 						"type": "DatasetReference",
 						"parameters": {
-							"fileName": "POS_HOURLY_DB2_CONFIGURATION.CSV"
+							"fileName": "PRODUCT_HOURLY_DB2_CONFIGURATION.CSV"
 						}
 					},
 					"firstRowOnly": false
@@ -177,7 +177,7 @@
 			}
 		},
 		"folder": {
-			"name": "Digital-Merchandising/POS_MINIBATCH_INGESTION"
+			"name": "Digital-Merchandising/PRODUCT_MINIBATCH_INGESTION"
 		},
 		"annotations": []
 	}

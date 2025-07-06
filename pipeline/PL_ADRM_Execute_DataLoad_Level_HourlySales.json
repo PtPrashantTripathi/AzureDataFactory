@@ -182,7 +182,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/HourlySales"
+			"name": "ProductAPI/HourlySales"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-01T09:17:14Z"

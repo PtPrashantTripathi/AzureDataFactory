@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/ADRM_one_To_one/Master_ADRM_Schema_Gen",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ADRM_one_To_one/Master_ADRM_Schema_Gen",
 					"baseParameters": {
 						"entity_name": {
 							"value": "@pipeline().parameters.entity_name",
@@ -36,7 +36,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-03T11:19:38Z"

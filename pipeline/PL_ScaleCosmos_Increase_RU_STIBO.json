@@ -27,7 +27,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "DS_ScaleCosmos_Pos",
+						"referenceName": "DS_ScaleCosmos_Product",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -138,7 +138,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/stibo"
+			"name": "ProductAPI/stibo"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-01T09:17:18Z"

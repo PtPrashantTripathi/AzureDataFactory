@@ -136,7 +136,7 @@
 						"Content-Type": "application/x-www-form-urlencoded"
 					},
 					"body": {
-						"value": "@concat('grant_type=client_credentials&client_id=',activity('Get ClientId from AKV').output.value,'@',activity('Get Tenant from AKV').output.value,'&client_secret=',activity('Get Secret from AKV').output.value,'&resource=00000003-0000-0ff1-ce00-000000000000/apex365.sharepoint.com@',activity('Get Tenant from AKV').output.value)",
+						"value": "@concat('grant_type=client_credentials&client_id=',activity('Get ClientId from AKV').output.value,'@',activity('Get Tenant from AKV').output.value,'&client_secret=',activity('Get Secret from AKV').output.value,'&resource=00000003-0000-0ff1-ce00-000000000000/meijer365.sharepoint.com@',activity('Get Tenant from AKV').output.value)",
 						"type": "Expression"
 					}
 				}
@@ -256,7 +256,7 @@
 						"referenceName": "DS_DOB_AKV",
 						"type": "DatasetReference",
 						"parameters": {
-							"foldername": "Pos",
+							"foldername": "Product",
 							"filename": "DOB_Webactivity_AKV.txt"
 						}
 					}
@@ -280,7 +280,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/DOB"
+			"name": "ProductAPI/DOB"
 		},
 		"annotations": []
 	}

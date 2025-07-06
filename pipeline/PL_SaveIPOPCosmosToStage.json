@@ -7,7 +7,7 @@
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "Execute Increase RU for UPC_LOC",
+						"activity": "Execute Increase RU for ILC",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -22,7 +22,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/SaveIPOPToStage",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ILC/SaveIPOPToStage",
 					"baseParameters": {
 						"stores": {
 							"value": "@string(pipeline().parameters.store_list)",
@@ -36,12 +36,12 @@
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "AzureDatabricks_UPC_LOC",
+					"referenceName": "AzureDatabricks_ILC",
 					"type": "LinkedServiceReference"
 				}
 			},
 			{
-				"name": "Execute Increase RU for UPC_LOC",
+				"name": "Execute Increase RU for ILC",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"userProperties": [],
@@ -53,7 +53,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"p_CollectionName": {
-							"value": "UPC_LOCLocationLevel",
+							"value": "ILCLocationLevel",
 							"type": "Expression"
 						},
 						"fullorincl": {
@@ -64,7 +64,7 @@
 				}
 			},
 			{
-				"name": "Execute Decrease RU for UPC_LOC",
+				"name": "Execute Decrease RU for ILC",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -83,7 +83,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"p_CollectionName": {
-							"value": "UPC_LOCLocationLevel",
+							"value": "ILCLocationLevel",
 							"type": "Expression"
 						}
 					}
@@ -96,7 +96,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/UPC_LOC"
+			"name": "ProductAPI/ILC"
 		},
 		"annotations": []
 	}

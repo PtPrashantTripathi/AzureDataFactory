@@ -52,7 +52,7 @@
 										"value": "@pipeline().parameters.p_DatabaseName",
 										"type": "Expression"
 									},
-									"domain": "SAASRetirement",
+									"domain": "SASRetirement",
 									"WatermarkColumnName": "WatermarkColumnName"
 								}
 							}

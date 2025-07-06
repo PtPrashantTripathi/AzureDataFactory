@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/Planogram/Master_Notebook_Planogram",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/Planogram/Master_Notebook_Planogram",
 					"baseParameters": {
 						"fullorincl": {
 							"value": "@pipeline().parameters.fullorincl",
@@ -43,7 +43,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/Planogram"
+			"name": "ProductAPI/Planogram"
 		},
 		"annotations": []
 	}

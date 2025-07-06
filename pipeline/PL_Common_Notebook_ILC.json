@@ -1,0 +1,66 @@
+{
+	"name": "PL_Common_Notebook_ILC",
+	"properties": {
+		"activities": [
+			{
+				"name": "NB_ADRM_ENTITY",
+				"description": "Master notebook to process each entity passed as parameter",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 4,
+					"retryIntervalInSeconds": 120,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ILC/ADRM/ILC_Master_ADRM/Master_ADRM_Product_ILC",
+					"baseParameters": {
+						"entity_name": {
+							"value": "@pipeline().parameters.entity",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						},
+						"level_exec": {
+							"value": "@pipeline().parameters.level_exec",
+							"type": "Expression"
+						},
+						"start_Timestamp": {
+							"value": "@pipeline().parameters.start_Timestamp",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_ILC",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"entity": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			},
+			"level_exec": {
+				"type": "string"
+			},
+			"start_Timestamp": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ProductAPI/ILC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-03-03T12:16:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

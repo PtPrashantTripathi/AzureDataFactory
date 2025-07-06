@@ -11,7 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": "control.txt",
-				"folderPath": "configuration/Pos/dob_control",
+				"folderPath": "configuration/Product/dob_control",
 				"fileSystem": "raw"
 			},
 			"columnDelimiter": ",",

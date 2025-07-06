@@ -19,7 +19,7 @@
 					"source": {
 						"type": "AzureDatabricksDeltaLakeSource",
 						"query": {
-							"value": "select max(orderExec) as max_order from logadrmexecpos where levelExec = @{pipeline().parameters.level}",
+							"value": "select max(orderExec) as max_order from logadrmexecproduct where levelExec = @{pipeline().parameters.level}",
 							"type": "Expression"
 						}
 					},
@@ -186,7 +186,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/stibo"
+			"name": "ProductAPI/stibo"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-01T09:17:14Z"

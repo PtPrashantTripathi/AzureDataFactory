@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Master_ADRM_Pos_Stibo_PIM",
+				"name": "Master_ADRM_Product_Stibo_PIM",
 				"description": "Master notebook to process each entity passed as parameter",
 				"type": "DatabricksNotebook",
 				"dependsOn": [],
@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO_PIM/ADRM/Master_ADRM_Pos_Stibo_PIM",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/STIBO_PIM/ADRM/STIBO_PIM_Master_ADRM/Master_ADRM_Product_Stibo_PIM",
 					"baseParameters": {
 						"entity_name": {
 							"value": "@pipeline().parameters.entity",
@@ -53,7 +53,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/STIBO_PIM/ADRM"
+			"name": "ProductAPI/STIBO_PIM/ADRM"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-03T12:16:45Z"

@@ -10,7 +10,7 @@
 					"type": "PipelineReference"
 				},
 				"parameters": {
-					"p_SourceSystem": "PosPromo",
+					"p_SourceSystem": "ProductPromo",
 					"p_DatabaseName": "VPROD_PR_PROMO_HST",
 					"p_SourceTableName": "PROMO_UT_P_HST"
 				}

@@ -1,0 +1,27 @@
+{
+	"name": "TRG_PRODUCT_COSMOS_ATP_OSA_RL_TIME_MDL_DT",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_ATP_Intermediate_Refresh_Load",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"tableName": "OSA_RL_TIME_MDL_DT"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 1,
+				"startTime": "2021-08-03T00:00:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

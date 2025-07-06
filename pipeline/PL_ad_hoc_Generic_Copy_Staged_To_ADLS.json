@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/DOB/GetDatesAdHoc",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/DOB/GetDatesAdHoc",
 					"baseParameters": {
 						"domain": {
 							"value": "@pipeline().parameters.domain",
@@ -25,8 +25,8 @@
 							"value": "@pipeline().parameters.stagedContainerPath",
 							"type": "Expression"
 						},
-						"posContainerPath": {
-							"value": "@pipeline().parameters.posContainerPath",
+						"productContainerPath": {
+							"value": "@pipeline().parameters.productContainerPath",
 							"type": "Expression"
 						},
 						"date": {
@@ -112,11 +112,11 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "DOB_JSON_Pos",
+									"referenceName": "DOB_JSON_Product",
 									"type": "DatasetReference",
 									"parameters": {
 										"folderPath": {
-											"value": "@concat(pipeline().parameters.posContainerPath,'/',item().date)",
+											"value": "@concat(pipeline().parameters.productContainerPath,'/',item().date)",
 											"type": "Expression"
 										}
 									}
@@ -134,7 +134,7 @@
 			"stagedContainerPath": {
 				"type": "string"
 			},
-			"posContainerPath": {
+			"productContainerPath": {
 				"type": "string"
 			},
 			"sourceFolder": {
@@ -148,7 +148,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/DOB"
+			"name": "ProductAPI/DOB"
 		},
 		"annotations": []
 	}

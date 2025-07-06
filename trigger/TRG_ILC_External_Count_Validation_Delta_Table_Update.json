@@ -1,0 +1,36 @@
+{
+	"name": "TRG_ILC_External_Count_Validation_Delta_Table_Update",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_ILC_External_Count_Validation",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-06-02T11:19:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						8,
+						11,
+						14,
+						17,
+						20
+					]
+				}
+			}
+		}
+	}
+}

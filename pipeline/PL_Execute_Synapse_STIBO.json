@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/Ingredient_Synapse_Load"
+					"notebookPath": "/Published_Product/ProductAPI/GRC/STIBO/SYNAPSE/Ingredient_Synapse_Load"
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_AzureDatabricks_PubSub",
@@ -43,7 +43,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/Item_Ingredient_Synapse_Load"
+					"notebookPath": "/Published_Product/ProductAPI/GRC/STIBO/SYNAPSE/Item_Ingredient_Synapse_Load"
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_AzureDatabricks_PubSub",
@@ -63,7 +63,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/LabelMark_Synapse_Load"
+					"notebookPath": "/Published_Product/ProductAPI/GRC/STIBO/SYNAPSE/LabelMark_Synapse_Load"
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_AzureDatabricks_PubSub",
@@ -90,7 +90,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/ItemLabelMark_Synapse_Load"
+					"notebookPath": "/Published_Product/ProductAPI/GRC/STIBO/SYNAPSE/ItemLabelMark_Synapse_Load"
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_AzureDatabricks_PubSub",
@@ -117,7 +117,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/STIBO/SYNAPSE/LabelMarkGroup_Synapse_Load"
+					"notebookPath": "/Published_Product/ProductAPI/GRC/STIBO/SYNAPSE/LabelMarkGroup_Synapse_Load"
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_AzureDatabricks_PubSub",
@@ -126,7 +126,7 @@
 			}
 		],
 		"folder": {
-			"name": "PosAPI/stibo"
+			"name": "ProductAPI/stibo"
 		},
 		"annotations": []
 	}

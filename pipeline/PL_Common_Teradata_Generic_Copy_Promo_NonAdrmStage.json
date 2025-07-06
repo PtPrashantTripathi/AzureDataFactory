@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/PROMO_TABLES/Promo_Tables",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/PROMO_TABLES/Promo_Tables",
 					"baseParameters": {
 						"entity_name": {
 							"value": "@pipeline().parameters.entity_name",

@@ -1,0 +1,27 @@
+{
+	"name": "DOB_JSON_Product",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ServeADLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"folderPath": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().folderPath",
+					"type": "Expression"
+				},
+				"fileSystem": "product"
+			}
+		},
+		"schema": {}
+	}
+}

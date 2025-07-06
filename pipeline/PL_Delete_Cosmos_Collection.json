@@ -8,7 +8,7 @@
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "Execute Increase RU for UPC_LOC",
+						"activity": "Execute Increase RU for ILC",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -23,7 +23,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_CosmosDB/DeleteCosmosCollection",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/Product_CosmosDB/DeleteCosmosCollection",
 					"baseParameters": {
 						"database": {
 							"value": "@pipeline().parameters.DatabaseName",
@@ -41,7 +41,7 @@
 				}
 			},
 			{
-				"name": "Execute Increase RU for UPC_LOC",
+				"name": "Execute Increase RU for ILC",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"userProperties": [],
@@ -64,7 +64,7 @@
 				}
 			},
 			{
-				"name": "Execute Decrease RU for UPC_LOC",
+				"name": "Execute Decrease RU for ILC",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -94,14 +94,14 @@
 		"parameters": {
 			"DatabaseName": {
 				"type": "string",
-				"defaultValue": "ServePos"
+				"defaultValue": "ServeProduct"
 			},
 			"CollectionName": {
 				"type": "string"
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-03T10:56:19Z"

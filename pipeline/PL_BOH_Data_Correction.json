@@ -1,0 +1,232 @@
+{
+	"name": "PL_BOH_Data_Correction",
+	"properties": {
+		"description": "Give UT_ID in comma separated manner,\nLast Date is always the max_Date in source database.",
+		"activities": [
+			{
+				"name": "Run PL_ExportToCosmos Pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute  ADRM PL_Common_Notebook",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Export_To_Cosmos",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"collectionname": {
+							"value": "@pipeline().parameters.collectioname",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute  ADRM PL_Common_Notebook",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Cleansing PL_Common_Generic_Cleanse",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_Notebook",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"entity": {
+							"value": "@pipeline().parameters.collectioname",
+							"type": "Expression"
+						},
+						"fullorincl": {
+							"value": "@pipeline().parameters.fullorincl",
+							"type": "Expression"
+						},
+						"level_exec": "-2"
+					}
+				}
+			},
+			{
+				"name": "Execute Cleansing PL_Common_Generic_Cleanse",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Data_Correction_Copy",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_Generic_Cleanse",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "STO_UPC",
+						"sourceSystem": "PMM"
+					}
+				}
+			},
+			{
+				"name": "Lookup_Config_file",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_DB2_CONFIG_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "DB2_CONFIGURATION.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Filter_BOH",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Lookup_Config_file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup_Config_file').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(item().EntityName,'BOH')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Data_Correction_Copy",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Filter_BOH",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Common_DB2_Generic_Copy_Correction",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": {
+							"value": "@activity('Filter_BOH').output.value[0].SourceTableName",
+							"type": "Expression"
+						},
+						"databaseName": {
+							"value": "@activity('Filter_BOH').output.value[0].ConnectionString",
+							"type": "Expression"
+						},
+						"dbvalue": " ",
+						"WatermarkColumnName": {
+							"value": "@activity('Filter_BOH').output.value[0].WatermarkColumnName",
+							"type": "Expression"
+						},
+						"sourceSystem": {
+							"value": "@activity('Filter_BOH').output.value[0].SourceSystem",
+							"type": "Expression"
+						},
+						"domain": {
+							"value": "@activity('Filter_BOH').output.value[0].Domain",
+							"type": "Expression"
+						},
+						"folderName": {
+							"value": "@concat('delta_correction/','Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Day=',formatDateTime(utcnow(),'dd'))",
+							"type": "Expression"
+						},
+						"fileName": {
+							"value": "@concat(activity('Filter_BOH').output.value[0].SourceTableName,'-',formatDateTime(utcnow()) )",
+							"type": "Expression"
+						},
+						"userName": {
+							"value": "@activity('Filter_BOH').output.value[0].UserName",
+							"type": "Expression"
+						},
+						"StoreId": {
+							"value": "@pipeline().parameters.StoreId",
+							"type": "Expression"
+						},
+						"StartDate": {
+							"value": "@pipeline().parameters.StartDate",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"collectioname": {
+				"type": "string"
+			},
+			"fullorincl": {
+				"type": "string"
+			},
+			"StoreId": {
+				"type": "string"
+			},
+			"StartDate": {
+				"type": "string",
+				"defaultValue": "2000-01-31T00:00:00:000000"
+			}
+		},
+		"folder": {
+			"name": "ProductAPI/BOH"
+		},
+		"annotations": []
+	}
+}

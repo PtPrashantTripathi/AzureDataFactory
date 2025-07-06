@@ -1,0 +1,38 @@
+{
+	"name": "TRG_OSA_INCREMENTAL",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_OSA_incremental",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"p_DatabaseName": "VPRODDLY",
+					"p_SourceSystem": "OSA",
+					"p_SourceTableName": "DLY_UT_P_GRP_ORDR_QT_HST",
+					"fullorincl": "I"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-08-02T04:30:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						19
+					]
+				}
+			}
+		}
+	}
+}

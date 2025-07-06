@@ -168,7 +168,7 @@
 		"parameters": {
 			"p_EntityName": {
 				"type": "string",
-				"defaultValue": "Pos"
+				"defaultValue": "Product"
 			},
 			"p_SourceSystem": {
 				"type": "string",

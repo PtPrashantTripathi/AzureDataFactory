@@ -23,7 +23,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_CosmosDB/RunCosmosNotebook",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/Product_CosmosDB/RunCosmosNotebook",
 					"baseParameters": {
 						"collectionname": {
 							"value": "@pipeline().parameters.collectionname",
@@ -355,7 +355,7 @@
 			}
 		},
 		"folder": {
-			"name": "Pos_Minibatch"
+			"name": "Product_Minibatch"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-03T10:59:23Z"

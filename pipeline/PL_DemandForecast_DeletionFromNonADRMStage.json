@@ -164,7 +164,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/GRC/DemandForecast/DeletionFromStage",
+								"notebookPath": "/Published_Product/ProductAPI/GRC/DemandForecast/DeletionFromStage",
 								"baseParameters": {
 									"entity_name": {
 										"value": "@item().SourceTableName",
@@ -216,7 +216,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/Datastage"
+			"name": "ProductAPI/Datastage"
 		},
 		"annotations": []
 	}

@@ -1,0 +1,36 @@
+{
+	"name": "TRG_PRODUCT_COSMOS_PRODUCTTAXONOMY_LOAD",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Export_To_Cosmos",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"collectionname": "ProductTaxonomy",
+					"fullorincl": "I"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2021-03-12T12:32:00",
+				"timeZone": "Eastern Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						3
+					]
+				}
+			}
+		}
+	}
+}

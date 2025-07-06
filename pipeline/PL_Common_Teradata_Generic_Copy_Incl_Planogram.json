@@ -349,7 +349,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/Planogram"
+			"name": "ProductAPI/Planogram"
 		},
 		"annotations": []
 	}

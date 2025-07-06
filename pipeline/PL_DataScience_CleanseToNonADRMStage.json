@@ -92,7 +92,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/GRC/DataScienceOnDemand/CleansedToStage",
+								"notebookPath": "/Published_Product/ProductAPI/GRC/DataScienceOnDemand/CleansedToStage",
 								"baseParameters": {
 									"entity_name": {
 										"value": "@item().SourceTableName",

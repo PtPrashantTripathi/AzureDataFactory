@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/Pos/StoreItem/STAGE/NONADRM/Master_Notebook_ATP",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ATP/Master_Notebook_ATP",
 					"baseParameters": {
 						"fullorincl": {
 							"value": "@pipeline().parameters.fullorincl",
@@ -43,7 +43,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/SAASRetirement"
+			"name": "ProductAPI/SASRetirement"
 		},
 		"annotations": []
 	}

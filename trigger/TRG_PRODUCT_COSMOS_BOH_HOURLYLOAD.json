@@ -1,0 +1,24 @@
+{
+	"name": "TRG_PRODUCT_COSMOS_BOH_HOURLYLOAD",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_Start_BOH_Load",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 1,
+				"startTime": "2021-04-22T09:30:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

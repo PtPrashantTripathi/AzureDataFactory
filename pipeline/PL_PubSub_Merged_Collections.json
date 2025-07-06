@@ -298,15 +298,15 @@
 					}
 				],
 				"policy": {
-					"timeout": "00.12:00:00",
-					"retry": 0,
+					"timeout": "00.01:00:00",
+					"retry": 4,
 					"retryIntervalInSeconds": 120,
 					"secureOutput": false,
 					"secureInput": false
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/Pos_ServiceBus/ExportMergedCollectionstoServiceBus"
+					"notebookPath": "/Published_Product/ProductAPI/GRC/Product_ServiceBus/ExportMergedCollectionstoServiceBus"
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_AzureDatabricks_Connector",
@@ -318,10 +318,10 @@
 			"collections_associated": {
 				"type": "Array",
 				"defaultValue": [
-					"PosTaxonomy",
-					"Pos",
-					"PosGroup",
-					"Sku"
+					"ProductTaxonomy",
+					"Product",
+					"ProductGroup",
+					"Item"
 				]
 			},
 			"nothing": {
@@ -329,7 +329,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/PubSub"
+			"name": "ProductAPI/PubSub"
 		},
 		"annotations": []
 	}

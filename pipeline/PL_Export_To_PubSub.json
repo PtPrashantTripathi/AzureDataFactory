@@ -14,7 +14,7 @@
 					}
 				],
 				"policy": {
-					"timeout": "00.00:45:00",
+					"timeout": "00.00:30:00",
 					"retry": 2,
 					"retryIntervalInSeconds": 120,
 					"secureOutput": false,
@@ -23,7 +23,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"notebookPath": {
-						"value": "@concat('/Published_Pos/PosAPI/GRC/Pos_ServiceBus/Export',pipeline().parameters.collectionname,'toServiceBus')",
+						"value": "@concat('/Published_Product/ProductAPI/GRC/Product_ServiceBus/Export',pipeline().parameters.collectionname,'toServiceBus')",
 						"type": "Expression"
 					}
 				},
@@ -117,7 +117,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/PubSub"
+			"name": "ProductAPI/PubSub"
 		},
 		"annotations": []
 	}

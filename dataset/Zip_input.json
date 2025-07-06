@@ -11,7 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": "Promo_ut_p_hst_csv.zip",
-				"folderPath": "CDM/Pos/testzip",
+				"folderPath": "CDM/Product/testzip",
 				"fileSystem": "models"
 			},
 			"compression": {

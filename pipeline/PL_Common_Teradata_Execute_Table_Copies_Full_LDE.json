@@ -1,0 +1,238 @@
+{
+	"name": "PL_Common_Teradata_Execute_Table_Copies_Full_LDE",
+	"properties": {
+		"description": "Master pipeline Full load for Teradata source tables for SAS and ATP feature.",
+		"activities": [
+			{
+				"name": "LKP_CONFIG_FILE",
+				"description": "This activity reads from a source file located in configuration in the Data Lake",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_TeraData_CONFIG_SASRetirement_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"fileName": "TERADATA_DB_CONFIGURATION_LDE.CSV"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FLTR_SRC",
+				"description": "",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LKP_CONFIG_FILE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Set SourceSystem",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_CONFIG_FILE').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(and(equals(item().DatabaseName,pipeline().parameters.p_DatabaseName),equals(item().SourceSystem,pipeline().parameters.p_SourceSystem)),equals(variables('Input SourceSystem'),'LDE'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FOREACH_SRC_Tables",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FLTR_SRC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FLTR_SRC').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "Execute PL_Common_Generic_Cleanse",
+							"description": "Execute cleanse notebook pipeline",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Execute PL_SRC_Teradata_Generic_Copy_Full",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Generic_Cleanse",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"tableName": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Execute PL_SRC_Teradata_Generic_Copy_Full",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_Teradata_Generic_Copy_Full_LDE",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"tableName": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"WatermarkColumnName": {
+										"value": "@item().WatermarkColumnName",
+										"type": "Expression"
+									},
+									"sourceSystem": {
+										"value": "@item().SourceSystem",
+										"type": "Expression"
+									},
+									"domain": {
+										"value": "@item().Domain",
+										"type": "Expression"
+									},
+									"folderName": {
+										"value": "@concat('full/','Year=',formatDateTime(utcnow(),'yyyy'),'/','Month=',formatDateTime(utcnow(),'MM'),'/','Day=',formatDateTime(utcnow(),'dd'))",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@concat(item().SourceTableName,'-',formatDateTime(utcnow()) )",
+										"type": "Expression"
+									},
+									"databaseName": {
+										"value": "@item().DatabaseName",
+										"type": "Expression"
+									},
+									"PartitionColumn": {
+										"value": "@item().PartitionColumn",
+										"type": "Expression"
+									},
+									"queryPattern": {
+										"value": "@item().QueryPattern",
+										"type": "Expression"
+									},
+									"WhereClause": {
+										"value": "@item().WhereClause",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Execute PL_Common_Generic_Cleanse",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Common_NonADRM_LDE",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"entity_name": {
+										"value": "@item().SourceTableName",
+										"type": "Expression"
+									},
+									"fullorincl": "F"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Set SourceSystem",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Input SourceSystem",
+					"value": {
+						"value": "@toUpper(pipeline().parameters.p_SourceSystem)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"p_DatabaseName": {
+				"type": "string"
+			},
+			"p_SourceSystem": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"Input SourceSystem": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ProductAPI/LDE"
+		},
+		"annotations": []
+	}
+}

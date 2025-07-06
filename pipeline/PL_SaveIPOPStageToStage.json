@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/UPC_LOC/ExportUPC_LOCStagetoStage",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ILC/ExportILCStagetoStage",
 					"baseParameters": {
 						"stores": {
 							"value": "@string(pipeline().parameters.store_list)",
@@ -29,7 +29,7 @@
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "AzureDatabricks_UPC_LOC",
+					"referenceName": "AzureDatabricks_ILC",
 					"type": "LinkedServiceReference"
 				}
 			}
@@ -40,7 +40,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/UPC_LOC"
+			"name": "ProductAPI/ILC"
 		},
 		"annotations": []
 	}

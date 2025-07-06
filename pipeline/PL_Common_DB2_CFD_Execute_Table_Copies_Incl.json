@@ -31,7 +31,7 @@
 						"referenceName": "DS_DB2_CONFIG_CSV",
 						"type": "DatasetReference",
 						"parameters": {
-							"fileName": "POS_HOURLY_DB2_CONFIGURATION.CSV"
+							"fileName": "PRODUCT_HOURLY_DB2_CONFIGURATION.CSV"
 						}
 					},
 					"firstRowOnly": false

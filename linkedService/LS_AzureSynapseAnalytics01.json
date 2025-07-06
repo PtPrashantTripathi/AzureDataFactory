@@ -4,7 +4,7 @@
 		"annotations": [],
 		"type": "AzureSqlDW",
 		"typeProperties": {
-			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sql-np-ea2-apex-serve-01.database.windows.net;Initial Catalog=dw-np-ea2-apex-serve-02;User ID=apex-synapse-load-user-dev",
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sql-np-ea2-edaa-serve-01.database.windows.net;Initial Catalog=dw-np-ea2-edaa-serve-02;User ID=edaa-synapse-load-user-dev",
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {

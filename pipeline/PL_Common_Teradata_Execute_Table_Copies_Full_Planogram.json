@@ -28,7 +28,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "DS_TeraData_CONFIG_SAASRetirement_CSV",
+						"referenceName": "DS_TeraData_CONFIG_SASRetirement_CSV",
 						"type": "DatasetReference",
 						"parameters": {
 							"fileName": "TERADATA_DB_CONFIGURATION_PRICING_COMPETITIVE.CSV"
@@ -206,7 +206,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/Planogram"
+			"name": "ProductAPI/Planogram"
 		},
 		"annotations": []
 	}

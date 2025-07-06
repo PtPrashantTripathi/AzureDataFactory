@@ -17,7 +17,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/DOB/DOB_Incremental_Ds_To_Stg",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/DOB/DOB_Incremental_Ds_To_Stg",
 					"baseParameters": {
 						"sourcetablename": {
 							"value": "@pipeline().parameters.sourcetablename",
@@ -37,7 +37,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": []
 	}

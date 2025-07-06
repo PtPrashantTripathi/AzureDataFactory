@@ -1,0 +1,154 @@
+{
+	"name": "PL_ILC_Cleanse_To_CosmosDB_Data_Count_Validation",
+	"properties": {
+		"activities": [
+			{
+				"name": "Cleanse_To_CosmosDB_Data_Count_Validation",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Published_Product/ProductAPI/ALERT/ILC_Cleanse_To_CosmosDB_Data_Count_Validation"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks_ILC",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "If_Mismatched_Found",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Cleanse_To_CosmosDB_Data_Count_Validation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('Cleanse_To_CosmosDB_Data_Count_Validation').output.runOutput.key5,'True')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "GetSecret",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@activity('Cleanse_To_CosmosDB_Data_Count_Validation').output.runOutput.key2",
+									"type": "Expression"
+								},
+								"method": "GET",
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://vault.azure.net"
+								}
+							}
+						},
+						{
+							"name": "GetEmailID",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "GetSecret",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"dataset": {
+									"referenceName": "DS_ILC_COUNT_VALIDATION_EMAIL_LIST",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "SendEmailViaAPIM",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "GetEmailID",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@activity('Cleanse_To_CosmosDB_Data_Count_Validation').output.runOutput.key3",
+									"type": "Expression"
+								},
+								"method": "POST",
+								"headers": {
+									"Ocp-Apim-Subscription-Key": {
+										"value": "@activity('GetSecret').output.value",
+										"type": "Expression"
+									}
+								},
+								"body": {
+									"value": "{\n   \"from\":\"@{activity('GetEmailId').Output.firstRow.from}\",\n   \"to\":[@{activity('GetEmailId').Output.firstRow.to}],\n   \"cc\":[@{activity('GetEmailId').Output.firstRow.cc}],\n   \"subject\":\"@{activity('Cleanse_To_CosmosDB_Data_Count_Validation').Output.runOutput.key4}\",\n   \"body\":\"@{activity('Cleanse_To_CosmosDB_Data_Count_Validation').Output.runOutput.key }\"\n}",
+									"type": "Expression"
+								},
+								"authentication": {
+									"type": "MSI",
+									"resource": "https://management.azure.com"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "ProductAPI/ILC/ILC_COUNT_VALIDATION"
+		},
+		"annotations": []
+	}
+}

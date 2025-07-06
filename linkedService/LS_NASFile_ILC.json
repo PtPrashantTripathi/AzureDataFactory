@@ -1,0 +1,23 @@
+{
+	"name": "LS_NASFile_ILC",
+	"properties": {
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "\\\\ius.meijer.com\\mjrdata\\SDrive\\CSMerch\\Intactix",
+			"userId": "US\\EDAFSI",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVault01",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "fsedaapassword"
+			}
+		},
+		"connectVia": {
+			"referenceName": "SelfHosted-IR-BI-01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

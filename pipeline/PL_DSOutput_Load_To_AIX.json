@@ -236,7 +236,7 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"notebookPath": "/Published_Pos/PosAPI/GRC/LoadToTeradata/GZip_Transformation_Notebook",
+								"notebookPath": "/Published_Product/ProductAPI/GRC/LoadToTeradata/GZip_Transformation_Notebook",
 								"baseParameters": {
 									"LogTable": {
 										"value": "@item().LogTable",

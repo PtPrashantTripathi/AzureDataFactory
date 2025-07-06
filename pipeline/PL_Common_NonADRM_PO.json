@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/PosAPI/GRC/PO_TABLES/Master_Notebook_PO",
+					"notebookPath": "/Published_Product/ProductAPI/GRC/PO_TABLES/Master_Notebook_PO",
 					"baseParameters": {
 						"fullorincl": {
 							"value": "@pipeline().parameters.fullorincl",
@@ -42,7 +42,7 @@
 			}
 		},
 		"folder": {
-			"name": "PosAPI/PO"
+			"name": "ProductAPI/PO"
 		},
 		"annotations": []
 	}

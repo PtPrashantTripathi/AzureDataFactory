@@ -71,25 +71,25 @@
 		"parameters": {
 			"p_GetCommonAPISecret_URL": {
 				"type": "string",
-				"defaultValue": "https://kv-np-ea2-apex-etl-int.vault.azure.net/secrets/APIManagerSubscriptionKey/609d70826d904dc49856eb7295423c96?api-version=7.0"
+				"defaultValue": "https://kv-np-ea2-edaa-etl-int.vault.azure.net/secrets/APIManagerSubscriptionKey/609d70826d904dc49856eb7295423c96?api-version=7.0"
 			},
 			"p_ScaleCosmosDB_URL": {
 				"type": "string",
-				"defaultValue": "https://api.apex.com/cert/azurecommon/ScaleCosmosDatabase"
+				"defaultValue": "https://api.meijer.com/cert/azurecommon/ScaleCosmosDatabase"
 			},
 			"p_ScaleCosmosDB_Body": {
 				"type": "string",
 				"defaultValue": {
-					"CosmosAccount": "cosmosdb-np-ea2-apex-apis-int",
-					"CosmosServer": "ServePos",
+					"CosmosAccount": "cosmosdb-np-ea2-edaa-apis-int",
+					"CosmosServer": "ServeProduct",
 					"RUs": 800,
-					"ResourceGroupName": "rg-np-apex-apis-int",
+					"ResourceGroupName": "rg-np-edaa-apis-int",
 					"SubscriptionName": "Enterprise Data NonProduction"
 				}
 			}
 		},
 		"folder": {
-			"name": "PosAPI"
+			"name": "ProductAPI"
 		},
 		"annotations": [],
 		"lastPublishTime": "2021-03-01T09:17:12Z"

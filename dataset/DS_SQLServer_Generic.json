@@ -29,7 +29,7 @@
 			},
 			"ds_UserName": {
 				"type": "string",
-				"defaultValue": "US\\APEXMSINT"
+				"defaultValue": "US\\EDAAMSINT"
 			}
 		},
 		"folder": {

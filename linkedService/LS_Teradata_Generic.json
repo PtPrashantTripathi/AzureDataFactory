@@ -4,7 +4,7 @@
 		"annotations": [],
 		"type": "Teradata",
 		"typeProperties": {
-			"connectionString": "DbcName=TDDVA.apex.com;UID=APEX_ADF_DEV_USER",
+			"connectionString": "DbcName=TDDVA.meijer.com;UID=EDAA_ADF_DEV_USER",
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {

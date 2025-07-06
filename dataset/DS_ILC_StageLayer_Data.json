@@ -1,0 +1,30 @@
+{
+	"name": "DS_ILC_StageLayer_Data",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_AzureDataLakeStorage01",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"team_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ILC_NAS"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "ILC/@{dataset().team_name}",
+					"type": "Expression"
+				},
+				"fileSystem": "staged/Product"
+			}
+		},
+		"schema": {}
+	}
+}

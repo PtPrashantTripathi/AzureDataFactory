@@ -158,10 +158,10 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"KeyVaultDNSName": "https://kv-np-ea2-apex-etl-int.vault.azure.net",
+						"KeyVaultDNSName": "https://kv-np-ea2-edaa-etl-int.vault.azure.net",
 						"SecretName_TenantId": "TenantID",
-						"SecretName_SPClientId": "Apex-Data-Science-SharepointAccess-ClientId",
-						"SecretName_SPSecret": "Apex-Data-Science-SharepointAccess-ClientSecret"
+						"SecretName_SPClientId": "EDaA-Data-Science-SharepointAccess-ClientId",
+						"SecretName_SPSecret": "EDaA-Data-Science-SharepointAccess-ClientSecret"
 					}
 				}
 			},
@@ -219,15 +219,15 @@
 			},
 			"SecretName_SPClientId": {
 				"type": "string",
-				"defaultValue": "Apex-Data-Science-SharepointAccess-ClientId"
+				"defaultValue": "EDaA-Data-Science-SharepointAccess-ClientId"
 			},
 			"SecretName_SPSecret": {
 				"type": "string",
-				"defaultValue": "Apex-Data-Science-SharApex-Data-Science-SharepointAccess-ClientSecretepointAccess-ClientSecret"
+				"defaultValue": "EDaA-Data-Science-SharEDaA-Data-Science-SharepointAccess-ClientSecretepointAccess-ClientSecret"
 			}
 		},
 		"folder": {
-			"name": "PosAPI/DOB"
+			"name": "ProductAPI/DOB"
 		},
 		"annotations": []
 	}

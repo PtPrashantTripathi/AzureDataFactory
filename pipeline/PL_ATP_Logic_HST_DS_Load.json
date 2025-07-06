@@ -16,7 +16,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Published_Pos/Pos/StoreItem/STAGE/ETP_DataSciencetoStage"
+					"notebookPath": "/Published_Product/ProductAPI/GRC/ETP/ETP_DataSciencetoStage"
 				},
 				"linkedServiceName": {
 					"referenceName": "LS_AzureDatabricks_Connector",
@@ -25,7 +25,7 @@
 			}
 		],
 		"folder": {
-			"name": "PosAPI/StoreItem"
+			"name": "ProductAPI/ETP"
 		},
 		"annotations": []
 	}
