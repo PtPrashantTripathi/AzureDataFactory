@@ -1,0 +1,18 @@
+{
+	"name": "DS_MYSQL_ECOMM",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_MYSQL_AWS_RDS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "PH"
+		},
+		"annotations": [],
+		"type": "MySqlTable",
+		"schema": [],
+		"typeProperties": {
+			"tableName": "`philippines_dcom_pos`"
+		}
+	}
+}

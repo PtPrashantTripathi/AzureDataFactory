@@ -1,0 +1,125 @@
+{
+	"name": "PL_VN_D_PUREPLAY_SILVER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "daily_pureplay_transaction combine",
+				"description": "PL_VN_D_PUREPLAY_COMBINE_DATASET",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_D_PUREPLAY_COMBINE_DATASET",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "DIM PRODUCT",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "daily_pureplay_transaction combine",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_D_PUREPLAY_DIM_PRODUCT",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "DIM PRICING",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "daily_pureplay_transaction combine",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_D_PUREPLAY_DIM_PRICING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "DIM SELLER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "daily_pureplay_transaction combine",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_D_PUREPLAY_DIM_SELLER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "DIM RATING",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "daily_pureplay_transaction combine",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_D_PUREPLAY_DIM_SELLER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "DIM CATEGORY",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "daily_pureplay_transaction combine",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_D_PUREPLAY_DIM_SELLER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "VN/BEECOST/PUREPLAY"
+		},
+		"annotations": []
+	}
+}

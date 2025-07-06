@@ -1,0 +1,31 @@
+{
+    "name": "DS_AWS",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "LS_AWS_S3",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "folder_name": {
+                "type": "string"
+            }
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "AmazonS3Location",
+                "bucketName": "superstore-migration",
+                "folderPath": {
+                    "value": "@dataset().folder_name",
+                    "type": "Expression"
+                }
+            },
+            "columnDelimiter": ",",
+            "escapeChar": "\\",
+            "firstRowAsHeader": true,
+            "quoteChar": "\""
+        },
+        "schema": []
+    }
+}

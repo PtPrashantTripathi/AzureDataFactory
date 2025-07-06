@@ -1,0 +1,185 @@
+{
+	"name": "PL_VN_M_OMNI_OFFTAKE_COMBINE",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_Onboarding",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@pipeline().parameters.onboarder_notebook_path",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"landing_path": {
+							"value": "@string(variables('processed_file_names'))",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"save_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"time_zone": "utc",
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"sequential_extraction": {
+							"value": "@pipeline().parameters.sequential_extraction",
+							"type": "Expression"
+						},
+						"job_id": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						}
+					},
+					"libraries": [
+						{
+							"jar": "dbfs:/mnt/databricks/jars/uniframe/deequ-2.0.1-spark-3.2.jar"
+						},
+						{
+							"maven": {
+								"coordinates": "com.crealytics:spark-excel_2.12:3.2.1_0.17.1"
+							}
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_container": {
+				"type": "string",
+				"defaultValue": "''"
+			},
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "''"
+			},
+			"source_file_name": {
+				"type": "array"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "OMNI"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "offtake_bigc"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"onboarder_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/silver/OMNI/OFFTAKE/DIM_OMNI_OFFTAKE_TRANSACTIONS_SILVER"
+			},
+			"landing_date": {
+				"type": "string",
+				"defaultValue": "''"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "''"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"sequential_extraction": {
+				"type": "string",
+				"defaultValue": "False"
+			}
+		},
+		"variables": {
+			"status": {
+				"type": "String"
+			},
+			"archival_file_name": {
+				"type": "String"
+			},
+			"processing_file_name": {
+				"type": "String"
+			},
+			"processing_directory": {
+				"type": "String"
+			},
+			"processed_file_names": {
+				"type": "Array"
+			},
+			"processing_file_names": {
+				"type": "Array"
+			},
+			"fail_reason": {
+				"type": "String"
+			},
+			"filename": {
+				"type": "String"
+			},
+			"file_name_part": {
+				"type": "Array"
+			},
+			"file_status": {
+				"type": "String"
+			},
+			"processed_file_name": {
+				"type": "String"
+			},
+			"processed_files": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "VN/OMNI/OFFTAKE/BRONZE/SUBS"
+		},
+		"annotations": []
+	}
+}

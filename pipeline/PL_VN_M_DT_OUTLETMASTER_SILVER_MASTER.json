@@ -1,0 +1,93 @@
+{
+	"name": "PL_VN_M_DT_OUTLETMASTER_SILVER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"write_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"onboarder_notebook_path": {
+							"value": "@pipeline().parameters.notebook_path",
+							"type": "Expression"
+						},
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"layer": "Silver",
+						"stage": "Dimension"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/silver/DistributiveTrade/VN_DT_DIM_OUTLET_MASTER"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "dim_vn_outlet_master"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "DistributiveTrade"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "Country"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "overwrite"
+			},
+			"landing_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "VN/DISTRIBUTIVE_TRADE"
+		},
+		"annotations": []
+	}
+}

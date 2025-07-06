@@ -1,0 +1,21 @@
+{
+	"name": "PL_PH_A_UNIFIEDMAPPING_SUBCATEGORY_SUBCLASS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Fail1",
+				"type": "Fail",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "unsued pipeline",
+					"errorCode": "404"
+				}
+			}
+		],
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

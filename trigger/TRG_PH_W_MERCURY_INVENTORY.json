@@ -1,0 +1,60 @@
+{
+	"name": "TRG_PH_W_MERCURY_INVENTORY",
+	"properties": {
+		"description": "This will trigger Pipeline Daily at 7:35 PM as per Kuala Lumpur, Singapore time zone (UTC+8)) \n",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_MERCURY_INVENTORY_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Mercury/Inventory",
+					"source_container": "landing",
+					"object_name": "Inventory",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Mercury",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake/",
+					"Source": "/Shared Documents/LandingSpace/PH/MERCURY/Inventory",
+					"Blob_Destination": "/landing/Mercury/Inventory",
+					"last_execution_file_name": "last_execution_Mercury_Inventory",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Mercury",
+					"custom_notebook_path": "/Shared/notebooks/bronze/MERCURY/PH_MERCURY_INVENTORY"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-04-02T11:42:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						35
+					],
+					"hours": [
+						19
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

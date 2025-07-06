@@ -1,0 +1,83 @@
+{
+	"name": "PL_VN_M_MT_SGC_FACT_VN_OFFTAKE_SILVER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "EXE_FACT_VN_OFFTAKE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_SGC_MONTHLY_OFFTAKE_MARKETSHARE_BRONZE_MASTER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": "ModernTrade",
+						"object_name": "fact_vn_offtake",
+						"country_code": "VN",
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"write_mode": "overwrite",
+						"onboarder_notebook_path": "/Shared/notebooks/silver/ModernTrade/VN_MT_SGC_MONTHLYOFFTAKE_HARMONIZATION",
+						"partition_keys": "periodicity,account_name,sk_calendar",
+						"on_error_alert": true,
+						"layer": "Silver",
+						"stage": "Dimension",
+						"kwargs": {
+							"value": "{\n    \"catalog\": \"@{pipeline().globalParameters.UNITY_CATALOG}\"\n}",
+							"type": "Expression"
+						},
+						"uniframe_version": "4.0.8",
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": "unity_catalog"
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_SGC_MONTHLY_OFFTAKE_MARKETSHARE_BRONZE_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_SGC_MONTHLY_OFFTAKE_MARKETSHARE_BRONZE_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"landing_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "VN/MODERN_TRADE"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,33 @@
+{
+	"name": "PL_VN_W_MINDSHARE_TOTAL_CAMPAIGN_BRONZE_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_SET_Date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "CurrentDate",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time', 'yyyyMMdd'))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"CurrentDate": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

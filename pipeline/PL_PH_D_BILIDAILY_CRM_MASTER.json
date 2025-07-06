@@ -1,0 +1,576 @@
+{
+	"name": "PL_PH_D_BILIDAILY_CRM_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_WEB_CALL_LOGICAPP_COPY",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_IF_CASE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:20:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"httpRequestTimeout": "00:10:00",
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_01",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "@concat('{\"body\":\"Files have been successfully uploaded in sharepoint and copied for TINDAHAN TAPAT CRM\",\n    \"subject\":\"Sharepoint update status\",\n    \"body_copy_fail\":\"Files have not been uploaded in sharepoint\",\n    \"Logic Apps Case\":\"',variables('Case'),'\",','\n    \"Nested\":\"',variables('Nested'),'\",','\n    \"Pipeline Name\":\"',pipeline().Pipeline,'\",','\n    \"to\":\"',variables('receiver'),'\",','\n    \"run_id\":\"',pipeline().RunId,'\",','\n    \"run_date_time\":\"',formatDateTime(utcNow(),'MM-dd-yyyy'),'\",','\n    \"Contains\":\"',variables('Contains'),'\",','\n    \"column_name\":\"',variables('column_name'),'\",','\n    \"Source\":\"',variables('source'),'\",','\n    \"Site\":\"',pipeline().parameters.Site,'\",','\n    \"library_name\":\"',pipeline().parameters.library_name,'\",','\n    \"Blob_Destination\":\"',pipeline().parameters.Blob_Destination,'\",','\n    \"execution_env\":\"',pipeline().globalParameters.ENVIRONMENT,'\",','\n    \"last_execution\":\"',activity('EXEC_PL_PH_A_POS_LAST_EXEXUTION').output.pipelineReturnValue.last_execution,'\",','\n    \"full_load\":\"',activity('EXEC_PL_PH_A_POS_LAST_EXEXUTION').output.pipelineReturnValue.full_load,'\"}')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "EXEC_PL_PH_A_POS_LAST_EXEXUTION",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_A_POS_LAST_EXECUTION",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"primary_keys": {
+							"value": "@pipeline().parameters.primary_keys",
+							"type": "Expression"
+						},
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"time_zone": {
+							"value": "@pipeline().parameters.time_zone",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"Site": {
+							"value": "@pipeline().parameters.Site",
+							"type": "Expression"
+						},
+						"Source": {
+							"value": "@pipeline().parameters.Source",
+							"type": "Expression"
+						},
+						"Blob_Destination": {
+							"value": "@pipeline().parameters.Blob_Destination",
+							"type": "Expression"
+						},
+						"last_execution_file_name": {
+							"value": "@pipeline().parameters.last_execution_file_name",
+							"type": "Expression"
+						},
+						"save_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"write_mode": {
+							"value": "@pipeline().parameters.write_mode",
+							"type": "Expression"
+						},
+						"library_name": {
+							"value": "@pipeline().parameters.library_name",
+							"type": "Expression"
+						},
+						"source_customer": {
+							"value": "@pipeline().parameters.source_customer",
+							"type": "Expression"
+						},
+						"create_directory": {
+							"value": "@pipeline().parameters.create_directory",
+							"type": "Expression"
+						},
+						"custom_notebook_path": {
+							"value": "@pipeline().parameters.custom_notebook_path",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "AT_IF_INGEST",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('AT_WEB_CALL_LOGICAPP_COPY').output.Response,'Pass')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "EXEP_EXECUTE",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_PH_A_EXECUTE_v2",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"source_directory": {
+										"value": "@pipeline().parameters.source_directory",
+										"type": "Expression"
+									},
+									"source_container": {
+										"value": "@pipeline().parameters.source_container",
+										"type": "Expression"
+									},
+									"object_name": {
+										"value": "@pipeline().parameters.object_name",
+										"type": "Expression"
+									},
+									"object_type": {
+										"value": "@pipeline().parameters.object_type",
+										"type": "Expression"
+									},
+									"primary_keys": {
+										"value": "@pipeline().parameters.primary_keys",
+										"type": "Expression"
+									},
+									"partition_keys": {
+										"value": "@pipeline().parameters.partition_keys",
+										"type": "Expression"
+									},
+									"time_zone": {
+										"value": "@pipeline().parameters.time_zone",
+										"type": "Expression"
+									},
+									"country_code": {
+										"value": "@pipeline().parameters.country_code",
+										"type": "Expression"
+									},
+									"source_name": {
+										"value": "@pipeline().parameters.source_name",
+										"type": "Expression"
+									},
+									"Site": {
+										"value": "@pipeline().parameters.Site",
+										"type": "Expression"
+									},
+									"Source": {
+										"value": "@pipeline().parameters.Source",
+										"type": "Expression"
+									},
+									"Blob_Destination": {
+										"value": "@pipeline().parameters.Blob_Destination",
+										"type": "Expression"
+									},
+									"last_execution_file_name": {
+										"value": "@pipeline().parameters.last_execution_file_name",
+										"type": "Expression"
+									},
+									"save_mode": {
+										"value": "@pipeline().parameters.save_mode",
+										"type": "Expression"
+									},
+									"write_mode": {
+										"value": "@pipeline().parameters.write_mode",
+										"type": "Expression"
+									},
+									"master_pipeline": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"source_customer": {
+										"value": "@pipeline().parameters.source_customer",
+										"type": "Expression"
+									},
+									"custom_notebook_path": {
+										"value": "@pipeline().parameters.custom_notebook_path",
+										"type": "Expression"
+									},
+									"uniframe_version": {
+										"value": "@pipeline().parameters.uniframe_version",
+										"type": "Expression"
+									},
+									"metastore": {
+										"value": "@pipeline().parameters.metastore",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_IF_CASE",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "EXEC_PL_PH_A_POS_LAST_EXEXUTION",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(activity('EXEC_PL_PH_A_POS_LAST_EXEXUTION').output.pipelineReturnValue.full_load , variables('Nested'))",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "AT_SET_INCREMENTAL",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Case",
+								"value": "Incremental Load POS"
+							}
+						},
+						{
+							"name": "AT_SET_SOURCE_INC",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "AT_SET_INCREMENTAL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "source",
+								"value": {
+									"value": "@replace(replace(pipeline().parameters.Source, '/', '%2F'), ' ', '%20')",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "AT_SET_HISTORICAL",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Case",
+								"value": "Historical POS"
+							}
+						},
+						{
+							"name": "AT_SET_SOURCE",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "AT_SET_HISTORICAL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "source",
+								"value": {
+									"value": "@replace(replace(pipeline().parameters.Source, '/', '%2F'), ' ', '%20')",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_FAILURE_EMAIL_ALERTS_PL",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_IF_INGEST",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\"Logic Apps Case\" : \"Email Alert\", \n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT}-Failed Pipeline Alert - @{pipeline().parameters.source_customer} @{pipeline().parameters.object_name}\",\n\"to\":\"@{variables('receiver')}\",\n\"body\": \"Pipeline failed after execute pipeline activity.\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n    }",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "AT_FAILURE_EMAIL_ALERTS_LA",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\"Logic Apps Case\" : \"Email Alert\", \n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT}-Failed Logic app Alert - @{pipeline().parameters.source_customer} @{pipeline().parameters.object_name}\",\n\"to\":\"@{variables('receiver')}\",\n\"body\": \"Pipeline failed after Logic App activity.\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n    }",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "LOGICAPP COPY FAILURE",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "AT_FAILURE_EMAIL_ALERTS_LA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "Pipeline failed after Logic App activity.",
+					"errorCode": "Failed"
+				}
+			},
+			{
+				"name": "INGESTION FAILURE",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "AT_FAILURE_EMAIL_ALERTS_PL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "Pipeline failed after execute pipeline activity.",
+					"errorCode": "Failed"
+				}
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "BILIDAILY/CRM"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "landing"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "CRM"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string",
+				"defaultValue": "rowidentifier"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "BILIDAILY"
+			},
+			"Site": {
+				"type": "string",
+				"defaultValue": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake"
+			},
+			"Source": {
+				"type": "string",
+				"defaultValue": "/Shared Documents/LandingSpace/PH/BiliDaily/CRM"
+			},
+			"Blob_Destination": {
+				"type": "string",
+				"defaultValue": "/landing/BILIDAILY/CRM"
+			},
+			"last_execution_file_name": {
+				"type": "string",
+				"defaultValue": "last_execution_BILIDAILY_CRM"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "overwrite"
+			},
+			"write_mode": {
+				"type": "string",
+				"defaultValue": "upsert"
+			},
+			"library_name": {
+				"type": "string",
+				"defaultValue": "Documents"
+			},
+			"source_customer": {
+				"type": "string",
+				"defaultValue": "BILIDAILY"
+			},
+			"create_directory": {
+				"type": "string"
+			},
+			"custom_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Workspace/Shared/notebooks/bronze/BILIDAILY/BILIDAILY_CRM"
+			},
+			"uniframe_version": {
+				"type": "string",
+				"defaultValue": "4.*"
+			},
+			"metastore": {
+				"type": "string",
+				"defaultValue": "unity_catalog"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"last_exe": {
+				"type": "String"
+			},
+			"files_name": {
+				"type": "Array"
+			},
+			"Contains": {
+				"type": "String",
+				"defaultValue": "."
+			},
+			"output_dir": {
+				"type": "String"
+			},
+			"column_name": {
+				"type": "String",
+				"defaultValue": "Created"
+			},
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			},
+			"Nested": {
+				"type": "Boolean",
+				"defaultValue": true
+			},
+			"Case": {
+				"type": "String"
+			},
+			"source": {
+				"type": "String"
+			},
+			"file_format": {
+				"type": "String",
+				"defaultValue": "xlsx"
+			}
+		},
+		"folder": {
+			"name": "PH/BILIDAILY"
+		},
+		"annotations": []
+	}
+}

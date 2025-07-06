@@ -1,0 +1,61 @@
+{
+	"name": "TRG_PH_D_SM_PROXY_POS",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_SM_PROXY_POS_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SM_PROXY/POS",
+					"source_container": "landing",
+					"object_name": "POS",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "SM_PROXY",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "/Shared Documents/LandingSpace/PH/SM PROXY/POS",
+					"Blob_Destination": "/landing/SM_PROXY/POS",
+					"last_execution_file_name": "last_execution_SM_PROXY_POS",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "SM_PROXY",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/SM_PROXY/SM_PROXY_POS",
+					"uniframe_version": "4.*",
+					"metastore": "unity_catalog"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-11-19T08:11:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						2
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

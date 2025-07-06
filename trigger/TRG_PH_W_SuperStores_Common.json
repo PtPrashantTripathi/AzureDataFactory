@@ -1,0 +1,137 @@
+{
+	"name": "TRG_PH_W_SuperStores_Common",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_SuperStores_CategoryPerformance_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SuperStores/CategoryPerformance",
+					"source_container": "landing",
+					"source_customer": "SuperStores",
+					"source_name": "SuperStores",
+					"object_name": "CategoryPerformance",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "Category_Performance",
+					"Blob_Destination": "/landing/SuperStores/CategoryPerformance",
+					"last_execution_file_name": "last_execution_SuperStores_CategoryPerformance",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"create_directory": "NA",
+					"custom_notebook_path": "/Shared/notebooks/bronze/SuperStores/PH_SuperStores_CategoryPerformance"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_SuperStores_Registration_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SuperStores/Registration",
+					"source_container": "landing",
+					"object_name": "Registration",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "SuperStores",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "Registration",
+					"Blob_Destination": "/landing/SuperStores/Registration",
+					"last_execution_file_name": "last_execution_SuperStores_Registration",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "SuperStores",
+					"create_directory": "NA",
+					"custom_notebook_path": "/Shared/notebooks/bronze/SuperStores/PH_SuperStores_Registration"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_SuperStores_SalesEntryReport_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SuperStores/SalesEntryReport",
+					"source_container": "landing",
+					"source_customer": "SuperStores",
+					"source_name": "SuperStores",
+					"object_name": "SalesEntryReport",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "Sales_Entry_Report",
+					"Blob_Destination": "/landing/SuperStores/SalesEntryReport",
+					"last_execution_file_name": "last_execution_SuperStores_SalesEntryReport",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"create_directory": "NA",
+					"custom_notebook_path": "/Shared/notebooks/bronze/SuperStores/PH_SuperStores_SalesEntryReport"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_SuperStores_Usage_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SuperStores/Usage",
+					"source_container": "landing",
+					"source_customer": "SuperStores",
+					"source_name": "SuperStores",
+					"object_name": "Usage",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "Superstore_Usage",
+					"Blob_Destination": "/landing/SuperStores/Usage",
+					"last_execution_file_name": "last_execution_SuperStores_Usage",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"create_directory": "NA",
+					"custom_notebook_path": "/Shared/notebooks/bronze/SuperStores/PH_SuperStores_Usage"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 2,
+				"startTime": "2024-01-01T00:00:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						12
+					],
+					"weekDays": [
+						"Monday"
+					]
+				}
+			}
+		}
+	}
+}

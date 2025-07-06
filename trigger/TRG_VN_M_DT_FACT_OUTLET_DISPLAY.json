@@ -1,0 +1,41 @@
+{
+	"name": "TRG_VN_M_DT_FACT_OUTLET_DISPLAY",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_M_DT_FACT_OUTLET_DISPLAY_MASTER",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_M_DT_DIM_DISPLAY_TYPE_SILVER_MASTER",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2024-09-30T10:33:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						5
+					],
+					"monthDays": [
+						-1
+					]
+				}
+			}
+		}
+	}
+}

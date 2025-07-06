@@ -1,0 +1,35 @@
+{
+	"name": "TRG_VN_W_MINDSHARE_WEEKLYTHU",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_A_MINDSHARE_BRONZE_EXPLODE",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-09-11T09:38:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						16
+					],
+					"weekDays": [
+						"Thursday"
+					]
+				}
+			}
+		}
+	}
+}

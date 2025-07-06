@@ -1,0 +1,214 @@
+{
+	"name": "PL_PH_A_MAPPING_LAST_EXECUTION",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_WEB_CALL_LOGICAPP_GET_LAST_EXECUTION_DATE_SP",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.00:20:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_01",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"body": {
+						"value": "@concat('{\n    \"Logic Apps Case\":\"get_last_execution_date\",','\n    \"Site\":\"',pipeline().parameters.Site,'\",','\n    \"library_name\":\"',pipeline().parameters.library_name,'\",','\n    \"source_name\":\"',pipeline().parameters.source_name,'\",','\n    \"object_name\":\"',pipeline().parameters.object_name,'\",','\n    \"last_execution_file_name\":\"',pipeline().parameters.last_execution_file_name,'\",','\n    \"execution_env\":\"',pipeline().globalParameters.ENVIRONMENT,'\",','\n    \"last_execution_file_path_sp\":\"',replace(replace(concat('/Shared Documents/Config/',pipeline().globalParameters.ENVIRONMENT,'/'), '/', '%2F'), ' ', '%20'),'\",','\n    }')",
+						"type": "Expression"
+					},
+					"httpRequestTimeout": "00:10:00"
+				}
+			},
+			{
+				"name": "Set variable full load_and_Last_execution",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set variable last execution",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "last_execution",
+							"value": {
+								"type": "Expression",
+								"content": "@variables('last_execution')"
+							}
+						},
+						{
+							"key": "full_load",
+							"value": {
+								"type": "Expression",
+								"content": "@if(equals(variables('last_execution'),''),true,false)"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			},
+			{
+				"name": "Set variable last execution",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_GET_LAST_EXECUTION_DATE_SP",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "last_execution",
+					"value": {
+						"value": "@formatDateTime(if(equals(activity('AT_WEB_CALL_LOGICAPP_GET_LAST_EXECUTION_DATE_SP').output.last_execution,''),addDays(utcNow(),-365),activity('AT_WEB_CALL_LOGICAPP_GET_LAST_EXECUTION_DATE_SP').output.last_execution),'yyyy-MM-ddTHH:mm:ss')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "LaNueva/MappingSKU"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "landing"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "MappingSKU"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string",
+				"defaultValue": "child_sku_code"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "LaNueva"
+			},
+			"Site": {
+				"type": "string",
+				"defaultValue": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub"
+			},
+			"Source": {
+				"type": "string",
+				"defaultValue": "/Shared Documents/01 POS Data/02 Masterlist/La Nueva/SKU Masterlist"
+			},
+			"Blob_Destination": {
+				"type": "string",
+				"defaultValue": "/landing/LaNueva/MappingSKU/"
+			},
+			"last_execution_file_name": {
+				"type": "string",
+				"defaultValue": "last_execution_LaNueva_MappingSKU"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "overwrite"
+			},
+			"write_mode": {
+				"type": "string",
+				"defaultValue": "upsert"
+			},
+			"library_name": {
+				"type": "string",
+				"defaultValue": "Documents"
+			},
+			"source_customer": {
+				"type": "string",
+				"defaultValue": "LaNueva"
+			},
+			"create_directory": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/bronze/LaNueva/LaNueva_Folder_creation"
+			},
+			"custom_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/bronze/LaNueva/LaNueva_MappingSKU"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"last_execution": {
+				"type": "String"
+			},
+			"files_name": {
+				"type": "Array"
+			},
+			"Contains": {
+				"type": "String",
+				"defaultValue": "SKU"
+			},
+			"output_dir": {
+				"type": "String"
+			},
+			"column_name": {
+				"type": "String",
+				"defaultValue": "Created"
+			},
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			},
+			"Nested": {
+				"type": "Boolean",
+				"defaultValue": false
+			},
+			"Case": {
+				"type": "String"
+			},
+			"file_format": {
+				"type": "String"
+			},
+			"full_load": {
+				"type": "Boolean"
+			}
+		},
+		"folder": {
+			"name": "PH/child_pipelines"
+		},
+		"annotations": []
+	}
+}

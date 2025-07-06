@@ -1,0 +1,29 @@
+{
+	"name": "DS_ADLS_BACKUP",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"sourcename": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PH"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@concat('DataBackup/PH/Bronze/AutomatedBackUp/',dataset().sourcename)",
+					"type": "Expression"
+				},
+				"fileSystem": "unilever"
+			}
+		}
+	}
+}

@@ -1,0 +1,66 @@
+{
+	"name": "PL_PH_A_COMMON_SILVER_LAYER_VALIDATION",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_SILVER_LAYER_VALIDATION",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/notebooks/DataValidations/Silver_Layer_Genric_UnitTestCases",
+					"baseParameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						}
+					},
+					"libraries": [
+						{
+							"jar": "dbfs:/mnt/databricks/jars/uniframe/deequ-2.0.1-spark-3.2.jar"
+						},
+						{
+							"maven": {
+								"coordinates": "com.crealytics:spark-excel_2.12:3.2.1_0.17.1"
+							}
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "PH",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_name": {
+				"type": "string",
+				"defaultValue": "ALL"
+			}
+		},
+		"variables": {
+			"adhoc_ts": {
+				"type": "String"
+			},
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			}
+		},
+		"folder": {
+			"name": "PH/SILVER_LAYER"
+		},
+		"annotations": []
+	}
+}

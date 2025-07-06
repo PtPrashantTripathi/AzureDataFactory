@@ -1,0 +1,428 @@
+{
+	"name": "PL_PH_W_MDL_BACKUP_NEW",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach_Data_Source",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get_Source_Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get_Source_Name').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy data",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_ADLS_BRONZE",
+									"type": "DatasetReference",
+									"parameters": {
+										"sourcename": {
+											"value": "@item().Data_Source",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ADLS_BACKUP",
+									"type": "DatasetReference",
+									"parameters": {
+										"sourcename": {
+											"value": "@concat('\\',substring(utcNow(),0,10),'\\',item().Data_Source)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Set variable Temp Success",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Copy data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Temp_Success",
+								"value": {
+									"value": "@concat(item().Data_Source,' , ',variables('Success'))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Success variable",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set variable Temp Success",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Success",
+								"value": {
+									"value": "@variables('Temp_Success')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set variableTemp Fail",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Copy data",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Temp_Fail",
+								"value": {
+									"value": "@concat(item().Data_Source,' , ', variables('Fail'))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Fail variable",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set variableTemp Fail",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Fail",
+								"value": {
+									"value": "@variables('Temp_Fail')",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Metadata",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "IF_BACKUP_FAIL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_ADLS_BACKUP",
+						"type": "DatasetReference",
+						"parameters": {
+							"sourcename": "/"
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"modifiedDatetimeStart": {
+							"value": "@subtractFromTime(utcNow(),9999,'Day')",
+							"type": "Expression"
+						},
+						"modifiedDatetimeEnd": {
+							"value": "@subtractFromTime(utcNow(),30,'Day')",
+							"type": "Expression"
+						},
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ForEach_Delete",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Metadata').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Delete_Source",
+							"description": "Deleting backup files which are older than a month",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_ADLS_BACKUP",
+									"type": "DatasetReference",
+									"parameters": {
+										"sourcename": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get_Source_Name",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_PH_MDL_SOURCE_CONFIG",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "IF_BACKUP_SUCCESS",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "ForEach_Data_Source",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('Success')),0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "SEND_EMAIL",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Logic Apps Case\" : \"Email Alert\",\n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT}- Bronze Layer Data Backup completed  \",\n\"to\":\"@{pipeline().parameters.reciever}\",\n\"body\": \"Backup Pipeline completed. Here is the list of Success Retailers : @{variables('Success')}\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n    }",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "IF_BACKUP_FAIL",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "IF_BACKUP_SUCCESS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('Fail')),0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "SEND_EMAIL_FAILURE",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Logic Apps Case\" : \"Email Alert\",\n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT}- Bronze Layer Data Backup completed\",\n\"to\":\"@{pipeline().parameters.reciever}\",\n\"body\": \"Backup Pipeline completed. Here is the list of Failed Retailers : @{variables('Fail')}\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n    }",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"reciever": {
+				"type": "string",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			}
+		},
+		"variables": {
+			"Success": {
+				"type": "String"
+			},
+			"Fail": {
+				"type": "String"
+			},
+			"Temp_Success": {
+				"type": "String"
+			},
+			"Temp_Fail": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PH/BACKUP"
+		},
+		"annotations": []
+	}
+}

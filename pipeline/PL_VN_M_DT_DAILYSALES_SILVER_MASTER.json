@@ -1,0 +1,125 @@
+{
+	"name": "PL_VN_M_DT_DAILYSALES_SILVER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"onboarder_notebook_path": {
+							"value": "@pipeline().parameters.notebook_path",
+							"type": "Expression"
+						},
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"layer": "Silver",
+						"stage": "Fact"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/silver/DistributiveTrade/VN_DT_FACT_DAILY_SALES"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "fact_vn_daily_sales"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "DistributiveTrade"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "year_id,month_id,time_key"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "upsert"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"status": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "VN/DISTRIBUTIVE_TRADE"
+		},
+		"annotations": []
+	}
+}

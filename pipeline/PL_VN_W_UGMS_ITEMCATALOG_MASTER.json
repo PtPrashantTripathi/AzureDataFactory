@@ -1,0 +1,239 @@
+{
+	"name": "PL_VN_W_UGMS_ITEMCATALOG_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_CPY_UGMS-GM_TB_SYSTEM_ITEM_TYPE",
+				"description": "Extracting Gift type master data from UGift database",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_MSQL_UGMS_GM_TB_CATALOG",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ABLB_PARQUET",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.source_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.source_directory",
+								"type": "Expression"
+							},
+							"file_name": {
+								"value": "@pipeline().parameters.source_file_name",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_LANDED",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_CPY_UGMS-GM_TB_SYSTEM_ITEM_TYPE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_LANDED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_file_name": {
+							"value": "@array(pipeline().parameters.source_file_name)",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"save_mode": "overwrite",
+						"time_zone": {
+							"value": "@pipeline().parameters.time_zone",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_PROCESSED",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_LANDED",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_PROCESSED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": "overwrite"
+					}
+				}
+			},
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_name": {
+				"type": "string",
+				"defaultValue": "UGIFT"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "gift_item_catalog"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "ugms"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "landing"
+			},
+			"source_file_name": {
+				"type": "string",
+				"defaultValue": "ITEM_CATALOG.parquet"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "VN/UGMS"
+		},
+		"annotations": []
+	}
+}

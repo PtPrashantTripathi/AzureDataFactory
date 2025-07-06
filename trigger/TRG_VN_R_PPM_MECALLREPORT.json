@@ -1,0 +1,41 @@
+{
+	"name": "TRG_VN_R_PPM_MECALLREPORT",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_R_PPM_MECALLREPORT_BRONZE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2023-11-21T09:57:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						23
+					],
+					"monthDays": [
+						1,
+						15,
+						22,
+						25
+					]
+				}
+			}
+		}
+	}
+}

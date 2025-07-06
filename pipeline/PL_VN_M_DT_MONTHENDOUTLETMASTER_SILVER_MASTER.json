@@ -1,0 +1,120 @@
+{
+	"name": "PL_VN_M_DT_MONTHENDOUTLETMASTER_SILVER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"onboarder_notebook_path": {
+							"value": "@pipeline().parameters.notebook_path",
+							"type": "Expression"
+						},
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"layer": "Silver",
+						"stage": "Dimension",
+						"uniframe_version": "3.*",
+						"adb_runtime_version": "14.3.x-scala2.12"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/silver/DistributiveTrade/VN_DT_DIM_MONTHEND_OUTLET_MASTER"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "DistributiveTrade"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "dim_monthend_outlet_master"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "snapshot"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "Country,YYYY,MM"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "VN/DISTRIBUTIVE_TRADE"
+		},
+		"annotations": []
+	}
+}

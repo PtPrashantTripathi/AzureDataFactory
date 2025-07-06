@@ -1,0 +1,85 @@
+{
+	"name": "TRG_PH_W_SSD_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_SSD_SKUMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SSD/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "SSD",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/South Star Drug",
+					"Blob_Destination": "/landing/SSD/MappingSKU/",
+					"last_execution_file_name": "last_execution_SSD_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "SSD",
+					"custom_notebook_path": "/Shared/notebooks/bronze/SSD/SSD_MappingSKU"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_SSD_STOREMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SSD/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "SSD",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/South Star Drug",
+					"Blob_Destination": "/landing/SSD/MappingStore/",
+					"last_execution_file_name": "last_execution_SSD_mappingstore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "SSD",
+					"create_directory": "/Shared/notebooks/bronze/SSD/SSD_MappingStore"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-10-31T10:19:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						0
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

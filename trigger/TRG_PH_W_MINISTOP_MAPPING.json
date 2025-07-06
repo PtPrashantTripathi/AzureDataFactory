@@ -1,0 +1,85 @@
+{
+	"name": "TRG_PH_W_MINISTOP_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_MINISTOP_STOREMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "MINISTOP/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "MINISTOP",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Mini Stop",
+					"Blob_Destination": "/landing/MINISTOP/MappingStore/",
+					"last_execution_file_name": "last_execution_MINISTOP_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "MINISTOP",
+					"custom_notebook_path": "/Shared/notebooks/bronze/MINISTOP/MINISTOP_MappingStore"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_MINISTOP_SKUMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "MINISTOP/MappingProductMasterlist",
+					"source_container": "landing",
+					"object_name": "MappingProductMasterlist",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "MINISTOP",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Mini Stop",
+					"Blob_Destination": "/landing/MINISTOP/MappingProductMasterlist/",
+					"last_execution_file_name": "last_execution_MINISTOP_MappingProductMasterlist",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "MINISTOP",
+					"custom_notebook_path": "/Shared/notebooks/bronze/MINISTOP/MINISTOP_MappingProductMasterlist"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-12-13T06:23:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						23
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

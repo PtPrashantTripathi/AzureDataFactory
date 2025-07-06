@@ -1,0 +1,186 @@
+{
+	"name": "PL_VN_D_PUREPLAY_DIM_PRICING",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Dim_pureplay_product-Stage_Builder",
+				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": "scd",
+						"table_name": {
+							"value": "@pipeline().parameters.table_name",
+							"type": "Expression"
+						},
+						"layer": "Silver",
+						"stage": "Dimension",
+						"number_of_days_look_back": "3"
+					}
+				}
+			},
+			{
+				"name": "AT_ADB_CUSTOM_DIM_PRICING",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/notebooks/silver/PurePlay/Silver_dim_pureplay_pricing",
+					"baseParameters": {
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": "overwrite",
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"time_zone": "utc",
+						"number_of_days_look_back": "3"
+					},
+					"libraries": [
+						{
+							"jar": "dbfs:/mnt/databricks/jars/uniframe/deequ-2.0.1-spark-3.2.jar"
+						},
+						{
+							"maven": {
+								"coordinates": "com.crealytics:spark-excel_2.12:3.2.1_0.17.1"
+							}
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"object_name": {
+				"type": "string",
+				"defaultValue": "dim_pureplay_pricing"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "PurePlay"
+			},
+			"source_file_name": {
+				"type": "array"
+			},
+			"table_name": {
+				"type": "string",
+				"defaultValue": "beecost.daily_pureplay_transactions"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "VN/BEECOST/PUREPLAY/SILVER"
+		},
+		"annotations": []
+	}
+}

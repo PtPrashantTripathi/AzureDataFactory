@@ -1,0 +1,34 @@
+{
+	"name": "TRG_VN_A_ESS-RPTOOS",
+	"properties": {
+		"annotations": [
+			"VN-ESS"
+		],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_A_ESS_RPTOOS_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "@substring(triggerBody().folderPath,add(indexof(triggerBody().folderPath,'/'),1),sub(length(triggerBody().folderPath),add(indexof(triggerBody().folderPath,'/'),1)))",
+					"source_file_name": [
+						"@{triggerBody().fileName}"
+					],
+					"source_container": "@substring(triggerBody().folderPath,0,indexof(triggerBody().folderPath,'/'))"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/vn-ess/blobs/rptOOS/rptOOS",
+			"blobPathEndsWith": ".parquet",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/e1d1de9f-a503-4330-86fb-88f5f6fc3107/resourceGroups/bieno-da22-d-903766-rg/providers/Microsoft.Storage/storageAccounts/dbstorageda22d903766",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

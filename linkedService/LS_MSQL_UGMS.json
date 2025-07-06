@@ -1,0 +1,19 @@
+{
+	"name": "LS_MSQL_UGMS",
+	"properties": {
+		"description": "Linked service for connecting to UGMS (UGift Database)",
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Data Source=103.1.209.7;Initial Catalog=UGMS_PRO;User ID=ugms",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_02",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "KV-VN-UGIFT-UGMS-PASSWORD"
+			}
+		}
+	}
+}

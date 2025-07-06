@@ -1,0 +1,60 @@
+{
+	"name": "TRG_PH_W_CITIMART_CRM",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_CITIMART_CRM_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Citimart/CRM",
+					"source_container": "landing",
+					"object_name": "CRM",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Citimart",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "/Shared Documents/LandingSpace/PH/CITIMART/CRM",
+					"Blob_Destination": "/landing/Citimart/CRM",
+					"last_execution_file_name": "last_execution_Citimart_CRM",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Citimart",
+					"create_directory": "/Workspace/Shared/notebooks/bronze/CITIMART/Citimart_CRM",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/CITIMART/Citimart_CRM"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-05-02T14:38:00",
+				"timeZone": "India Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						22
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

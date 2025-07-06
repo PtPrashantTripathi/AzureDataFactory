@@ -1,0 +1,44 @@
+{
+	"name": "bieno-da22-d-903766-adf-01",
+	"properties": {
+		"globalParameters": {
+			"LOGICAPPS_ALERT_URL": {
+				"type": "string",
+				"value": "https://prod-61.northeurope.logic.azure.com:443/workflows/a2f7e20ce8ca40d392034eba42658100/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PMDU1wI7ru13yrB_0LFxgiQPa0Eu4vX2Ra-_5IBxuY4"
+			},
+			"LOGICAPPS_UTILITIES_URL": {
+				"type": "string",
+				"value": "https://prod-58.northeurope.logic.azure.com:443/workflows/815195526d304c648f823d34e265d2d7/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=rV7NtxzwR8YN6EySAgks0NSUaaKQhVqvKkOCDlLvQpo"
+			},
+			"PH_MDL_LOGICAPPS_01": {
+				"type": "string",
+				"value": "https://prod-14.northeurope.logic.azure.com:443/workflows/0c578ec5980045159fffa11270de8e55/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hLqag_i2Mey17INSCFbG_y1VqAHFaFptsh4z-pwLQyo"
+			},
+			"PH_MDL_LOGICAPPS_02": {
+				"type": "string",
+				"value": "https://prod-47.northeurope.logic.azure.com:443/workflows/bccbf2a363bc40c59af0902da7275730/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=0p-Wx8zp5HlL1JgZqxZ1j4L6Y4HHqSBugCCRAQQCqys"
+			},
+			"ENVIRONMENT": {
+				"type": "string",
+				"value": "DEV"
+			},
+			"PH_MDL_POWERAPP_DATAFLOW_URL": {
+				"type": "string",
+				"value": "https://prod-220.westeurope.logic.azure.com:443/workflows/418967c7dfa9486391c696efe425b2bc/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=OdCJLHMlS5th4p515VCokgqyPMXNilJpToIN_4Di_8E"
+			},
+			"UNITY_CATALOG": {
+				"type": "string",
+				"value": "mdl_seaa_dev"
+			}
+		},
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "773eee0d-d9b7-4478-ada4-090deafab57b",
+		"tenantId": "f66fae02-5d36-495b-bfe0-78a6ff9f8e6e"
+	}
+}

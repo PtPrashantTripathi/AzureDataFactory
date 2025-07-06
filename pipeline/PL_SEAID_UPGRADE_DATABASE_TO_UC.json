@@ -1,0 +1,91 @@
+{
+	"name": "PL_SEAID_UPGRADE_DATABASE_TO_UC",
+	"properties": {
+		"activities": [
+			{
+				"name": "UC_MIGRATION",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@concat(pipeline().parameters.onboarder_notebook_path,'/',pipeline().parameters.notebook)",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"catalog_destination": {
+							"value": "@pipeline().parameters.catalog_destination",
+							"type": "Expression"
+						},
+						"input_file_path": {
+							"value": "@pipeline().parameters.input_file_path",
+							"type": "Expression"
+						}
+					},
+					"libraries": [
+						{
+							"jar": "dbfs:/mnt/databricks/jars/uniframe/deequ-2.0.1-spark-3.2.jar"
+						},
+						{
+							"maven": {
+								"coordinates": "com.crealytics:spark-excel_2.12:3.2.1_0.17.1"
+							}
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "SEAID",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v2.sh",
+						"UniframeVersion": "3.*",
+						"RuntimeVersion": "14.3.x-scala2.12"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"onboarder_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/UC_Migration"
+			},
+			"notebook": {
+				"type": "string",
+				"defaultValue": "00_UPGRADE_DATABASE_TO_UC"
+			},
+			"UniframeVersion": {
+				"type": "string",
+				"defaultValue": "3.*"
+			},
+			"RuntimeVersion": {
+				"type": "string",
+				"defaultValue": "14.3.x-scala2.12"
+			},
+			"catalog_destination": {
+				"type": "string"
+			},
+			"input_file_path": {
+				"type": "string",
+				"defaultValue": "/mnt/adls/"
+			}
+		},
+		"variables": {
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			}
+		},
+		"folder": {
+			"name": "PH/UC_MIGRATION"
+		},
+		"annotations": []
+	}
+}

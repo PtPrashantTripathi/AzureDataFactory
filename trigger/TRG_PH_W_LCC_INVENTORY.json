@@ -1,0 +1,60 @@
+{
+	"name": "TRG_PH_W_LCC_INVENTORY",
+	"properties": {
+		"description": "This will trigger Pipeline Daily at 7 PM as per Kuala Lumpur, Singapore time zone (UTC+8)) \n",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_LCC_INVENTORY_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "LCC/Inventory",
+					"source_container": "landing",
+					"object_name": "Inventory",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "LCC",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake/",
+					"Source": "/Shared Documents/LandingSpace/PH/LCC/Inventory",
+					"Blob_Destination": "/landing/LCC/Inventory",
+					"last_execution_file_name": "last_execution_LCC_Inventory",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "LCC",
+					"custom_notebook_path": "/Shared/notebooks/bronze/LCC/PH_LCC_INVENTORY"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-12-12T08:41:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						19
+					],
+					"weekDays": [
+						"Friday",
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday"
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,792 @@
+{
+	"name": "PL_VN_A_MINDSHARE_BRONZE_EXPLODE",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_REPORT",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AT_LOOP_Ingest_files",
+						"dependencyConditions": [
+							"Succeeded",
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(variables('status'), 'SUCCESS')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "OnboarderFailed",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@activity('AT_ADB_Onboarding').output.runOutput.message",
+									"type": "Expression"
+								},
+								"errorCode": "500"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_SET_Processing-Directory",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_GATHER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "processing_directory",
+					"value": {
+						"value": "@concat(pipeline().parameters.source_container, '/', pipeline().parameters.source_directory)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "AT_LOOP_processing_file_names",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_Processing-Directory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "AT_SET_landing_date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.source_file_name",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "AT_SET_Processing-File-Path",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "processing_file_name",
+								"value": {
+									"value": "@concat(formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMddHHmmss'),'-',item())",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AT_APPEND_Processed_file_names",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "AT_isParquet_format",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "processed_file_names",
+								"value": {
+									"value": "@concat('processing/',variables('processing_directory'),'/',variables('processing_file_name'))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AT_isParquet_format",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "AT_SET_Processing-File-Path",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@contains(item(),'.parquet')",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "AT_CPY_Processing_Else",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "BinarySource",
+												"storeSettings": {
+													"type": "AzureBlobStorageReadSettings",
+													"recursive": false,
+													"deleteFilesAfterCompletion": true
+												},
+												"formatSettings": {
+													"type": "BinaryReadSettings"
+												}
+											},
+											"sink": {
+												"type": "BinarySink",
+												"storeSettings": {
+													"type": "AzureBlobStorageWriteSettings"
+												}
+											},
+											"enableStaging": false
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_BINARY",
+												"type": "DatasetReference",
+												"parameters": {
+													"container": {
+														"value": "@pipeline().parameters.source_container",
+														"type": "Expression"
+													},
+													"directory": {
+														"value": "@pipeline().parameters.source_directory",
+														"type": "Expression"
+													},
+													"file_name": "@item()"
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_BINARY",
+												"type": "DatasetReference",
+												"parameters": {
+													"container": "processing",
+													"directory": {
+														"value": "@variables('processing_directory')",
+														"type": "Expression"
+													},
+													"file_name": {
+														"value": "@variables('processing_file_name')",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "AT_CPY_Processing_Parquet",
+										"type": "Copy",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "ParquetSource",
+												"storeSettings": {
+													"type": "AzureBlobStorageReadSettings",
+													"recursive": true,
+													"enablePartitionDiscovery": false
+												},
+												"formatSettings": {
+													"type": "ParquetReadSettings"
+												}
+											},
+											"sink": {
+												"type": "ParquetSink",
+												"storeSettings": {
+													"type": "AzureBlobStorageWriteSettings"
+												},
+												"formatSettings": {
+													"type": "ParquetWriteSettings"
+												}
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_ABLB_PARQUET",
+												"type": "DatasetReference",
+												"parameters": {
+													"container": {
+														"value": "@pipeline().parameters.source_container",
+														"type": "Expression"
+													},
+													"directory": {
+														"value": "@pipeline().parameters.source_directory",
+														"type": "Expression"
+													},
+													"file_name": "@item()"
+												}
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "DS_ABLB_PARQUET",
+												"type": "DatasetReference",
+												"parameters": {
+													"container": "processing",
+													"directory": {
+														"value": "@variables('processing_directory')",
+														"type": "Expression"
+													},
+													"file_name": {
+														"value": "@variables('processing_file_name')",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "AT_DEL_Landing_parquet",
+										"type": "Delete",
+										"dependsOn": [
+											{
+												"activity": "AT_CPY_Processing_Parquet",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"dataset": {
+												"referenceName": "DS_ABLB_PARQUET",
+												"type": "DatasetReference",
+												"parameters": {
+													"container": {
+														"value": "@pipeline().parameters.source_container",
+														"type": "Expression"
+													},
+													"directory": {
+														"value": "@pipeline().parameters.source_directory",
+														"type": "Expression"
+													},
+													"file_name": "@item()"
+												}
+											},
+											"enableLogging": false,
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": false,
+												"enablePartitionDiscovery": false
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_LOOP_Ingest_files",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_Status-Result",
+						"dependencyConditions": [
+							"Succeeded",
+							"Skipped"
+						]
+					},
+					{
+						"activity": "AT_SET_Status-UnexpectedError",
+						"dependencyConditions": [
+							"Succeeded",
+							"Skipped"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('processed_file_names')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "AT_SET_Archival-FileName",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "AT_SET_SplitFilePath",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "archival_file_name",
+								"value": {
+									"value": "@concat(variables('status'), '_', last(variables('file_name_part')))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AT_CPY_Archival_Binary",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "AT_SET_Archival-FileName",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"deleteFilesAfterCompletion": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_BINARY",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "processing",
+											"type": "Expression"
+										},
+										"directory": {
+											"value": "@variables('processing_directory')",
+											"type": "Expression"
+										},
+										"file_name": {
+											"value": "@last(variables('file_name_part'))",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_BINARY",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "archival",
+										"directory": {
+											"value": "@variables('processing_directory')",
+											"type": "Expression"
+										},
+										"file_name": {
+											"value": "@variables('archival_file_name')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "AT_TERMINATE_Fail_Copy_Archival",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "AT_CPY_Archival_Binary",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@activity('AT_ADB_Onboarding').output.runOutput.message",
+									"type": "Expression"
+								},
+								"errorCode": {
+									"value": "@concat('500 - Onboarder: ', activity('AT_ADB_Onboarding').output.runOutput.status, activity('AT_ADB_Onboarding').output.runOutput.message, ' - Archival: Copy Failed!')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AT_SET_SplitFilePath",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "file_name_part",
+								"value": {
+									"value": "@split(item(), '/')",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_ADB_Onboarding",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "AT_LOOP_processing_file_names",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@pipeline().parameters.onboarder_notebook_path",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"landing_path": {
+							"value": "@string(variables('processed_file_names'))",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"save_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"time_zone": "utc",
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						}
+					},
+					"libraries": [
+						{
+							"jar": "dbfs:/mnt/databricks/jars/uniframe/deequ-2.0.1-spark-3.2.jar"
+						},
+						{
+							"maven": {
+								"coordinates": "com.crealytics:spark-excel_2.12:3.2.1_0.17.1"
+							}
+						},
+						{
+							"pypi": {
+								"package": "tqdm"
+							}
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			},
+			{
+				"name": "AT_SET_Status-Result",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_Onboarding",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "status",
+					"value": {
+						"value": "@activity('AT_ADB_Onboarding').output.runOutput.status",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "AT_SET_Status-UnexpectedError",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_Onboarding",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "status",
+					"value": "ERROR"
+				}
+			},
+			{
+				"name": "AT_SET_landing_date",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_GATHER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_GATHER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_GATHER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"file_type": "xlsx",
+						"on_error_alert": true,
+						"layer": "Bronze",
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_container": {
+				"type": "string",
+				"defaultValue": "mindshare"
+			},
+			"source_directory": {
+				"type": "string"
+			},
+			"source_file_name": {
+				"type": "array"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "Mindshare"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "Explode"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"onboarder_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/bronze/MINDSHARE/VN_MINDSHARE_EXPLODE"
+			},
+			"landing_date": {
+				"type": "string"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "append"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "object_name,YYYY,MM,DD"
+			}
+		},
+		"variables": {
+			"status": {
+				"type": "String"
+			},
+			"archival_file_name": {
+				"type": "String"
+			},
+			"processing_file_name": {
+				"type": "String"
+			},
+			"processing_directory": {
+				"type": "String"
+			},
+			"processed_file_names": {
+				"type": "Array"
+			},
+			"processing_file_names": {
+				"type": "Array"
+			},
+			"fail_reason": {
+				"type": "String"
+			},
+			"filename": {
+				"type": "String"
+			},
+			"file_name_part": {
+				"type": "Array"
+			},
+			"landing_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "VN/MINDSHARE/BRONZE"
+		},
+		"annotations": [
+			"VN"
+		]
+	}
+}

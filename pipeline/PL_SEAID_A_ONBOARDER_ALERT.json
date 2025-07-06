@@ -1,0 +1,74 @@
+{
+	"name": "PL_SEAID_A_ONBOARDER_ALERT",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_IF_IS_ALERT",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(pipeline().parameters.is_alert, greater(length(pipeline().parameters.invalid_records), 0))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "AT_WEB_CALL_SEND_ALERT",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@pipeline().globalParameters.LOGICAPPS_ALERT_URL",
+									"type": "Expression"
+								},
+								"method": "POST",
+								"body": {
+									"value": "{\n    \"execution_env\":\"@{pipeline().globalParameters.ENVIRONMENT}\",\n    \"logicapps_case\" : \"@{pipeline().parameters.error_case}\",\n    \"records\": @{pipeline().parameters.invalid_records},\n    \"data_source\": \"@{pipeline().parameters.data_source}\",\n    \"object_name\": \"@{pipeline().parameters.object_name}\",\n    \"data_owner\": \"@{pipeline().parameters.data_owner_email}\",\n    \"process_owner\": \"@{pipeline().parameters.process_owner_email}\",\n    \"job_id\": \"@{pipeline().RunId}\"\n}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"is_alert": {
+				"type": "bool",
+				"defaultValue": false
+			},
+			"invalid_records": {
+				"type": "array"
+			},
+			"data_owner_email": {
+				"type": "string"
+			},
+			"process_owner_email": {
+				"type": "string"
+			},
+			"error_case": {
+				"type": "string",
+				"defaultValue": "INGEST_ERROR"
+			},
+			"data_source": {
+				"type": "string"
+			},
+			"object_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ONBOARDER"
+		},
+		"annotations": []
+	}
+}

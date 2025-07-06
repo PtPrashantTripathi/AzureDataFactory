@@ -1,0 +1,39 @@
+{
+	"name": "TRG_PH_W_BACKUP",
+	"properties": {
+		"description": "Trigger for back up PL",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_MDL_BACKUP_NEW",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"reciever": "ph_mdl@unilever.onmicrosoft.com"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-05-27T14:09:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						6
+					],
+					"weekDays": [
+						"Sunday"
+					]
+				}
+			}
+		}
+	}
+}

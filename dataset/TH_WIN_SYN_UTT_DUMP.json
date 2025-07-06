@@ -1,0 +1,304 @@
+{
+	"name": "TH_WIN_SYN_UTT_DUMP",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "TH_UTT_ADLS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "TH/WIN-app"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.raw_win_score_compliance.parquet",
+				"fileSystem": "syn-data-dump"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "Store_List",
+				"type": "UTF8"
+			},
+			{
+				"name": "Product_Check_List",
+				"type": "UTF8"
+			},
+			{
+				"name": "PJP_Wave_Reason",
+				"type": "UTF8"
+			},
+			{
+				"name": "Wave_Score",
+				"type": "UTF8"
+			},
+			{
+				"name": "Wave_All_Month",
+				"type": "UTF8"
+			},
+			{
+				"name": "KPI_Name",
+				"type": "UTF8"
+			},
+			{
+				"name": "Application_Menu",
+				"type": "UTF8"
+			},
+			{
+				"name": "Year",
+				"type": "INT32"
+			},
+			{
+				"name": "Month",
+				"type": "INT32"
+			},
+			{
+				"name": "Week",
+				"type": "INT32"
+			},
+			{
+				"name": "CheckInDate",
+				"type": "DATE"
+			},
+			{
+				"name": "CheckInTime",
+				"type": "UTF8"
+			},
+			{
+				"name": "Save_Date",
+				"type": "DATE"
+			},
+			{
+				"name": "Saved_Time",
+				"type": "UTF8"
+			},
+			{
+				"name": "Channel",
+				"type": "UTF8"
+			},
+			{
+				"name": "Account",
+				"type": "UTF8"
+			},
+			{
+				"name": "Banner",
+				"type": "UTF8"
+			},
+			{
+				"name": "Store_Sub_type",
+				"type": "UTF8"
+			},
+			{
+				"name": "WIN_Store_code",
+				"type": "UTF8"
+			},
+			{
+				"name": "Store_SAP_Code",
+				"type": "UTF8"
+			},
+			{
+				"name": "Store_Main_Code",
+				"type": "UTF8"
+			},
+			{
+				"name": "Store_Name_Thai",
+				"type": "UTF8"
+			},
+			{
+				"name": "Store_Name_Eng",
+				"type": "UTF8"
+			},
+			{
+				"name": "Store_Legacy_Name",
+				"type": "UTF8"
+			},
+			{
+				"name": "Geo_Region",
+				"type": "UTF8"
+			},
+			{
+				"name": "Province_TH",
+				"type": "UTF8"
+			},
+			{
+				"name": "Province_EN",
+				"type": "UTF8"
+			},
+			{
+				"name": "Sales_Region",
+				"type": "UTF8"
+			},
+			{
+				"name": "Sales_Area",
+				"type": "UTF8"
+			},
+			{
+				"name": "Sales_Route",
+				"type": "UTF8"
+			},
+			{
+				"name": "FE_Region",
+				"type": "UTF8"
+			},
+			{
+				"name": "FE_Area",
+				"type": "UTF8"
+			},
+			{
+				"name": "FE_Name",
+				"type": "UTF8"
+			},
+			{
+				"name": "Company",
+				"type": "UTF8"
+			},
+			{
+				"name": "Business_Unit_Group",
+				"type": "UTF8"
+			},
+			{
+				"name": "Business_Unit",
+				"type": "UTF8"
+			},
+			{
+				"name": "Category",
+				"type": "UTF8"
+			},
+			{
+				"name": "Sub_Category",
+				"type": "UTF8"
+			},
+			{
+				"name": "Brand",
+				"type": "UTF8"
+			},
+			{
+				"name": "Barcode",
+				"type": "UTF8"
+			},
+			{
+				"name": "ItemCode",
+				"type": "UTF8"
+			},
+			{
+				"name": "Material_EN",
+				"type": "UTF8"
+			},
+			{
+				"name": "Material_TH",
+				"type": "UTF8"
+			},
+			{
+				"name": "LocalFormat",
+				"type": "UTF8"
+			},
+			{
+				"name": "LocalSegment",
+				"type": "UTF8"
+			},
+			{
+				"name": "Mail_Period",
+				"type": "UTF8"
+			},
+			{
+				"name": "ProjectOID",
+				"type": "UTF8"
+			},
+			{
+				"name": "ProjectID_ItemCode",
+				"type": "UTF8"
+			},
+			{
+				"name": "Project_Name",
+				"type": "UTF8"
+			},
+			{
+				"name": "Project_Type",
+				"type": "UTF8"
+			},
+			{
+				"name": "Display_Type",
+				"type": "UTF8"
+			},
+			{
+				"name": "Promotion_Mechanic",
+				"type": "UTF8"
+			},
+			{
+				"name": "Target_Score",
+				"type": "INT32"
+			},
+			{
+				"name": "Hit_Score",
+				"type": "INT32"
+			},
+			{
+				"name": "Target_Goal",
+				"type": "INT32"
+			},
+			{
+				"name": "Hit_Goal",
+				"type": "INT32"
+			},
+			{
+				"name": "NOOS",
+				"type": "INT32"
+			},
+			{
+				"name": "Reason",
+				"type": "UTF8"
+			},
+			{
+				"name": "Employee_No",
+				"type": "UTF8"
+			},
+			{
+				"name": "Emp_Full_Name_Th",
+				"type": "UTF8"
+			},
+			{
+				"name": "Position",
+				"type": "UTF8"
+			},
+			{
+				"name": "Employee_Type",
+				"type": "UTF8"
+			},
+			{
+				"name": "Employee_Sub_Type",
+				"type": "UTF8"
+			},
+			{
+				"name": "Team_Recorded",
+				"type": "UTF8"
+			},
+			{
+				"name": "Agency",
+				"type": "UTF8"
+			},
+			{
+				"name": "Agency_Region",
+				"type": "UTF8"
+			},
+			{
+				"name": "Agency_Route",
+				"type": "UTF8"
+			},
+			{
+				"name": "ItemID",
+				"type": "UTF8"
+			},
+			{
+				"name": "On_EdgeCalendar",
+				"type": "UTF8"
+			},
+			{
+				"name": "Project_Main_Name",
+				"type": "UTF8"
+			}
+		]
+	}
+}

@@ -1,0 +1,38 @@
+{
+	"name": "TRG_VN_W_DT_DIM_HISTORICALOUTLETMIGRATION",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_M_DT_HISTORICALOUTLETMAP_SILVER_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-11-21T10:37:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						9
+					],
+					"weekDays": [
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

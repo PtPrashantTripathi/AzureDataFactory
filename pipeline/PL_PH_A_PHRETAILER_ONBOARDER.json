@@ -1,0 +1,224 @@
+{
+	"name": "PL_PH_A_PHRETAILER_ONBOARDER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "EXE_Onboarder-Landed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_SEAID_A_ONBOARDER_LANDED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_file_name": {
+							"value": "@pipeline().parameters.source_file_name",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"onboarder_notebook_path": {
+							"value": "@pipeline().parameters.custom_notebook_path",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"save_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"master_pipeline": {
+							"value": "@pipeline().parameters.master_pipeline",
+							"type": "Expression"
+						},
+						"uniframe_version": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						},
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "EXE_Onboarder-Processed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_Onboarder-Landed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_PROCESSED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": {
+							"value": "@pipeline().parameters.write_mode",
+							"type": "Expression"
+						},
+						"uniframe_version": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						},
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string"
+			},
+			"source_container": {
+				"type": "string"
+			},
+			"object_name": {
+				"type": "string"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"source_name": {
+				"type": "string"
+			},
+			"source_file_name": {
+				"type": "string"
+			},
+			"save_mode": {
+				"type": "string"
+			},
+			"write_mode": {
+				"type": "string"
+			},
+			"custom_notebook_path": {
+				"type": "string"
+			},
+			"master_pipeline": {
+				"type": "string"
+			},
+			"uniframe_version": {
+				"type": "string",
+				"defaultValue": "3.*"
+			},
+			"metastore": {
+				"type": "string",
+				"defaultValue": "hive"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"source": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PH/child_pipelines"
+		},
+		"annotations": []
+	}
+}

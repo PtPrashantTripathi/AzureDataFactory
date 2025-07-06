@@ -1,0 +1,47 @@
+{
+	"name": "TRG_PH_D_PROCESSED_FILES_REPORT",
+	"properties": {
+		"description": "This will trigger Pipeline Daily at 6:00 AM as per Kuala Lumpur, Singapore time zone (UTC+8)) \n",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_MDL_FILES_REPORT",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"notebook_path": "/Shared/utilities/ALERT/PH_MDL_DAILY_FILES_REPORT",
+					"daysDelta": "-1",
+					"reciever": "ph_mdl@Unilever.onmicrosoft.com",
+					"timezone": "SE Asia Standard Time",
+					"status": "T"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-05-28T09:57:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						6
+					],
+					"weekDays": [
+						"Tuesday",
+						"Wednesday",
+						"Friday",
+						"Thursday",
+						"Saturday"
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,141 @@
+{
+    "Microsoft.DataFactory/factories/globalparameters": {
+        "properties": {
+            "LOGICAPPS_ALERT_URL": {
+                "value": "=:-LOGICAPPS_ALERT_URL:string"
+            },
+            "LOGICAPPS_UTILITIES_URL": {
+                "value": "=:-LOGICAPPS_UTILITIES_URL:string"
+            },
+            "PH_MDL_LOGICAPPS_01": {
+                "value": "=:-PH_MDL_LOGICAPPS_01:string"
+            },
+            "PH_MDL_LOGICAPPS_02": {
+                "value": "=:-PH_MDL_LOGICAPPS_02:string"
+            },
+            "UNITY_CATALOG": {
+                "value": "=:-UNITY_CATALOG:string"
+            },
+            "ENVIRONMENT": {
+                "value": "=:-ENVIRONMENT:string"
+            }
+        }
+    },
+    "Microsoft.DataFactory/factories/pipelines": {
+        "properties": {
+            "parameters": {
+            }
+        }
+    },
+    "Microsoft.DataFactory/factories/integrationRuntimes": {
+        "properties": {
+            "typeProperties": {
+                "ssisProperties": {
+                    "catalogInfo": {
+                        "catalogServerEndpoint": "=",
+                        "catalogAdminUserName": "=",
+                        "catalogAdminPassword": {
+                            "value": "-::secureString"
+                        }
+                    },
+                    "customSetupScriptProperties": {
+                        "sasToken": {
+                            "value": "-::secureString"
+                        }
+                    }
+                },
+                "linkedInfo": {
+                    "key": {
+                        "value": "-::secureString"
+                    },
+                    "resourceId": "="
+                }
+            }
+        }
+    },
+    "Microsoft.DataFactory/factories/triggers": {
+        "properties": {
+            "pipelines": [
+                "pipelineReference.referenceName"
+            ],
+            "pipeline": {
+                "parameters": {
+                    "*": "="
+                }
+            },
+            "typeProperties": {
+                "scope": "=:-Scope:string"
+            }
+        }
+    },
+    "Microsoft.DataFactory/factories/linkedServices": {
+        "*": {
+            "properties": {
+                "typeProperties": {
+                    "accountName": "=",
+                    "username": "=",
+                    "userName": "=",
+                    "accessKeyId": "=",
+                    "servicePrincipalId": "=",
+                    "userId": "=",
+                    "clientId": "=",
+                    "clusterUserName": "=",
+                    "clusterSshUserName": "=",
+                    "existingClusterId": "=",
+                    "hostSubscriptionId": "=",
+                    "clusterResourceGroup": "=",
+                    "subscriptionId": "=",
+                    "resourceGroupName": "=",
+                    "dataLakeStoreUri": "=",
+                    "baseUrl": "=",
+                    "database": "=",
+                    "serviceEndpoint": "=",
+                    "batchUri": "=",
+                    "databaseName": "=",
+                    "systemNumber": "=",
+                    "server": "=",
+                    "url": "=",
+                    "aadResourceId": "=",
+                    "connectionString": "=",
+                    "servicePrincipalKey": {
+                        "secretName": "="
+                    },
+                    "password": {
+                        "secretName": "="
+                    },
+                    "host": "=",
+                    "workspaceResourceId": "=:-ResourceId:string",
+                    "domain": "=:-Domain:string",
+                    "newClusterSparkEnvVars": {
+                        "UC_STORAGE_LOCATION": "=:-UC_STORAGE_LOCATION:string"
+                    }
+                }
+            }
+        },
+        "Odbc": {
+            "properties": {
+                "typeProperties": {
+                    "userName": "=",
+                    "connectionString": {
+                        "secretName": "="
+                    }
+                }
+            }
+        },
+        "Sftp": {
+            "properties": {
+                "typeProperties": {
+                    "host": "=",
+                    "port": "=",
+                    "userName": "=",
+                    "privateKeyContent": {
+                        "secretName": "="
+                    },
+                    "passPhrase": {
+                        "secretName": "="
+                    }
+                }
+            }
+        }
+    }
+}

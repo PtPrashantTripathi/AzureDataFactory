@@ -1,0 +1,306 @@
+{
+	"name": "TH_WIN_FTP_LANDING",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "TH_FTP_WIN",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "TH/WIN-app"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FtpServerLocation",
+				"folderPath": "Outbound/Daily"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Store_List",
+				"type": "String"
+			},
+			{
+				"name": "Product_Check_List",
+				"type": "String"
+			},
+			{
+				"name": "PJP_Wave_Reason",
+				"type": "String"
+			},
+			{
+				"name": "Wave_Score",
+				"type": "String"
+			},
+			{
+				"name": "Wave_All_Month",
+				"type": "String"
+			},
+			{
+				"name": "KPI_Name",
+				"type": "String"
+			},
+			{
+				"name": "Application_Menu",
+				"type": "String"
+			},
+			{
+				"name": "Year",
+				"type": "String"
+			},
+			{
+				"name": "Month",
+				"type": "String"
+			},
+			{
+				"name": "Week",
+				"type": "String"
+			},
+			{
+				"name": "CheckInDate",
+				"type": "String"
+			},
+			{
+				"name": "CheckInTime",
+				"type": "String"
+			},
+			{
+				"name": "Save_Date",
+				"type": "String"
+			},
+			{
+				"name": "Saved_Time",
+				"type": "String"
+			},
+			{
+				"name": "Channel",
+				"type": "String"
+			},
+			{
+				"name": "Account",
+				"type": "String"
+			},
+			{
+				"name": "Banner",
+				"type": "String"
+			},
+			{
+				"name": "Store_Sub_type",
+				"type": "String"
+			},
+			{
+				"name": "WIN_Store_code",
+				"type": "String"
+			},
+			{
+				"name": "Store_SAP_Code",
+				"type": "String"
+			},
+			{
+				"name": "Store_Main_Code",
+				"type": "String"
+			},
+			{
+				"name": "Store_Name_Thai",
+				"type": "String"
+			},
+			{
+				"name": "Store_Name_Eng",
+				"type": "String"
+			},
+			{
+				"name": "Store_Legacy_Name",
+				"type": "String"
+			},
+			{
+				"name": "Geo_Region",
+				"type": "String"
+			},
+			{
+				"name": "Province_TH",
+				"type": "String"
+			},
+			{
+				"name": "Province_EN",
+				"type": "String"
+			},
+			{
+				"name": "Sales_Region",
+				"type": "String"
+			},
+			{
+				"name": "Sales_Area",
+				"type": "String"
+			},
+			{
+				"name": "Sales_Route",
+				"type": "String"
+			},
+			{
+				"name": "FE_Region",
+				"type": "String"
+			},
+			{
+				"name": "FE_Area",
+				"type": "String"
+			},
+			{
+				"name": "FE_Name",
+				"type": "String"
+			},
+			{
+				"name": "Company",
+				"type": "String"
+			},
+			{
+				"name": "Business_Unit_Group",
+				"type": "String"
+			},
+			{
+				"name": "Business_Unit",
+				"type": "String"
+			},
+			{
+				"name": "Category",
+				"type": "String"
+			},
+			{
+				"name": "Sub_Category",
+				"type": "String"
+			},
+			{
+				"name": "Brand",
+				"type": "String"
+			},
+			{
+				"name": "Barcode",
+				"type": "String"
+			},
+			{
+				"name": "ItemCode",
+				"type": "String"
+			},
+			{
+				"name": "Material_EN",
+				"type": "String"
+			},
+			{
+				"name": "Material_TH",
+				"type": "String"
+			},
+			{
+				"name": "LocalFormat",
+				"type": "String"
+			},
+			{
+				"name": "LocalSegment",
+				"type": "String"
+			},
+			{
+				"name": "Mail_Period",
+				"type": "String"
+			},
+			{
+				"name": "ProjectOID",
+				"type": "String"
+			},
+			{
+				"name": "ProjectID_ItemCode",
+				"type": "String"
+			},
+			{
+				"name": "Project_Name",
+				"type": "String"
+			},
+			{
+				"name": "Project_Type",
+				"type": "String"
+			},
+			{
+				"name": "Display_Type",
+				"type": "String"
+			},
+			{
+				"name": "Promotion_Mechanic",
+				"type": "String"
+			},
+			{
+				"name": "Target_Score",
+				"type": "String"
+			},
+			{
+				"name": "Hit_Score",
+				"type": "String"
+			},
+			{
+				"name": "Target_Goal",
+				"type": "String"
+			},
+			{
+				"name": "Hit_Goal",
+				"type": "String"
+			},
+			{
+				"name": "NOOS",
+				"type": "String"
+			},
+			{
+				"name": "Reason",
+				"type": "String"
+			},
+			{
+				"name": "Employee_No",
+				"type": "String"
+			},
+			{
+				"name": "Emp_Full_Name_Th",
+				"type": "String"
+			},
+			{
+				"name": "Position",
+				"type": "String"
+			},
+			{
+				"name": "Employee_Type",
+				"type": "String"
+			},
+			{
+				"name": "Employee_Sub_Type",
+				"type": "String"
+			},
+			{
+				"name": "Team_Recorded",
+				"type": "String"
+			},
+			{
+				"name": "Agency",
+				"type": "String"
+			},
+			{
+				"name": "Agency_Region",
+				"type": "String"
+			},
+			{
+				"name": "Agency_Route",
+				"type": "String"
+			},
+			{
+				"name": "ItemID",
+				"type": "String"
+			},
+			{
+				"name": "On_EdgeCalendar",
+				"type": "String"
+			},
+			{
+				"name": "Project_Main_Name",
+				"type": "String"
+			}
+		]
+	}
+}

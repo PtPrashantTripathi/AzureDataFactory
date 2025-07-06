@@ -1,0 +1,59 @@
+{
+	"name": "TRG_PH_W_ALLDAY_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_ALLDAY_SKU_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "AllDay/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "AllDay",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/All Day",
+					"Blob_Destination": "/landing/AllDay/MappingSKU/",
+					"last_execution_file_name": "last_execution_AllDay_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "AllDay",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/ALLDAY/AllDay_MappingSKU"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-07-16T10:44:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						45
+					],
+					"hours": [
+						23
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

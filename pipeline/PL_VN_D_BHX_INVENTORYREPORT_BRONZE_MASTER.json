@@ -1,0 +1,317 @@
+{
+	"name": "PL_VN_D_BHX_INVENTORYREPORT_BRONZE_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_WEB_CALL_LOGICAPP_COPY",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"httpRequestTimeout": "00:10:00",
+					"url": {
+						"value": "@pipeline().globalParameters.LOGICAPPS_UTILITIES_URL",
+						"type": "Expression"
+					},
+					"body": {
+						"Logic Apps Case": "COPY",
+						"Source": "%252fShared Documents%252fLandingSpace%252fBach Hoa Xanh%252fInventoryReport",
+						"Destination": "/landing/BHX/InventoryReport/"
+					}
+				}
+			},
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "EXE_Onboarder-Landed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_GATHER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_LANDED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_file_name": {
+							"value": "@activity('PL_SEAID_A_ONBOARDER_GATHER').output.pipelineReturnValue.FILE_LIST",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"save_mode": "overwrite",
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"uniframe_version": "4.0.8",
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": "unity_catalog"
+					}
+				}
+			},
+			{
+				"name": "EXE_Onboarder-Processed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_Onboarder-Landed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_PROCESSED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": "upsert",
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"uniframe_version": "4.0.8",
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": "unity_catalog"
+					}
+				}
+			},
+			{
+				"name": "FEACH_ARCHIVAL",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "EXE_Onboarder-Processed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('PL_SEAID_A_ONBOARDER_GATHER').output.pipelineReturnValue.FILE_LIST",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "AT_WEB_CALL_LOGICAPP_ARCHIVE",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"httpRequestTimeout": "00:10:00",
+								"url": {
+									"value": "@pipeline().globalParameters.LOGICAPPS_UTILITIES_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Logic Apps Case\":\"ARCHIVE\",\n\"Source\":\"%252fShared Documents%252fLandingSpace%252fBach Hoa Xanh%252fInventoryReport%252f\",\n\"Destination\":\"/Shared Documents/Archival/Bach Hoa Xanh/InventoryReport\",\n\"Filename\": \"@{item()}\"}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_GATHER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_GATHER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"file_type": "xlsx",
+						"file_prefix": "InvQuantityReport",
+						"on_error_alert": true,
+						"layer": "Bronze",
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "BHX/InventoryReport"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "landing"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "InventoryReport"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string",
+				"defaultValue": "STORE_ID,PRODUCT_ID,MODEL_NO,DATE"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "BHX"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"file_names": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "VN/BHX"
+		},
+		"annotations": []
+	}
+}

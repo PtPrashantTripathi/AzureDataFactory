@@ -1,0 +1,76 @@
+{
+	"name": "PL_VN_A_SGC_MT_FACT_VN_OFFTAKE_SILVER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": "ModernTrade",
+						"object_name": "fact_vn_offtake",
+						"country_code": "VN",
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": "upsert",
+						"onboarder_notebook_path": "/Shared/notebooks/silver/ModernTrade/VN_SGC_FACT_OFFTAKE_HARMONIZATION",
+						"partition_keys": "Country,period",
+						"layer": "Silver",
+						"stage": "Fact"
+					}
+				}
+			},
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

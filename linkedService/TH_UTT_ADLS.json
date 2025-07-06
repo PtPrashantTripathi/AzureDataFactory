@@ -1,0 +1,19 @@
+{
+	"name": "TH_UTT_ADLS",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://strdlsdataplatformprod01.dfs.core.windows.net",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_02",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "th-utt-adls"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

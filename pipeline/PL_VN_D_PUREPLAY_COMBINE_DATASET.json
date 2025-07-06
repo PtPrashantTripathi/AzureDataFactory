@@ -1,0 +1,96 @@
+{
+	"name": "PL_VN_D_PUREPLAY_COMBINE_DATASET",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "AT_ADB_Custom_Notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/notebooks/silver/PurePlay/10_Silver_Combine_Pureplay"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "VN",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"object_name": {
+				"type": "string",
+				"defaultValue": "daily_pureplay_transactions"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "beecost"
+			},
+			"source_file_name": {
+				"type": "array"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "VN/BEECOST/PUREPLAY"
+		},
+		"annotations": []
+	}
+}

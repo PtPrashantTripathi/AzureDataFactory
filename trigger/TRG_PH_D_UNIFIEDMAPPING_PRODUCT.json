@@ -1,0 +1,40 @@
+{
+	"name": "TRG_PH_D_UNIFIEDMAPPING_PRODUCT",
+	"properties": {
+		"description": "This will trigger Pipeline Daily at 6:00 AM as per Kuala Lumpur, Singapore time zone (UTC+8)) \n",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_UNIFIEDMAPPING_PRODUCT_MASTER",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-06-10T10:35:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						4
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

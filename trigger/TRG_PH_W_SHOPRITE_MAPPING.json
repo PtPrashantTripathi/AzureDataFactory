@@ -1,0 +1,85 @@
+{
+	"name": "TRG_PH_W_SHOPRITE_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_SHOPRITE_SKUMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SHOPRITE/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "SHOPRITE",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Shoprite",
+					"Blob_Destination": "/landing/SHOPRITE/MappingSKU/",
+					"last_execution_file_name": "last_execution_SHOPRITE_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "SHOPRITE",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/Shoprite/Shoprite_MappingSKU"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_SHOPRITE_STOREMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SHOPRITE/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "SHOPRITE",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Shoprite",
+					"Blob_Destination": "/landing/SHOPRITE/MappingStore/",
+					"last_execution_file_name": "last_execution_SHOPRITE_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "SHOPRITE",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/Shoprite/Shoprite_MappingStore"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-03-25T10:54:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						10
+					],
+					"hours": [
+						1
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

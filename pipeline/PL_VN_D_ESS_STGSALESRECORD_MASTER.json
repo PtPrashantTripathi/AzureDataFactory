@@ -1,0 +1,209 @@
+{
+	"name": "PL_VN_D_ESS_STGSALESRECORD_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_SEAID_A_ONBOARDER_GATHER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_GATHER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"file_type": "parquet",
+						"file_prefix": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"layer": "Bronze",
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "EXE_Onboarder-Landed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_GATHER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_LANDED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_file_name": {
+							"value": "@activity('PL_SEAID_A_ONBOARDER_GATHER').output.pipelineReturnValue.FILE_LIST",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"save_mode": "overwrite",
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"uniframe_version": "4.0.8",
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": "unity_catalog"
+					}
+				}
+			},
+			{
+				"name": "EXE_Onboarder-Processed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_Onboarder-Landed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_PROCESSED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"write_mode": "upsert",
+						"uniframe_version": "4.0.8",
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": "unity_catalog"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "StgSalesRecord"
+			},
+			"source_file_name": {
+				"type": "array"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "vn-ess"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "StgSalesRecord"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string",
+				"defaultValue": "Date,RecordCode,StoreCode,EmployeeCode,SABACategory,SKUCode"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "ESS"
+			},
+			"landing_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "VN/ESS"
+		},
+		"annotations": []
+	}
+}

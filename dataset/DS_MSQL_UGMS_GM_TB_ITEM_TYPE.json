@@ -1,0 +1,60 @@
+{
+	"name": "DS_MSQL_UGMS_GM_TB_ITEM_TYPE",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_MSQL_UGMS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "UGMS"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "ITEM_TYPE_ID",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "CODE",
+				"type": "varchar"
+			},
+			{
+				"name": "NAME",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ENABLED_FLAG",
+				"type": "varchar"
+			},
+			{
+				"name": "CREATED_BY",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CREATION_DATE",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "LAST_UPDATED_BY",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "LAST_UPDATE_DATE",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "GM_TB_ITEM_TYPE"
+		}
+	}
+}

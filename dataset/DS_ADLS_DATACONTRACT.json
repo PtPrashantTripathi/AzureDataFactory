@@ -1,0 +1,123 @@
+{
+	"name": "DS_ADLS_DATACONTRACT",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"layer": {
+				"type": "string"
+			},
+			"country_code": {
+				"type": "string"
+			},
+			"source_name": {
+				"type": "string"
+			},
+			"object_name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat(dataset().source_name, '_', dataset().object_name, '.json')",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@concat('DataContract/', dataset().layer, '/', dataset().country_code)",
+					"type": "Expression"
+				},
+				"fileSystem": "unilever"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"contract_uuid": {
+					"type": "string"
+				},
+				"contract_name": {
+					"type": "string"
+				},
+				"contract_description": {
+					"type": "string"
+				},
+				"contract_layer": {
+					"type": "string"
+				},
+				"contract_stage": {
+					"type": "string"
+				},
+				"contract_data_source": {
+					"type": "string"
+				},
+				"contract_object_name": {
+					"type": "string"
+				},
+				"contract_fields": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"field_name": {
+								"type": "string"
+							},
+							"field_type": {
+								"type": "string"
+							},
+							"field_nullable": {
+								"type": "boolean"
+							},
+							"field_is_primary": {
+								"type": "boolean"
+							},
+							"field_validations": {
+								"type": "array"
+							},
+							"field_description": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"contract_data_owner": {
+					"type": "string"
+				},
+				"contract_process_owner": {
+					"type": "string"
+				},
+				"contract_country": {
+					"type": "string"
+				},
+				"contract_is_enable": {
+					"type": "boolean"
+				},
+				"contract_created_timestamp": {
+					"type": "string"
+				},
+				"contract_updated_timestamp": {
+					"type": "string"
+				},
+				"contract_options_override": {
+					"type": "object",
+					"properties": {
+						"delimiter": {
+							"type": "string"
+						},
+						"header": {
+							"type": "boolean"
+						}
+					}
+				},
+				"contract_cron": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

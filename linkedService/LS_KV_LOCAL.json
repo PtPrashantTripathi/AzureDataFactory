@@ -1,0 +1,11 @@
+{
+	"name": "LS_KV_LOCAL",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://bieno-da22-d-903766-kv01.vault.azure.net/"
+		}
+	}
+}

@@ -1,0 +1,299 @@
+{
+	"name": "PL_VN_W_SGC_WEEKLY_INVENTORY_SECSALE_BRONZE_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_WEB_CALL_LOGICAPP_COPY",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@pipeline().globalParameters.LOGICAPPS_UTILITIES_URL",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"body": {
+						"value": "{\n    \"Logic Apps Case\":\"COPY\",\n    \"Source\":\"%252fShared Documents%252fLandingSpace%252fSaigon Coop%252fWeeklyInventory%26WeeklySecondarySale%252f\",\n    \"Destination\":\"/landing/SGC/WeeklyInventory&WeeklySecondarySale/\"\n}",
+						"type": "Expression"
+					},
+					"httpRequestTimeout": "00:10:00"
+				}
+			},
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_GATHER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_GATHER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"file_type": "xlsx",
+						"on_error_alert": true,
+						"layer": "Bronze",
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "WeeklyInventory",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_LANDED",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_GATHER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_LANDED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_file_name": {
+							"value": "@activity('PL_SEAID_A_ONBOARDER_GATHER').output.pipelineReturnValue.FILE_LIST",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": "VN",
+						"onboarder_notebook_path": "/Shared/notebooks/bronze/SGC/VN_SGC_INVENTORY_SECSALE_LANDED",
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"save_mode": "overwrite",
+						"sequential_extraction": "True"
+					}
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_PROCESSED_WeeklyInventory",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_LANDED",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_PROCESSED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": "SGC",
+						"object_name": "WeeklyInventory",
+						"country_code": "VN",
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": "upsert"
+					}
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_PROCESSED_WeeklySecondarySale",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_LANDED",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_PROCESSED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": "SGC",
+						"object_name": "WeeklySecondarySale",
+						"country_code": "VN",
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": "upsert"
+					}
+				}
+			},
+			{
+				"name": "AT_FEACH_CallArchival",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_PROCESSED_WeeklyInventory",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_PROCESSED_WeeklySecondarySale",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('PL_SEAID_A_ONBOARDER_GATHER').output.pipelineReturnValue.FILE_LIST",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "AT_WEB_CALL_LOGICAPP_ARCHIVE",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@pipeline().globalParameters.LOGICAPPS_UTILITIES_URL",
+									"type": "Expression"
+								},
+								"method": "POST",
+								"body": {
+									"value": "{\"Logic Apps Case\":\"ARCHIVE\",\n\"Source\":\"%252fShared Documents%252fLandingSpace%252fSaigon Coop%252fWeeklyInventory%26WeeklySecondarySale%252f\",\n\"Destination\":\"/Shared Documents/Archival/Saigon Coop/WeeklyInventory&WeeklySecondarySale\",\n\"Filename\": \"@{item()}\"}",
+									"type": "Expression"
+								},
+								"httpRequestTimeout": "00:10:00"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "SGC/WeeklyInventory&WeeklySecondarySale"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "landing"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "WeeklyInventory&WeeklySecondarySale"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "SGC"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "VN/SGC"
+		},
+		"annotations": []
+	}
+}

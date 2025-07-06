@@ -1,0 +1,72 @@
+{
+	"name": "PL_VN_M_DT_FACT_OUTLET_DISPLAY_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_VN_M_DT_DIM_DISPLAY_CYCLE_SILVER_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_DT_DIM_DISPLAY_CYCLE_SILVER_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PL_VN_M_DT_FACT_OUTLET_DISPLAY_SILVER_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_DT_DIM_DISPLAY_CYCLE_SILVER_MASTER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PL_VN_M_DT_DIM_OUTLET_MIGRATION_SILVER_MASTER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_DT_FACT_OUTLET_DISPLAY_SILVER_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PL_VN_M_DT_DIM_OUTLET_MIGRATION_SILVER_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_DT_DIM_OUTLET_MIGRATION_SILVER_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "VN/DISTRIBUTIVE_TRADE"
+		},
+		"annotations": []
+	}
+}

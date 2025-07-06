@@ -1,0 +1,84 @@
+{
+	"name": "PL_SEAI_A_REF_DIM_CALENDAR_SILVER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": "Reference",
+						"object_name": "dim_calendar",
+						"country_code": "SEAI",
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						},
+						"write_mode": "overwrite",
+						"onboarder_notebook_path": "/Shared/notebooks/silver/Reference/SEAI_REFERENCE_DIM_CALENDAR",
+						"partition_keys": "period",
+						"on_error_alert": true,
+						"table_name": "reference.dim_calendar",
+						"layer": "Silver",
+						"stage": "Dimension",
+						"kwargs": {
+							"value": "{\n    \"start_date\": \"2001-01-01\",\n    \"end_date\": \"2050-12-31\"\n}",
+							"type": "Expression"
+						},
+						"uniframe_version": "4.*",
+						"adb_runtime_version": "14.3.x-scala2.12"
+					}
+				}
+			},
+			{
+				"name": "AT_SET_LandingDate",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "SEAID"
+		},
+		"annotations": []
+	}
+}

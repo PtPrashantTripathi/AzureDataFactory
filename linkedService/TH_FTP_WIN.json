@@ -1,0 +1,24 @@
+{
+	"name": "TH_FTP_WIN",
+	"properties": {
+		"description": "WIN data landing from vendor",
+		"annotations": [],
+		"type": "FtpServer",
+		"typeProperties": {
+			"host": "ftpuni.uttwin.com",
+			"port": 21,
+			"enableSsl": false,
+			"enableServerCertificateValidation": false,
+			"authenticationType": "Basic",
+			"userName": "ftpuni.uttwin.com|ftp_uni_usr",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_02",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "th-win-ftp-landing"
+			}
+		}
+	}
+}

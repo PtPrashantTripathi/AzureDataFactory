@@ -1,0 +1,60 @@
+{
+	"name": "TRG_PH_W_WALTERMART_ONLINEPOS",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_WALTERMART_ONLINEPOS_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Waltermart/OnlinePOS",
+					"source_container": "landing",
+					"object_name": "OnlinePOS",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Waltermart",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "/Shared Documents/LandingSpace/PH/WALTERMART/POS_Online",
+					"Blob_Destination": "/landing/Waltermart/OnlinePOS",
+					"last_execution_file_name": "last_execution_Waltermart_OnlinePOS",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Waltermart",
+					"create_directory": "/Shared/notebooks/bronze/Waltermart/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/Waltermart/Waltermart_POS_Online"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-10-04T09:39:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						50
+					],
+					"hours": [
+						0
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,646 @@
+{
+	"name": "PL_VN_M_OMNI_OFFTAKE_MASTER_TRIGGER",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE-AEON",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE-AEON",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE-BHX",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE-BHX",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE-BIGC",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE-BIGC",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE-GDN",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE-GDN",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE-HSK",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE-HSK",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE-LOTTE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE-LOTTE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE-MEGA",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE-MEGA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE-SGC",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE-SGC",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE-WMT",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE-WMT",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@variables('landing_date')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "AT_WEB_CALL_LOGICAPP_COPY",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LandingDate_From_Pipelines",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"httpRequestTimeout": "00:10:00",
+					"url": {
+						"value": "@pipeline().globalParameters.LOGICAPPS_UTILITIES_URL",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\n    \"Logic Apps Case\":\"COPY\",\n    \"Source\":\"%252fShared Documents%252fLandingSpace%252fOMNI%252fOFFTAKE\",\n    \"Destination\":\"/landing/omni/OFFTAKE/\"\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append FILE_LIST",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_OMNI_OFFTAKE-AEON",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FILE_LIST",
+					"value": {
+						"value": "@activity('PL_VN_M_OMNI_OFFTAKE-AEON').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append FILE_LIST_copy1",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_OMNI_OFFTAKE-BHX",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FILE_LIST",
+					"value": {
+						"value": "@activity('PL_VN_M_OMNI_OFFTAKE-BHX').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append FILE_LIST_copy2",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_OMNI_OFFTAKE-BIGC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FILE_LIST",
+					"value": {
+						"value": "@activity('PL_VN_M_OMNI_OFFTAKE-BIGC').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append FILE_LIST_copy3",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_OMNI_OFFTAKE-MEGA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FILE_LIST",
+					"value": {
+						"value": "@activity('PL_VN_M_OMNI_OFFTAKE-MEGA').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append FILE_LIST_copy4",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_OMNI_OFFTAKE-GDN",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FILE_LIST",
+					"value": {
+						"value": "@activity('PL_VN_M_OMNI_OFFTAKE-GDN').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append FILE_LIST_copy5",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_OMNI_OFFTAKE-LOTTE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FILE_LIST",
+					"value": {
+						"value": "@activity('PL_VN_M_OMNI_OFFTAKE-LOTTE').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append FILE_LIST_copy6",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_OMNI_OFFTAKE-HSK",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FILE_LIST",
+					"value": {
+						"value": "@activity('PL_VN_M_OMNI_OFFTAKE-HSK').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append FILE_LIST_copy7",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_OMNI_OFFTAKE-SGC",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FILE_LIST",
+					"value": {
+						"value": "@activity('PL_VN_M_OMNI_OFFTAKE-SGC').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Append FILE_LIST_copy8",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_M_OMNI_OFFTAKE-WMT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FILE_LIST",
+					"value": {
+						"value": "@activity('PL_VN_M_OMNI_OFFTAKE-WMT').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "AT_FEACH_CallArchival",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Append FILE_LIST",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Append FILE_LIST_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Append FILE_LIST_copy2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Append FILE_LIST_copy4",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Append FILE_LIST_copy6",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Append FILE_LIST_copy5",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Append FILE_LIST_copy3",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Append FILE_LIST_copy7",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Append FILE_LIST_copy8",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('FILE_LIST')",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "AT_WEB_CALL_LOGICAPP_ARCHIVE",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"httpRequestTimeout": "00:10:00",
+								"url": {
+									"value": "@pipeline().globalParameters.LOGICAPPS_UTILITIES_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Logic Apps Case\":\"ARCHIVE\",\n    \"Source\":\"%252fShared Documents%252fLandingSpace%252fOMNI%252fOFFTAKE\",\n    \"Destination\":\"/landing/omni/OFFTAKE/\"\n\"Filename\": \"@{item()}\"}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_SET_LandingDate_From_Pipelines",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@empty(pipeline().parameters.landing_date)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "AT_SET_LandingDate_from_pipelines_params",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "landing_date",
+								"value": {
+									"value": "@pipeline().parameters.landing_date",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "AT_SET_LandingDate_as_today",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "landing_date",
+								"value": {
+									"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "utc"
+			},
+			"landing_date": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"FILE_LIST": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "VN/OMNI/OFFTAKE"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"name": "TRG_VN_M_SGC_MONTHLYOFFTAKE_MARKETSHARE",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_M_MT_SGC_FACT_VN_OFFTAKE_SILVER_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2023-05-04T19:32:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						23
+					],
+					"monthDays": [
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28,
+						29,
+						30,
+						31
+					]
+				}
+			}
+		}
+	}
+}

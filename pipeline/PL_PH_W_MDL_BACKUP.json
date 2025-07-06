@@ -1,0 +1,136 @@
+{
+	"name": "PL_PH_W_MDL_BACKUP",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_BACKUP",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@pipeline().parameters.notebook_path",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "PH",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			},
+			{
+				"name": "IF_BACKUP_SUCCESS",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_BACKUP",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('AT_ADB_BACKUP').output.runOutput.return_code, 'SUCCESS')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "AT_FAILURE_EMAIL_ALERTS_PL",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Logic Apps Case\" : \"Email Alert\", \n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT} - Weekly Backup Pipeline Failed\",\n\"to\":\"@{pipeline().parameters.reciever}\",\n\"body\": \"Dear Team,\n  The backup process for the PH MDL has been Failed due to unexpected error.\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n    }",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Fail1",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "AT_FAILURE_EMAIL_ALERTS_PL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "BACKUP PL FAILED DUE TO UNEXPECTED ERROR",
+								"errorCode": "500"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "SEND_EMAIL",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Logic Apps Case\" : \"Email Validation Success\", \n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT} - PH MDL Backup Status \",\n\"to\":\"@{pipeline().parameters.reciever}\",\n\"Return Code\":\"Backup Successful\",\n\"body\": \"Dear Team, The backup process for the PH MDL has been completed successfully. Please review the below table list Error Files for backup and address any issues if exists.\" ,\n\"out_df\":@{activity('AT_ADB_BACKUP').output.runOutput.out_df},\n\"run_id\":\"@{pipeline().RunId}\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"triggered_pipeline\":\"@{pipeline().Pipeline}\"\n}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/utilities/PH_MDL_utility_notebooks/PH MDL Bronze Layer Databackup"
+			},
+			"reciever": {
+				"type": "string",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			}
+		},
+		"folder": {
+			"name": "PH/BACKUP"
+		},
+		"annotations": []
+	}
+}

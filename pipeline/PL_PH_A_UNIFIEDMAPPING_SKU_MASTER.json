@@ -1,0 +1,164 @@
+{
+	"name": "PL_PH_A_UNIFIEDMAPPING_SKU_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_Silver_Layer_Onboarding",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@concat(pipeline().parameters.onboarder_notebook_path,pipeline().parameters.notebook)",
+						"type": "Expression"
+					},
+					"libraries": [
+						{
+							"jar": "dbfs:/mnt/databricks/jars/uniframe/deequ-2.0.1-spark-3.2.jar"
+						},
+						{
+							"maven": {
+								"coordinates": "com.crealytics:spark-excel_2.12:3.2.1_0.17.1"
+							}
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			},
+			{
+				"name": "AT_WEB_EMAIL_PROCEESSING_SUCCESS",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_Silver_Layer_Onboarding",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:10:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\n    \"Logic Apps Case\" : \"Email Validation Success\", \n    \"subject\":\"@{pipeline().globalParameters.ENVIRONMENT} - Silver Layer Proccessing Completed - @{pipeline().parameters.entity_name}\",\n    \"to\":\"@{variables('receiver')}\",\n    \"Return Code\":\"@{activity('AT_ADB_Silver_Layer_Onboarding').output.runOutput.return_code}\",\n    \"body\": \"@{activity('AT_ADB_Silver_Layer_Onboarding').output.runOutput.message}\",\n    \"run_id\":\"@{pipeline().RunId}\",\n    \"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n    \"out_df\":@{activity('AT_ADB_Silver_Layer_Onboarding').output.runOutput.out_df},\n    \"triggered_pipeline\":\"@{pipeline().Pipeline}\"\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "AT_WEB_EMAIL_PROCEESSING_FAIL",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_Silver_Layer_Onboarding",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:10:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\n    \"Logic Apps Case\" : \"Email Validation\",\n    \"subject\":\"@{pipeline().globalParameters.ENVIRONMENT} - Silver Layer Proccessing Failed - @{pipeline().parameters.entity_name}\",\n    \"to\":\"@{variables('receiver')}\",\n    \"Return Code\":\"@{activity('AT_ADB_Silver_Layer_Onboarding').output.runOutput.return_code}\",\n    \"body\": \"@{activity('AT_ADB_Silver_Layer_Onboarding').output.runOutput.message}\",\n    \"run_id\":\"@{pipeline().RunId}\",\n    \"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n    \"out_df\":@{activity('AT_ADB_Silver_Layer_Onboarding').output.runOutput.out_df},\n    \"triggered_pipeline\":\"@{pipeline().Pipeline}\"\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FAIL",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_EMAIL_PROCEESSING_FAIL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": {
+						"value": "@activity('AT_ADB_Silver_Layer_Onboarding').output",
+						"type": "Expression"
+					},
+					"errorCode": "200"
+				}
+			}
+		],
+		"parameters": {
+			"entity_name": {
+				"type": "string",
+				"defaultValue": "ALL"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"full_or_incl": {
+				"type": "string",
+				"defaultValue": "full"
+			},
+			"onboarder_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/silver/UnifiedMapping/"
+			},
+			"notebook": {
+				"type": "string",
+				"defaultValue": "PH_MDL_UNIFIEDMAPPING_SKU"
+			}
+		},
+		"variables": {
+			"adhoc_ts": {
+				"type": "String"
+			},
+			"receiver": {
+				"type": "String",
+				"defaultValue": "jaoon.ong@unilever.com;kirti.jain@unilever.com;prashant.tripathi@unilever.com;gargi.banerjee2@unilever.com;satyanarayan.t@unilever.com"
+			}
+		},
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

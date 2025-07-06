@@ -1,0 +1,44 @@
+{
+	"name": "TRG_VN_D_ACACY",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_D_ACACY_DATADISPLAY_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_D_ACACY_DATASTORE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-08-31T04:56:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						10
+					],
+					"hours": [
+						5
+					]
+				}
+			}
+		}
+	}
+}

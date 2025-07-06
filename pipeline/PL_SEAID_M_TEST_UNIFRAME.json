@@ -1,0 +1,36 @@
+{
+	"name": "PL_SEAID_M_TEST_UNIFRAME",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_RUN_NOTEBOOK",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/notebooks/UniFrame"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "SEAID",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v2.sh",
+						"UniframeVersion": "LATEST"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

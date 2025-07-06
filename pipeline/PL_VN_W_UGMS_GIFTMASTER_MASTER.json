@@ -1,0 +1,63 @@
+{
+	"name": "PL_VN_W_UGMS_GIFTMASTER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_VN_W_UGMS_ITEM_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_W_UGMS_ITEM_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PL_VN_W_UGMS_ITEMCATALOG_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_W_UGMS_ITEMCATALOG_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PL_VN_W_UGMS_ITEMTYPE_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_W_UGMS_ITEMTYPE_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PL_VN_W_UGMS_ORDERTYPE_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_W_UGMS_ORDERTYPE_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "VN/UGMS"
+		},
+		"annotations": []
+	}
+}

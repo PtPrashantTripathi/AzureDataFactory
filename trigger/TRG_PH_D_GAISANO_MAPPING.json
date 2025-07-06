@@ -1,0 +1,86 @@
+{
+	"name": "TRG_PH_D_GAISANO_MAPPING",
+	"properties": {
+		"description": "Daily trigger for Gaisano mapping at 23:00 Hrs SGT",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_GAISANO_STOREMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Gaisano/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Gaisano",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Gaisano Grand",
+					"Blob_Destination": "/landing/Gaisano/MappingStore",
+					"last_execution_file_name": "last_execution_Gaisano_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Gaisano",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/GAISANO/Gaisano_MappingStore"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_GAISANO_SKUMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Gaisano/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Gaisano",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Gaisano Grand",
+					"Blob_Destination": "/landing/Gaisano/MappingSKU",
+					"last_execution_file_name": "last_execution_Gaisano_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Gaisano",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/GAISANO/Gaisano_MappingSKU"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-09-03T14:22:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						23
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

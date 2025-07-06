@@ -1,0 +1,30 @@
+{
+	"name": "TRG_PH_W_PHRETAILER",
+	"properties": {
+		"description": "triggers twice a week: Tuesday and Friday\nTiming: 12pm PH",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-04-13T04:08:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						4
+					],
+					"weekDays": [
+						"Friday",
+						"Tuesday"
+					]
+				}
+			}
+		}
+	}
+}

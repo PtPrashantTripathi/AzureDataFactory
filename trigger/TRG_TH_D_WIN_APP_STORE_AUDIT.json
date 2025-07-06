@@ -1,0 +1,25 @@
+{
+	"name": "TRG_TH_D_WIN_APP_STORE_AUDIT",
+	"properties": {
+		"description": "daily trigger for TH daily win app store audit",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_TH_D_WINAPP_STORE_AUDIT",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2024-03-11T03:45:00",
+				"timeZone": "SE Asia Standard Time"
+			}
+		}
+	}
+}

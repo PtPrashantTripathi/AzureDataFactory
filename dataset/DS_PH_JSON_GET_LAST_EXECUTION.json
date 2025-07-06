@@ -1,0 +1,43 @@
+{
+	"name": "DS_PH_JSON_GET_LAST_EXECUTION",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ABLB",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"file_name": {
+				"type": "string"
+			},
+			"source_container": {
+				"type": "string"
+			},
+			"source_customer": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().file_name",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().source_container",
+					"type": "Expression"
+				}
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"last_execution": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}

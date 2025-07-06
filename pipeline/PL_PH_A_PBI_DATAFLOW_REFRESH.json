@@ -1,0 +1,148 @@
+{
+	"name": "PL_PH_A_PBI_DATAFLOW_REFRESH",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_PBI_DATAFLOW_ID",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@pipeline().parameters.notebook_path",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "SEAID",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh",
+						"UniframeVersion": "LATEST",
+						"RuntimeVersion": "10.4.x-scala2.12",
+						"MinWorkers": 1,
+						"MaxWorkers": 10
+					}
+				}
+			},
+			{
+				"name": "ForEach",
+				"description": "Run loop for PBI Dataflow ID",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_PBI_DATAFLOW_ID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('AT_ADB_PBI_DATAFLOW_ID').output.runOutput.pbi_dataflow_id_list",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "AT_WEB_LA_POWERBI_DATAFLOW_REFRESH",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.PH_MDL_POWERAPP_DATAFLOW_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{   \n    \"environment\" : \"@{pipeline().globalParameters.ENVIRONMENT}\",\n    \"pbi_dataflow\" : \"@{item()}\",\n    \"pbi_workspace\" : \"02967bfe-d98d-4939-97a9-041eca1703e2\"\n}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Wait 2 min",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "AT_WEB_LA_POWERBI_DATAFLOW_REFRESH",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 120
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_WEB_EMAIL_PROCEESSING_FAIL",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "ForEach",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:10:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\n    \"Logic Apps Case\" : \"Email Validation\", \n    \"subject\":\"@{pipeline().globalParameters.ENVIRONMENT} - PowerBI dataflow refresh Pipeline is Failed\",\n    \"to\":\"@{variables('receiver')}\",\n    \"Return Code\":\"SUCCESS\",\n    \"body\": \"PowerBI dataflow refresh pipeline is Failed. Please check.\",\n    \"run_id\":\"@{pipeline().RunId}\",\n    \"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n    \"out_df\":\"\",\n    \"triggered_pipeline\":\"@{pipeline().Pipeline}\"\n}",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"notebook_path": {
+				"type": "String",
+				"defaultValue": "/Shared/utilities/PH_MDL_utility_notebooks/PH_MDL_PBI_DataFlow_Refresh"
+			}
+		},
+		"variables": {
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			}
+		},
+		"folder": {
+			"name": "PH/PBI_DATAFLOW"
+		},
+		"annotations": []
+	}
+}

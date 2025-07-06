@@ -1,0 +1,377 @@
+{
+	"name": "PL_PH_A_RDS_SKUMAP_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_IF_INGEST",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_CALL_LOGICAPP_COPY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('AT_WEB_CALL_LOGICAPP_COPY').output.Response,'Pass')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "EXEP_EXECUTE",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_PH_A_EXECUTE",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"source_directory": {
+										"value": "@pipeline().parameters.source_directory",
+										"type": "Expression"
+									},
+									"source_container": {
+										"value": "@pipeline().parameters.source_container",
+										"type": "Expression"
+									},
+									"object_name": {
+										"value": "@pipeline().parameters.object_name",
+										"type": "Expression"
+									},
+									"object_type": {
+										"value": "@pipeline().parameters.object_type",
+										"type": "Expression"
+									},
+									"primary_keys": {
+										"value": "@pipeline().parameters.primary_keys",
+										"type": "Expression"
+									},
+									"partition_keys": {
+										"value": "@pipeline().parameters.partition_keys",
+										"type": "Expression"
+									},
+									"time_zone": {
+										"value": "@pipeline().parameters.time_zone",
+										"type": "Expression"
+									},
+									"country_code": {
+										"value": "@pipeline().parameters.country_code",
+										"type": "Expression"
+									},
+									"source_name": {
+										"value": "@pipeline().parameters.source_name",
+										"type": "Expression"
+									},
+									"Site": {
+										"value": "@pipeline().parameters.Site",
+										"type": "Expression"
+									},
+									"Source": {
+										"value": "@pipeline().parameters.Source",
+										"type": "Expression"
+									},
+									"Blob_Destination": {
+										"value": "@pipeline().parameters.Blob_Destination",
+										"type": "Expression"
+									},
+									"last_execution_file_name": {
+										"value": "@pipeline().parameters.last_execution_file_name",
+										"type": "Expression"
+									},
+									"save_mode": {
+										"value": "@pipeline().parameters.save_mode",
+										"type": "Expression"
+									},
+									"write_mode": {
+										"value": "@pipeline().parameters.write_mode",
+										"type": "Expression"
+									},
+									"master_pipeline": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"source_customer": {
+										"value": "@pipeline().parameters.source_customer",
+										"type": "Expression"
+									},
+									"custom_notebook_path": {
+										"value": "@pipeline().parameters.custom_notebook_path",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_WEB_CALL_LOGICAPP_COPY",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_IF_CASE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:20:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_01",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"body": {
+						"value": "@concat('{\"body\":\"Files have been successfully uploaded in sharepoint and copied for SKU Map\",\n    \"subject\":\"Sharepoint update status\",\n    \"body_copy_fail\":\"Files have not been uploaded in sharepoint\",\n    \"Logic Apps Case\":\"',variables('Case'),'\",','\n    \"Pipeline Name\":\"',pipeline().Pipeline,'\",','\n    \"to\":\"',variables('receiver'),'\",','\n    \"run_date_time\":\"',formatDateTime(utcNow(),'MM-dd-yyyy'),'\",','\n    \"run_id\":\"',pipeline().RunId,'\",','\n    \"Contains\":\"',variables('Contains'),'\",','\n    \"column_name\":\"',variables('column_name'),'\",','\n    \"library_name\":\"',pipeline().parameters.library_name,'\",','\n    \"Source\":\"',pipeline().parameters.Source,'\",','\n    \"Site\":\"',pipeline().parameters.Site,'\",','\n    \"Blob_Destination\":\"',pipeline().parameters.Blob_Destination,'\",','\n    \"last_execution\":\"',activity('EXEP_LAST_EXECUTION').output.pipelineReturnValue.last_execution,'\"}')",
+						"type": "Expression"
+					},
+					"httpRequestTimeout": "00:10:00"
+				}
+			},
+			{
+				"name": "EXEP_LAST_EXECUTION",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_FOLDER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_A_GET_LAST_EXECUTION",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"file_name": {
+							"value": "@concat(pipeline().parameters.source_customer,'/last_execution/',pipeline().parameters.last_execution_file_name)",
+							"type": "Expression"
+						},
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"source_customer": {
+							"value": "@pipeline().parameters.source_customer",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "AT_IF_CASE",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "EXEP_LAST_EXECUTION",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@and(activity('EXEP_LAST_EXECUTION').output.pipelineReturnValue.full_load , variables('Nested'))",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "AT_SET_INCREMENTAL",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Case",
+								"value": "Incremental Load"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "AT_SET_HISTORICAL",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Case",
+								"value": "Historical POS"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_ADB_FOLDER",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@pipeline().parameters.Create_directory",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "SEAID",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "RDS/MappingSKU"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "processing"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "MappingSKU"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string",
+				"defaultValue": "child_sku_code"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "RDS"
+			},
+			"Site": {
+				"type": "string",
+				"defaultValue": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub"
+			},
+			"Source": {
+				"type": "string",
+				"defaultValue": "/Shared Documents/01 POS Data/02 Masterlist/Robinson Department Store"
+			},
+			"Blob_Destination": {
+				"type": "string",
+				"defaultValue": "/processing/RDS/MappingSKU/"
+			},
+			"last_execution_file_name": {
+				"type": "string",
+				"defaultValue": "last_execution_RDS_MappingSKU"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "overwrite"
+			},
+			"write_mode": {
+				"type": "string",
+				"defaultValue": "upsert"
+			},
+			"library_name": {
+				"type": "string",
+				"defaultValue": "Documents"
+			},
+			"source_customer": {
+				"type": "string",
+				"defaultValue": "RDS"
+			},
+			"create_directory": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/bronze/RDS/Folder_creation"
+			},
+			"custom_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/bronze/RDS/RDS_MappingSKU"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"last_exe": {
+				"type": "String"
+			},
+			"files_name": {
+				"type": "Array"
+			},
+			"Contains": {
+				"type": "String",
+				"defaultValue": "SKU"
+			},
+			"output_dir": {
+				"type": "String"
+			},
+			"column_name": {
+				"type": "String",
+				"defaultValue": "Created"
+			},
+			"receiver": {
+				"type": "String",
+				"defaultValue": "kirti.jain@unilever.com;jaoon.ong@unilever.com;gargi.banerjee2@unilever.com"
+			},
+			"Nested": {
+				"type": "Boolean",
+				"defaultValue": false
+			},
+			"Case": {
+				"type": "String"
+			},
+			"file_format": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

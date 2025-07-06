@@ -1,0 +1,130 @@
+{
+	"name": "DS_MSQL_UGMS_GM_TB_SYSTEM_ITEM",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_MSQL_UGMS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "UGMS"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "SYSTEM_ITEM_ID",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "ITEM_TYPE_ID",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "ITEM_CODE",
+				"type": "varchar"
+			},
+			{
+				"name": "ITEM_NAME",
+				"type": "nvarchar"
+			},
+			{
+				"name": "BASIC_UOM",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PACKING_PER_CASE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "REMAIN_SL",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "ENABLED_FLAG",
+				"type": "varchar"
+			},
+			{
+				"name": "CREATED_BY",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CREATION_DATE",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "LAST_UPDATED_BY",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "LAST_UPDATE_DATE",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "DESCRIPTION",
+				"type": "nvarchar"
+			},
+			{
+				"name": "NET_WEIGHT",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WEIGHT",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DIMENSION",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ORDER_TYPE_ID",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "VAT",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "TIME_WARNING_EXPIRY",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "TIME_AUTO_DAMAGE",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "NUM_PALLET",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "TYPE_OF_RATE",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "GM_TB_SYSTEM_ITEM"
+		}
+	}
+}

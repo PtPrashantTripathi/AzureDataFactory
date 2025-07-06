@@ -1,0 +1,25 @@
+{
+	"name": "LS_MYSQL_AWS_RDS",
+	"properties": {
+		"annotations": [],
+		"type": "MySql",
+		"typeProperties": {
+			"server": "rdsadmin.cgfvlta2m3yg.ap-southeast-1.rds.amazonaws.com",
+			"port": 3306,
+			"database": "ph_mdl",
+			"username": "mdl_user1",
+			"sslMode": 1,
+			"useSystemTrustStore": 0,
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_02",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "KV-PH-AWS-RDS-MYSQL-PASSWORD"
+			},
+			"driverVersion": "v2"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

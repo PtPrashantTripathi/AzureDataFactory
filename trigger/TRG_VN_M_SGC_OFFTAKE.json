@@ -1,0 +1,35 @@
+{
+	"name": "TRG_VN_M_SGC_OFFTAKE",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_M_SGC_OFFTAKE_BRONZE_MASTER",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2023-05-04T19:32:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						3
+					],
+					"monthDays": [
+						2
+					]
+				}
+			}
+		}
+	}
+}

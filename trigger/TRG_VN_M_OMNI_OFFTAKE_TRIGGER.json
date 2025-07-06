@@ -1,0 +1,48 @@
+{
+	"name": "TRG_VN_M_OMNI_OFFTAKE_TRIGGER",
+	"properties": {
+		"annotations": [
+			"OMNI",
+			"Monthly"
+		],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_M_OMNI_OFFTAKE_MASTER_TRIGGER",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_M_OMNI_OFFTAKE_MASTER_DATA_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"time_zone": "utc",
+					"landing_date": "20240630"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Month",
+				"interval": 1,
+				"startTime": "2024-05-24T02:05:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						13
+					],
+					"monthDays": [
+						10
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,89 @@
+{
+	"name": "TRG_VN_W_MINDSHARE_WEEKLYFRI",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_A_MINDSHARE_MAPPING",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "mindshare/mapping",
+					"source_container": "landing",
+					"object_name": "segment_mapping",
+					"object_type": "parquet",
+					"primary_keys": "primary_keys",
+					"partition_keys": "object_name,YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "VN",
+					"source_name": "mindshare",
+					"source_file_name": [
+						""
+					]
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_A_MINDSHARE_SUMMARY",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "mindshare/raw",
+					"source_container": "landing",
+					"object_name": "Mindshare",
+					"object_type": "delta",
+					"primary_keys": "primary_keys",
+					"partition_keys": "object_name,YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "VN",
+					"source_name": "weekly_mindshare_summary",
+					"source_file_name": [
+						""
+					]
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_A_MINDSHARE_TRANSACTIONS",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "mindshare/raw",
+					"source_container": "landing",
+					"object_name": "weekly_mindshare_transactions",
+					"object_type": "delta",
+					"primary_keys": "primary_keys",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "VN",
+					"source_name": "Mindshare",
+					"source_file_name": [
+						""
+					]
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-09-11T09:42:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						4
+					],
+					"weekDays": [
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

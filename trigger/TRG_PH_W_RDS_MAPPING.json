@@ -1,0 +1,87 @@
+{
+	"name": "TRG_PH_W_RDS_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_RDS_SKUMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "RDS/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "RDS",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Robinson Department Store",
+					"Blob_Destination": "/landing/RDS/MappingSKU/",
+					"last_execution_file_name": "last_execution_RDS_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "RDS",
+					"create_directory": "/Shared/notebooks/bronze/RDS/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/RDS/RDS_MappingSKU"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_RDS_STOREMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "RDS/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "RDS",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Robinson Department Store",
+					"Blob_Destination": "/landing/RDS/MappingStore/",
+					"last_execution_file_name": "last_execution_RDS_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "RDS",
+					"create_directory": "/Shared/notebooks/bronze/RDS/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/RDS/RDS_MappingStore"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-09-05T09:05:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						23
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

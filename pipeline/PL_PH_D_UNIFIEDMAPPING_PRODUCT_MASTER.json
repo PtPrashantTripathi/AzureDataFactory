@@ -1,0 +1,265 @@
+{
+	"name": "PL_PH_D_UNIFIEDMAPPING_PRODUCT_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_PH_D_UNIFIEDMAPPING_MATERIAL_MAPPING",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_D_UNIFIEDMAPPING_MATERIAL_MAPPING",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"custom_notebook_path": {
+							"value": "@concat(pipeline().parameters.nb_repo,'notebooks/bronze/UNIFIEDMAPPING/PH_UNIFIEDMAPPING_MATERIAL_MAPPING'\r\n)",
+							"type": "Expression"
+						},
+						"uniframe_version": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						},
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_PH_D_UNIFIEDMAPPING_MATERIAl_CUSTOMER_SKU_REL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_PH_A_UNIFIEDMAPPING_STANDARDIZED_DATA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_D_UNIFIEDMAPPING_MATERIAL_CUSTOMER_SKU_REL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"custom_notebook_path": {
+							"value": "@concat(pipeline().parameters.nb_repo,'notebooks/bronze/UNIFIEDMAPPING/PH_UNIFIEDMAPPING_MATERIAL_CUSTOMER_SKU_REL_CXCG'\n)",
+							"type": "Expression"
+						},
+						"uniframe_version": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						},
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						},
+						"silver_notebook_path": {
+							"value": "@concat(pipeline().parameters.nb_repo,'notebooks/silver/UnifiedMapping/UNIFIEDMAPPING_DIM_PH_MATERIAL_CUSTOMER_SKU_REL'\n)",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_PH_A_UNIFIEDMAPPING_STANDARDIZED_DATA",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_A_UNIFIEDMAPPING_STANDARDIZED_DATA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"custom_notebook_path": {
+							"value": "@concat(pipeline().parameters.nb_repo,'notebooks/bronze/UNIFIEDMAPPING/PH_UNIFIEDMAPPING_STANDARDIZED_DATA'\n)",
+							"type": "Expression"
+						},
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						},
+						"uniframe_version": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_PH_D_UNIFIEDMAPPING_MATERIAL_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_PH_D_UNIFIEDMAPPING_MATERIAL_MAPPING",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PL_PH_D_UNIFIEDMAPPING_MATERIAl_CUSTOMER_SKU_REL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_A_ONBOARDER_COMMON_SILVER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"uniframe_version": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						},
+						"adb_runtime_version": {
+							"value": "@pipeline().parameters.adb_runtime_version",
+							"type": "Expression"
+						},
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						},
+						"silver_notebook_path": {
+							"value": "@concat(pipeline().parameters.nb_repo,'notebooks/silver/UnifiedMapping/UNIFIEDMAPPING_DIM_PH_MATERIAL_MASTER'\n)",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_PH_A_UNIFIEDMAPPING_PRODUCT_MASTER_OLD",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_PH_A_UNIFIEDMAPPING_STANDARDIZED_DATA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_A_ONBOARDER_COMMON_SILVER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"uniframe_version": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						},
+						"adb_runtime_version": {
+							"value": "@pipeline().parameters.adb_runtime_version",
+							"type": "Expression"
+						},
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						},
+						"silver_notebook_path": {
+							"value": "@concat(pipeline().parameters.nb_repo,'notebooks/silver/UnifiedMapping/UNIFIEDMAPPING_DIM_PH_PRODUCT'\n)",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_PH_D_UNIFIEDMAPPING_PRODUCT_UNIFIED_MAPPING",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_PH_D_UNIFIEDMAPPING_MATERIAL_MASTER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PL_PH_A_UNIFIEDMAPPING_STANDARDIZED_DATA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_A_ONBOARDER_COMMON_SILVER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"uniframe_version": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						},
+						"adb_runtime_version": {
+							"value": "@pipeline().parameters.adb_runtime_version",
+							"type": "Expression"
+						},
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						},
+						"silver_notebook_path": {
+							"value": "@concat(pipeline().parameters.nb_repo,'notebooks/silver/UnifiedMapping/UNIFIEDMAPPING_DIM_PH_PRODUCT_UNIFIED_MAPPING'\r\n)",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"uniframe_version": {
+				"type": "string",
+				"defaultValue": "4.*"
+			},
+			"metastore": {
+				"type": "string",
+				"defaultValue": "unity_catalog"
+			},
+			"adb_runtime_version": {
+				"type": "string",
+				"defaultValue": "14.3.x-scala2.12"
+			},
+			"nb_repo": {
+				"type": "string",
+				"defaultValue": "/Shared/"
+			}
+		},
+		"folder": {
+			"name": "PH/UNIFIEDMAPPING"
+		},
+		"annotations": []
+	}
+}

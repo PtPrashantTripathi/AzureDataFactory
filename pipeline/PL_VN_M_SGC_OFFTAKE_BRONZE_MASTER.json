@@ -1,0 +1,29 @@
+{
+	"name": "PL_VN_M_SGC_OFFTAKE_BRONZE_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_SET_Date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "CurrentDate",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time', 'yyyyMMdd'))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"CurrentDate": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

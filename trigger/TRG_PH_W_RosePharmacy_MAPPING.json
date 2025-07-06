@@ -1,0 +1,87 @@
+{
+	"name": "TRG_PH_W_RosePharmacy_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_RosePharmacy_SKUMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "RosePharmacy/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "RosePharmacy",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Rose Pharmacy",
+					"Blob_Destination": "/landing/RosePharmacy/MappingSKU/",
+					"last_execution_file_name": "last_execution_RosePharmacy_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "RosePharmacy",
+					"create_directory": "/Shared/utilities/PH_MDL_utility_notebooks/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/RosePharmacy/RosePharmacy_MappingSKU"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_RosePharmacy_STOREMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "RosePharmacy/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "RosePharmacy",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Rose Pharmacy",
+					"Blob_Destination": "/landing/RosePharmacy/MappingStore/",
+					"last_execution_file_name": "last_execution_RosePharmacy_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "RosePharmacy",
+					"custom_notebook_path": "/Shared/notebooks/bronze/RosePharmacy/RosePharmacy_MappingStore",
+					"create_directory": "/Shared/utilities/PH_MDL_utility_notebooks/Folder_creation"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-10-31T10:21:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						50
+					],
+					"hours": [
+						23
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

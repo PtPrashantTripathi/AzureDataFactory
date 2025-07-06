@@ -1,0 +1,42 @@
+{
+	"name": "TRG_PH_D_PBI_DATAFLOW_REFRESH",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_A_PBI_DATAFLOW_REFRESH",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"notebook_path": "/Shared/utilities/PH_MDL_utility_notebooks/PH_MDL_PBI_DataFlow_Refresh"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-10-16T08:10:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						4
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

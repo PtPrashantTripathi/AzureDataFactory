@@ -1,0 +1,166 @@
+{
+	"name": "PL_PH_D_MDL_FILES_REPORT",
+	"properties": {
+		"activities": [
+			{
+				"name": "PH_MDL_BRONZE_LOGS",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@pipeline().parameters.notebook_path",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"daysDelta": {
+							"value": "@pipeline().parameters.daysDelta",
+							"type": "Expression"
+						},
+						"status": {
+							"value": "@pipeline().parameters.status",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "PH",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			},
+			{
+				"name": "Return Code",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "PH_MDL_BRONZE_LOGS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@activity('PH_MDL_BRONZE_LOGS').output.runOutput.return_code",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "LOGS_AVAILABLE",
+							"activities": [
+								{
+									"name": "SEND_EMAIL_FOR_PROCESSED_FILES",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"url": {
+											"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "{\"Logic Apps Case\" : \"Email Validation Success\", \n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT} - @{activity('PH_MDL_BRONZE_LOGS').output.runOutput.status} \",\n\"to\":\"@{pipeline().parameters.reciever}\",\n\"Return Code\":\"@{activity('PH_MDL_BRONZE_LOGS').output.runOutput.status}\",\n\"body\": \"List of @{activity('PH_MDL_BRONZE_LOGS').output.runOutput.status} form @{formatDateTime(convertTimeZone(addDays(utcNow(), int(pipeline().parameters.daysDelta)), 'UTC', pipeline().parameters.timezone), 'yyyy-MM-dd HH:mm:ss')} to @{formatDateTime(convertTimeZone(utcNow(), 'UTC', pipeline().parameters.timezone), 'yyyy-MM-dd HH:mm:ss')} according to @{pipeline().parameters.timezone} timezone\",\n\"run_id\":\"@{pipeline().RunId}\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"out_df\":@{activity('PH_MDL_BRONZE_LOGS').output.runOutput.out_df},\n\"triggered_pipeline\":\"@{pipeline().Pipeline}\"\n    }",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"value": "NO_LOGS",
+							"activities": [
+								{
+									"name": "SEND_EMAIL_FOR_NO_LOGS",
+									"type": "WebActivity",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"url": {
+											"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "{\"Logic Apps Case\" : \"Email Validation Success\", \n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT} - @{activity('PH_MDL_BRONZE_LOGS').output.runOutput.status} \",\n\"to\":\"@{pipeline().parameters.reciever}\",\n\"Return Code\":\"@{activity('PH_MDL_BRONZE_LOGS').output.runOutput.status}\",\n\"body\": \"List of @{activity('PH_MDL_BRONZE_LOGS').output.runOutput.status} form @{formatDateTime(convertTimeZone(addDays(utcNow(), int(pipeline().parameters.daysDelta)), 'UTC', pipeline().parameters.timezone), 'yyyy-MM-dd HH:mm:ss')} to @{formatDateTime(convertTimeZone(utcNow(), 'UTC', pipeline().parameters.timezone), 'yyyy-MM-dd HH:mm:ss')} according to @{pipeline().parameters.timezone} timezone\",\n\"run_id\":\"@{pipeline().RunId}\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"out_df\":@{activity('PH_MDL_BRONZE_LOGS').output.runOutput.out_df},\n\"triggered_pipeline\":\"@{pipeline().Pipeline}\"\n    }",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					],
+					"defaultActivities": [
+						{
+							"name": "Unexpected Return Code",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "Unexpected Return Code",
+								"errorCode": {
+									"value": "@activity('PH_MDL_BRONZE_LOGS').output.runOutput.return_code",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/utilities/ALERT/PH_MDL_DAILY_FILES_REPORT"
+			},
+			"daysDelta": {
+				"type": "string",
+				"defaultValue": "-1"
+			},
+			"reciever": {
+				"type": "string",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			},
+			"timezone": {
+				"type": "string",
+				"defaultValue": "India Standard Time"
+			},
+			"status": {
+				"type": "string",
+				"defaultValue": "T"
+			}
+		},
+		"folder": {
+			"name": "PH/ALERT"
+		},
+		"annotations": []
+	}
+}

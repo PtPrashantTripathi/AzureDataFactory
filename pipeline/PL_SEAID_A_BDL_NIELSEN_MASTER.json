@@ -1,0 +1,40 @@
+{
+	"name": "PL_SEAID_A_BDL_NIELSEN_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_CPY_NIELSEN_DATA",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/notebooks/bronze/BDL/SEAID_BDL_NIELSEN_PROCESSED",
+					"baseParameters": {
+						"countries": "Vietnam,Thailand,Philippines,MalaysiaAndSingapore",
+						"source_dir_path": "/mnt/BusinessDataLake/Marketing/BusinessDataLake/Marketing/RetailScandata/",
+						"target_dir_path": "/mnt/adls/SharedSpace/RetailScandata/"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "SEAID",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "SEAID"
+		},
+		"annotations": []
+	}
+}

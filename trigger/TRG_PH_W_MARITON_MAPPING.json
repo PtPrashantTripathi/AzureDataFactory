@@ -1,0 +1,86 @@
+{
+	"name": "TRG_PH_W_MARITON_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_MARITON_SKUMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "MARITON/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "MARITON",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Mariton",
+					"Blob_Destination": "/landing/MARITON/MappingSKU/",
+					"last_execution_file_name": "last_execution_MARITON_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "MARITON",
+					"custom_notebook_path": "/Shared/notebooks/bronze/MARITON/MARITON_MappingSKU"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_MARITON_STOREMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "MARITON/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "MARITON",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Mariton",
+					"Blob_Destination": "/landing/MARITON/MappingStore/",
+					"last_execution_file_name": "last_execution_MARITON_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "MARITON",
+					"type": "string",
+					"custom_notebook_path": "/Shared/notebooks/bronze/MARITON/MARITON_MappingStore"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-12-27T13:59:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						40
+					],
+					"hours": [
+						22
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,504 @@
+{
+	"name": "PL_PH_W_SuperStores_Usage_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "EXEC_PL_PH_A_POS_LAST_EXEXUTION",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_A_POS_LAST_EXECUTION",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"primary_keys": {
+							"value": "@pipeline().parameters.primary_keys",
+							"type": "Expression"
+						},
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"time_zone": {
+							"value": "@pipeline().parameters.time_zone",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"Site": {
+							"value": "@pipeline().parameters.Site",
+							"type": "Expression"
+						},
+						"Source": {
+							"value": "@pipeline().parameters.Source",
+							"type": "Expression"
+						},
+						"Blob_Destination": {
+							"value": "@pipeline().parameters.Blob_Destination",
+							"type": "Expression"
+						},
+						"last_execution_file_name": {
+							"value": "@pipeline().parameters.last_execution_file_name",
+							"type": "Expression"
+						},
+						"save_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"write_mode": {
+							"value": "@pipeline().parameters.write_mode",
+							"type": "Expression"
+						},
+						"library_name": {
+							"value": "@pipeline().parameters.library_name",
+							"type": "Expression"
+						},
+						"source_customer": {
+							"value": "@pipeline().parameters.source_customer",
+							"type": "Expression"
+						},
+						"create_directory": {
+							"value": "@pipeline().parameters.create_directory",
+							"type": "Expression"
+						},
+						"custom_notebook_path": {
+							"value": "@pipeline().parameters.custom_notebook_path",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Copy Data From AWS",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "EXEC_PL_PH_A_POS_LAST_EXEXUTION",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AmazonS3ReadSettings",
+							"recursive": true,
+							"modifiedDatetimeStart": {
+								"value": "@activity('EXEC_PL_PH_A_POS_LAST_EXEXUTION').output.pipelineReturnValue.last_execution",
+								"type": "Expression"
+							},
+							"wildcardFolderPath": {
+								"value": "@pipeline().parameters.Source",
+								"type": "Expression"
+							},
+							"wildcardFileName": "*",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "LS_ABLB",
+								"type": "LinkedServiceReference"
+							},
+							"path": {
+								"value": "@concat(pipeline().parameters.Blob_Destination,'/.logs')",
+								"type": "Expression"
+							}
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_AWS",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder_name": {
+								"value": "@pipeline().parameters.Source",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_CSV",
+						"type": "DatasetReference",
+						"parameters": {
+							"source_container": {
+								"value": "@pipeline().parameters.source_container",
+								"type": "Expression"
+							},
+							"source_directory": {
+								"value": "@pipeline().parameters.source_directory",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "AT_IF_INGEST",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Copy Data From AWS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(activity('Copy Data From AWS').output.filesWritten,0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "EXEP_ONBOARDER",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_PH_A_PHRETAILER_ONBOARDER",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"source_directory": {
+										"value": "@pipeline().parameters.source_directory",
+										"type": "Expression"
+									},
+									"source_container": {
+										"value": "@pipeline().parameters.source_container",
+										"type": "Expression"
+									},
+									"object_name": {
+										"value": "@pipeline().parameters.object_name",
+										"type": "Expression"
+									},
+									"object_type": {
+										"value": "@pipeline().parameters.object_type",
+										"type": "Expression"
+									},
+									"primary_keys": {
+										"value": "@pipeline().parameters.primary_keys",
+										"type": "Expression"
+									},
+									"partition_keys": {
+										"value": "@pipeline().parameters.partition_keys",
+										"type": "Expression"
+									},
+									"time_zone": {
+										"value": "@pipeline().parameters.time_zone",
+										"type": "Expression"
+									},
+									"country_code": {
+										"value": "@pipeline().parameters.country_code",
+										"type": "Expression"
+									},
+									"source_name": {
+										"value": "@pipeline().parameters.source_name",
+										"type": "Expression"
+									},
+									"source_file_name": {
+										"value": "@variables('files_name')",
+										"type": "Expression"
+									},
+									"save_mode": {
+										"value": "@pipeline().parameters.save_mode",
+										"type": "Expression"
+									},
+									"write_mode": {
+										"value": "@pipeline().parameters.write_mode",
+										"type": "Expression"
+									},
+									"custom_notebook_path": {
+										"value": "@pipeline().parameters.custom_notebook_path",
+										"type": "Expression"
+									},
+									"master_pipeline": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "AT_WEB_CALL_LOGICAPP_CREATE_LAST_EXECUTION_FILE_SP",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "EXEP_ONBOARDER",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.00:20:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"httpRequestTimeout": "00:10:00",
+								"url": {
+									"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_01",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "@concat('{\n    \"Logic Apps Case\":\"create_last_execution_file\",','\n    \"Site\":\"',pipeline().parameters.Site,'\",','\n    \"source_name\":\"',pipeline().parameters.source_name,'\",','\n    \"object_name\":\"',pipeline().parameters.object_name,'\",','\n    \"last_execution_file_name\":\"',pipeline().parameters.last_execution_file_name,'\",','\n    \"execution_env\":\"',pipeline().globalParameters.ENVIRONMENT,'\",','\n    }')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AT_FAILURE_EMAIL_ALERTS_PL",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "EXEP_ONBOARDER",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Logic Apps Case\" : \"Email Alert\", \n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT}-Failed Pipeline Alert - @{pipeline().parameters.source_customer} @{pipeline().parameters.object_name}\",\n\"to\":\"@{variables('receiver')}\",\n\"body\": \"Pipeline failed after execute pipeline activity.\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "INGESTION FAILURE",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "AT_FAILURE_EMAIL_ALERTS_PL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "Pipeline failed after execute pipeline activity.",
+								"errorCode": "Failed"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "SuperStores/Usage"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "landing"
+			},
+			"source_customer": {
+				"type": "string",
+				"defaultValue": "SuperStores"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "SuperStores"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "Usage"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string",
+				"defaultValue": "rowidentifier"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"Site": {
+				"type": "string",
+				"defaultValue": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake"
+			},
+			"Source": {
+				"type": "string",
+				"defaultValue": "Superstore_Usage"
+			},
+			"Blob_Destination": {
+				"type": "string",
+				"defaultValue": "/landing/SuperStores/Usage"
+			},
+			"last_execution_file_name": {
+				"type": "string",
+				"defaultValue": "last_execution_SuperStores_Usage"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "overwrite"
+			},
+			"write_mode": {
+				"type": "string",
+				"defaultValue": "upsert"
+			},
+			"library_name": {
+				"type": "string",
+				"defaultValue": "Documents"
+			},
+			"create_directory": {
+				"type": "string"
+			},
+			"custom_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/bronze/SuperStores/PH_SuperStores_Usage"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"last_execution": {
+				"type": "String"
+			},
+			"files_name": {
+				"type": "Array"
+			},
+			"Contains": {
+				"type": "String"
+			},
+			"output_dir": {
+				"type": "String"
+			},
+			"column_name": {
+				"type": "String"
+			},
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			},
+			"Nested": {
+				"type": "Boolean",
+				"defaultValue": true
+			},
+			"Case": {
+				"type": "String"
+			},
+			"source": {
+				"type": "String"
+			},
+			"file_format": {
+				"type": "String"
+			},
+			"full_load": {
+				"type": "Boolean"
+			}
+		},
+		"folder": {
+			"name": "PH/SuperStores"
+		},
+		"annotations": []
+	}
+}

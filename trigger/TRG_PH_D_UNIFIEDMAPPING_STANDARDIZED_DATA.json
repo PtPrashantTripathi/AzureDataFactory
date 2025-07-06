@@ -1,0 +1,33 @@
+{
+	"name": "TRG_PH_D_UNIFIEDMAPPING_STANDARDIZED_DATA",
+	"properties": {
+		"description": "This will trigger Pipeline Daily at 5:30 AM as per Kuala Lumpur, Singapore time zone (UTC+8)) \nand Load the Excel file from the business.\n",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-07-29T02:24:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						4
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

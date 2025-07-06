@@ -1,0 +1,89 @@
+{
+	"name": "TRG_VN_D_OUTLETVALIDATION",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_D_OUTLETVALIDATION_MAPPINGCHAIN_BRONZE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_D_OUTLETVALIDATION_MARKETMASTER_BRONZE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_D_OUTLETVALIDATION_OUTLETINFO_BRONZE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_D_OUTLETVALIDATION_OUTLETINFODETAIL_BRONZE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_D_OUTLETVALIDATION_PROSPECTOUTLETDETAIL_BRONZE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_D_OUTLETVALIDATION_PROSPECTOUTLETINFO_BRONZE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_D_OUTLETVALIDATION_SWAPOUTLETHISTORY_BRONZE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"landing_date": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , 'SE Asia Standard Time'), 'yyyyMMdd')"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-07-25T11:43:00",
+				"timeZone": "India Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						3
+					]
+				}
+			}
+		}
+	}
+}

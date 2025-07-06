@@ -1,0 +1,89 @@
+{
+	"name": "TRG_PH_D_BILIDAILY_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_BILIDAILY_SKU_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "BILIDAILY/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "BILIDAILY",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/03 CRM Data/Bilidaily/Masterlist/",
+					"Blob_Destination": "/landing/BILIDAILY/MappingSKU/",
+					"last_execution_file_name": "last_execution_BILIDAILY_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "BILIDAILY",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/BILIDAILY/BILIDAILY_MappingSKU",
+					"uniframe_version": "4.*",
+					"metastore": "unity_catalog"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_BILIDAILY_STORE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "BILIDAILY/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "BILIDAILY",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/03 CRM Data/Bilidaily/Masterlist/",
+					"Blob_Destination": "/landing/BILIDAILY/MappingStore/",
+					"last_execution_file_name": "last_execution_BILIDAILY_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "BILIDAILY",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/BILIDAILY/BILIDAILY_MappingStore",
+					"uniframe_version": "4.*",
+					"metastore": "unity_catalog"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 15,
+				"startTime": "2024-10-28T13:50:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						1
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

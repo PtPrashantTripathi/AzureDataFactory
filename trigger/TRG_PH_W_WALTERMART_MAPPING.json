@@ -1,0 +1,87 @@
+{
+	"name": "TRG_PH_W_WALTERMART_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_WALTERMART_SKUMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Waltermart/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Waltermart",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Waltermart",
+					"Blob_Destination": "/landing/Waltermart/MappingSKU/",
+					"last_execution_file_name": "last_execution_Waltermart_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Waltermart",
+					"create_directory": "/Shared/notebooks/bronze/Waltermart/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/Waltermart/Waltermart_MappingSKU"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_WALTERMART_STOREMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Waltermart/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Waltermart",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Waltermart",
+					"Blob_Destination": "/landing/Waltermart/MappingStore/",
+					"last_execution_file_name": "last_execution_Waltermart_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Waltermart",
+					"create_directory": "/Shared/notebooks/bronze/Waltermart/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/Waltermart/Waltermart_MappingStore"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-10-04T09:41:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						40
+					],
+					"hours": [
+						0
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

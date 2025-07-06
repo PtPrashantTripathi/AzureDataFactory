@@ -1,0 +1,59 @@
+{
+	"name": "TRG_PH_W_360PHARMACY_POS",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_360PHARMACY_POS_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "360Pharmacy/POS",
+					"source_container": "landing",
+					"object_name": "POS",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "360Pharmacy",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "/Shared Documents/LandingSpace/PH/360 Pharmacy/POS",
+					"Blob_Destination": "/landing/360Pharmacy/POS",
+					"last_execution_file_name": "last_execution_360Pharmacy_POS",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "360Pharmacy",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/360Pharmacy/360Pharmacy_POS"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-07-24T10:36:00",
+				"timeZone": "India Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						23
+					],
+					"weekDays": [
+						"Tuesday",
+						"Monday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,32 @@
+{
+	"name": "DS_PH_MDL_SOURCE_CONFIG",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "PH"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "PH_MDL_Source_Config.csv",
+				"folderPath": "Config",
+				"fileSystem": "unilever"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Data_Source",
+				"type": "String"
+			}
+		]
+	}
+}

@@ -1,0 +1,59 @@
+{
+	"name": "TRG_PH_W_NCCC_MAPPINGCARDNUMBER",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_NCCC_CARDNUMBER_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "NCCC/MappingCustomerCard",
+					"source_container": "landing",
+					"object_name": "MappingCustomerCard",
+					"object_type": "parquet",
+					"primary_keys": "membership_no",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "NCCC",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/03 CRM Data/NCCC/Card Number Masterlist/",
+					"Blob_Destination": "/landing/NCCC/MappingCardNumber/",
+					"last_execution_file_name": "last_execution_NCCC_MappingCardNumber",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "NCCC",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/NCCC/NCCC_MappingCardNumber"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-05-29T04:12:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						55
+					],
+					"hours": [
+						23
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

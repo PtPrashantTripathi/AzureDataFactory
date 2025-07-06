@@ -1,0 +1,187 @@
+{
+	"name": "PL_PH_A_PHRETAILER_RRHIFCDS_ETL",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_ETL",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@pipeline().parameters.Notebook_path_ETL",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "PH",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			},
+			{
+				"name": "AT_IF_MAIL",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_ETL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('AT_ADB_ETL').output.runOutput.return_code, 'ERROR')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "AT_WEB_EMAIL_ETL_SUCCESS",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@pipeline().parameters.LogicAppsPath",
+									"type": "Expression"
+								},
+								"method": "POST",
+								"body": {
+									"value": "{\"Logic Apps Case\" : \"Email ETL Success\", \n\"subject\":\"Databricks ETL Success\",\n\"to\":\"@{variables('receiver')}\",\n\"Return Code\":\"@{activity('AT_ADB_ETL').output.runOutput.return_code}\",\n\"run_id\":\"@{pipeline().RunId}\",\n\"body\": \"ETL Notebook has run successfully.\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"out_df\":\"@{activity('AT_ADB_ETL').output.runOutput.out_df}\",\n\"triggered_pipeline\":\"@{pipeline().parameters.master_pipeline}\"\n    }",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AT_SET_VARIABLE",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "AT_WEB_EMAIL_ETL_SUCCESS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "pipelineReturnValue",
+								"value": [
+									{
+										"key": "output_dir",
+										"value": {
+											"type": "Expression",
+											"content": "@activity('AT_ADB_ETL').output.runOutput.out_dir"
+										}
+									}
+								],
+								"setSystemVariable": true
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "AT_WEB_EMAIL_ETL_FAIL",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@pipeline().parameters.LogicAppsPath",
+									"type": "Expression"
+								},
+								"method": "POST",
+								"body": {
+									"value": "{\"Logic Apps Case\" : \"Email ETL\", \n\"subject\":\"Databricks ETL failed\",\n\"to\":\"@{variables('receiver')}\",\n\"Return Code\":\"@{activity('AT_ADB_ETL').output.runOutput.return_code}\",\n\"body\": \"@{activity('AT_ADB_ETL').output.runOutput.message}\",\n\"run_id\":\"@{pipeline().RunId}\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"out_df\":\"@{activity('AT_ADB_ETL').output.runOutput.out_df}\",\n\"triggered_pipeline\":\"@{pipeline().parameters.master_pipeline}\"\n    }",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "FAIL",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "AT_WEB_EMAIL_ETL_FAIL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@activity('AT_ADB_ETL').output",
+									"type": "Expression"
+								},
+								"errorCode": "200"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"LogicAppsPath": {
+				"type": "string",
+				"defaultValue": "https://prod-47.northeurope.logic.azure.com:443/workflows/bccbf2a363bc40c59af0902da7275730/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=0p-Wx8zp5HlL1JgZqxZ1j4L6Y4HHqSBugCCRAQQCqys"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"Notebook_path_ETL": {
+				"type": "string"
+			},
+			"master_pipeline": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"receiver": {
+				"type": "String",
+				"defaultValue": "jaoon.ong@unilever.com"
+			},
+			"output_dir": {
+				"type": "String"
+			},
+			"triggered_pipeline": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

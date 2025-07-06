@@ -1,0 +1,44 @@
+{
+	"name": "TRG_PH_W_PUREMART_POS",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_PUREMART_POS_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "PUREMART/POS",
+					"source_container": "landing",
+					"object_name": "POS",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "PUREMART",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "/Shared Documents/LandingSpace/PH/PUREMART/POS",
+					"Blob_Destination": "/landing/PUREMART/POS",
+					"last_execution_file_name": "last_execution_PUREMART_POS",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"source_customer": "PUREMART",
+					"custom_notebook_path": "/Shared/notebooks/bronze/PUREMART/PUREMART_POS"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-11-20T17:51:00",
+				"endTime": "2024-02-08T00:00:00",
+				"timeZone": "Singapore Standard Time"
+			}
+		}
+	}
+}

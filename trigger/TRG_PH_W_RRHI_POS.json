@@ -1,0 +1,60 @@
+{
+	"name": "TRG_PH_W_RRHI_POS",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_RRHI_POS_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "RRHI/POS",
+					"source_container": "landing",
+					"object_name": "POS",
+					"object_type": "parquet",
+					"primary_keys": "CHILD SKU CODE",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "RRHI",
+					"Site": "https://unilever.sharepoint.com/sites/RRHIDailyPOS",
+					"Source": "/Shared Documents/General/03 RRHI Weekly rct source/04 Weekly RCT templated data",
+					"Blob_Destination": "/landing/RRHI/POS/",
+					"last_execution_file_name": "last_execution_RRHI_POS",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "RRHI",
+					"create_directory": "/Shared/notebooks/bronze/RRHI/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/RRHI/PH_RRHI_POS"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-04-13T04:08:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						10
+					],
+					"hours": [
+						0
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

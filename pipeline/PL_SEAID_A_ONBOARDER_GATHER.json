@@ -1,0 +1,314 @@
+{
+	"name": "PL_SEAID_A_ONBOARDER_GATHER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_META_ChildItems",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "AT_LKP_GetDataContract",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_BINARY_DIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.directory",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "AT_FLTR_CorrectFiles",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "AT_META_ChildItems",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('AT_META_ChildItems').output.childItems",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(\n    equals(item().type,'File'),\n    and(\n        endswith(item().name,pipeline().parameters.file_type)\n        ,or(\n            empty(pipeline().parameters.file_prefix),\n            startswith(item().name,pipeline().parameters.file_prefix)\n        )\n    )\n)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "AT_SET_ReturnFileArr",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "AT_IF_EmptyList",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "FILE_LIST",
+							"value": {
+								"type": "Expression",
+								"content": "@variables('FILE_LIST')"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			},
+			{
+				"name": "AT_LKP_GetDataContract",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_ADLS_DATACONTRACT",
+						"type": "DatasetReference",
+						"parameters": {
+							"layer": {
+								"value": "@pipeline().parameters.layer",
+								"type": "Expression"
+							},
+							"country_code": {
+								"value": "@pipeline().parameters.country_code",
+								"type": "Expression"
+							},
+							"source_name": {
+								"value": "@pipeline().parameters.source_name",
+								"type": "Expression"
+							},
+							"object_name": {
+								"value": "@pipeline().parameters.object_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "PL_SEAID_A_ONBOARDER_ALERT",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AT_IF_EmptyList",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_ALERT",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"is_alert": {
+							"value": "@pipeline().parameters.on_error_alert",
+							"type": "Expression"
+						},
+						"invalid_records": {
+							"value": "@array(1)",
+							"type": "Expression"
+						},
+						"data_owner_email": {
+							"value": "@activity('AT_LKP_GetDataContract').output.firstRow.contract_data_owner",
+							"type": "Expression"
+						},
+						"process_owner_email": {
+							"value": "@activity('AT_LKP_GetDataContract').output.firstRow.contract_process_owner",
+							"type": "Expression"
+						},
+						"error_case": "MISSING_FILES",
+						"data_source": {
+							"value": "@activity('AT_LKP_GetDataContract').output.firstRow.contract_data_source",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@activity('AT_LKP_GetDataContract').output.firstRow.contract_object_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "AT_FEACH_Files",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "AT_FLTR_CorrectFiles",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('AT_FLTR_CorrectFiles').output.Value",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "AT_APPEND_File_names",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "FILE_LIST",
+								"value": {
+									"value": "@item().name",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_IF_EmptyList",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AT_FEACH_Files",
+						"dependencyConditions": [
+							"Succeeded",
+							"Skipped"
+						]
+					},
+					{
+						"activity": "AT_META_ChildItems",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@lessOrEquals(length(variables('FILE_LIST')), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "AT_FAIL_EMPTYFILELIST",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "The list of files is empty.",
+								"errorCode": "500"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"container": {
+				"type": "string"
+			},
+			"directory": {
+				"type": "string"
+			},
+			"file_type": {
+				"type": "string"
+			},
+			"file_prefix": {
+				"type": "string"
+			},
+			"on_error_alert": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"layer": {
+				"type": "string"
+			},
+			"country_code": {
+				"type": "string"
+			},
+			"source_name": {
+				"type": "string"
+			},
+			"object_name": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"FILE_LIST": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "ONBOARDER"
+		},
+		"annotations": []
+	}
+}

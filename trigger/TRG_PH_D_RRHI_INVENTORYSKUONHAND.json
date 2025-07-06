@@ -1,0 +1,60 @@
+{
+	"name": "TRG_PH_D_RRHI_INVENTORYSKUONHAND",
+	"properties": {
+		"description": "This will trigger Pipeline Daily at 6:10 PM as per Kuala Lumpur, Singapore time zone (UTC+8)) \n",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_RRHI_INVENTORYSKUONHAND_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "RRHI/InventorySKUOnHand",
+					"source_container": "landing",
+					"object_name": "InventorySKUOnHand",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "RRHI",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "/Shared Documents/LandingSpace/PH/RRHI/InventorySKUOnHand",
+					"Blob_Destination": "/landing/RRHI/InventorySKUOnHand/",
+					"last_execution_file_name": "last_execution_RRHI_InventorySKUOnHand",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "RRHI",
+					"custom_notebook_path": "/Shared/notebooks/bronze/RRHI/PH_RRHI_InventorySKUOnHand"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-11-15T06:06:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						10
+					],
+					"hours": [
+						18
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

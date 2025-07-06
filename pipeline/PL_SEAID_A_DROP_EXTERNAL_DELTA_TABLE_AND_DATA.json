@@ -1,0 +1,86 @@
+{
+	"name": "PL_SEAID_A_DROP_EXTERNAL_DELTA_TABLE_AND_DATA",
+	"properties": {
+		"activities": [
+			{
+				"name": "DROP UC TABLE",
+				"description": "Description:\nDrops an unmanaged/External Delta table and data/files belonging to delta table with the specified full table name (catalog_name.database.table_name) if it exists. :param full_table_name: The fully qualified name of the Delta table (i.e., catalog_name.database.table_name).",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@concat(pipeline().parameters.onboarder_notebook_path,'/',pipeline().parameters.notebook)",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"full_table_name": {
+							"value": "@pipeline().parameters.full_table_name",
+							"type": "Expression"
+						}
+					},
+					"libraries": [
+						{
+							"jar": "dbfs:/mnt/databricks/jars/uniframe/deequ-2.0.1-spark-3.2.jar"
+						},
+						{
+							"maven": {
+								"coordinates": "com.crealytics:spark-excel_2.12:3.2.1_0.17.1"
+							}
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "SEAID",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v2.sh",
+						"UniframeVersion": "3.*",
+						"RuntimeVersion": "14.3.x-scala2.12",
+						"MinWorkers": 1,
+						"MaxWorkers": 10
+					}
+				}
+			}
+		],
+		"parameters": {
+			"onboarder_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/utilities/PH_MDL_utility_notebooks/"
+			},
+			"notebook": {
+				"type": "string",
+				"defaultValue": "DROP_EXTERNAL_DELTA_TABLE_AND_DATA"
+			},
+			"UniframeVersion": {
+				"type": "string",
+				"defaultValue": "4.*"
+			},
+			"RuntimeVersion": {
+				"type": "string",
+				"defaultValue": "14.3.x-scala2.12"
+			},
+			"full_table_name": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			}
+		},
+		"folder": {
+			"name": "SEAID/UTILITY"
+		},
+		"annotations": []
+	}
+}

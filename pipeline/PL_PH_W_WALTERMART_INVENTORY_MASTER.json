@@ -1,0 +1,21 @@
+{
+	"name": "PL_PH_W_WALTERMART_INVENTORY_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "Fail1",
+				"type": "Fail",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "unused pipeline",
+					"errorCode": "404"
+				}
+			}
+		],
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

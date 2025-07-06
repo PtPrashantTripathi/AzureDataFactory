@@ -1,0 +1,286 @@
+{
+	"name": "PL_VN_M_OMNI_OFFTAKE-LOTTE",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_SEAID_A_ONBOARDER_GATHER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_GATHER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"file_type": "xlsx",
+						"file_prefix": "LOTTE",
+						"on_error_alert": true,
+						"layer": "Bronze",
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "EXE_Onboarder-Landed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_GATHER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_LANDED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_file_name": {
+							"value": "@activity('PL_SEAID_A_ONBOARDER_GATHER').output.pipelineReturnValue.FILE_LIST",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"save_mode": "overwrite"
+					}
+				}
+			},
+			{
+				"name": "EXE_Onboarder-Processed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_Onboarder-Landed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_PROCESSED",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"write_mode": "upsert"
+					}
+				}
+			},
+			{
+				"name": "PL_VN_M_OMNI_OFFTAKE_COMBINE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_Onboarder-Processed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_M_OMNI_OFFTAKE_COMBINE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_file_name": {
+							"value": "@pipeline().parameters.source_file_name",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"object_type": {
+							"value": "@pipeline().parameters.object_type",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"save_mode": "upsert"
+					}
+				}
+			},
+			{
+				"name": "Return FILE_LIST",
+				"description": "Return FILE_LIST to master pipelines",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "EXE_Onboarder-Processed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "FILE_LIST",
+							"value": {
+								"type": "Expression",
+								"content": "@activity('PL_SEAID_A_ONBOARDER_GATHER').output.pipelineReturnValue.FILE_LIST"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "omni/OFFTAKE"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "landing"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "offtake_lotte"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string",
+				"defaultValue": "Guid"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "OMNI"
+			},
+			"source_file_name": {
+				"type": "array"
+			},
+			"landing_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "VN/OMNI/OFFTAKE/BRONZE"
+		},
+		"annotations": []
+	}
+}

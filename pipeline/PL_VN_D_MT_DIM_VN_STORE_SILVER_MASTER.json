@@ -1,0 +1,170 @@
+{
+	"name": "PL_VN_D_MT_DIM_VN_STORE_SILVER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_D_CD_CUSTOMERMAPPING_BRONZE_MASTER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"write_mode": "overwrite",
+						"onboarder_notebook_path": "/Shared/notebooks/silver/ModernTrade/VN_MT_DIM_STORE",
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"on_error_alert": true,
+						"table_name": "moderntrade.dim_vn_store",
+						"layer": "Silver",
+						"stage": "Dimension",
+						"uniframe_version": "4.0.8",
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": "unity_catalog"
+					}
+				}
+			},
+			{
+				"name": "PL_VN_D_CD_CUSTOMERMAPPING_BRONZE_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_D_CD_CUSTOMERMAPPING_BRONZE_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "EXEC_REFRESH_STORE_MAPPING",
+				"description": "Refresh the offtake store mapping",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"write_mode": "overwrite",
+						"onboarder_notebook_path": "/Shared/notebooks/silver/ModernTrade/VN_MT_OFFTAKE_STORE_MAPPING_REFRESH",
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"on_error_alert": true,
+						"layer": "Silver",
+						"stage": "Dimension",
+						"kwargs": {
+							"value": "{\n    \"catalog\": \"@{pipeline().globalParameters.UNITY_CATALOG}\"\n}",
+							"type": "Expression"
+						},
+						"uniframe_version": "4.*",
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": "unity_catalog"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "VN"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "dim_vn_store"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "ModernTrade"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "Country"
+			},
+			"landing_date": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "VN/MODERN_TRADE"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"name": "TRG_PH_W_PRINCE_INVENTORY",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 15,
+				"startTime": "2024-02-07T09:32:00",
+				"timeZone": "India Standard Time"
+			}
+		}
+	}
+}

@@ -1,0 +1,101 @@
+{
+	"name": "PL_PH_A_PHRETAILER_RRHIFCDS_GET_LAST_EXECUTION",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_LOOKUP_DATASET",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_PH_JSON_GET_LAST_EXECUTION",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name": {
+								"value": "@concat(pipeline().parameters.file_name,'.json')",
+								"type": "Expression"
+							},
+							"source_container": {
+								"value": "@pipeline().parameters.source_container",
+								"type": "Expression"
+							},
+							"source_customer": {
+								"value": "@pipeline().parameters.source_customer",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "AT_SET_VARIABLE",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "AT_LOOKUP_DATASET",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "last_execution",
+							"value": {
+								"type": "Expression",
+								"content": "@formatDateTime(if(equals(activity('AT_LOOKUP_DATASET').output.firstRow.last_execution,''),adddays(utcNow(),-365),activity('AT_LOOKUP_DATASET').output.firstRow.last_execution),'yyyy-MM-ddTHH:mm:ss')"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			}
+		],
+		"parameters": {
+			"file_name": {
+				"type": "string"
+			},
+			"source_container": {
+				"type": "string"
+			},
+			"source_customer": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"last_execution": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PH/child_pipelines"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,85 @@
+{
+	"name": "TRG_PH_W_RRHIFCDS_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_PHRETAILER_SKUMAP_RRHIFCDS_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "MappingSKU_RRHIFCDS",
+					"source_container": "phretailer",
+					"object_name": "MappingSKU_RRHIFCDS",
+					"object_type": "parquet",
+					"primary_keys": "rob_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "PHRetailer",
+					"Site": "https://unilever.sharepoint.com/sites/RRHIFCDS",
+					"Source": "/Shared Documents/General/RRHI FCDS MDL/01 Dim SKU Map Hair + Deos",
+					"Blob_Destination": "/phretailer/MappingSKU_RRHIFCDS/",
+					"last_execution_file_name": "last_execution_phretailer_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "e8d85da6-fcb4-4c06-8664-ff1352b9ed99",
+					"custom_notebook_path": "/Shared/notebooks/bronze/PHRetailer/PH_PHRetailer_MappingSKU_RRHIFCDS",
+					"source_customer": "phretailer"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_PHRETAILER_STOREMAP_RRHIFCDS_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "MappingStore_RRHIFCDS",
+					"source_container": "phretailer",
+					"object_name": "MappingStore_RRHIFCDS",
+					"object_type": "parquet",
+					"primary_keys": "RRHI_Code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "PHRetailer",
+					"Site": "https://unilever.sharepoint.com/sites/RRHIFCDS",
+					"Source": "/Shared Documents/General/RRHI FCDS MDL/01 Dim Store Map",
+					"Blob_Destination": "/phretailer/MappingStore_RRHIFCDS/",
+					"last_execution_file_name": "last_execution_phretailer_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "e8d85da6-fcb4-4c06-8664-ff1352b9ed99",
+					"custom_notebook_path": "/Shared/notebooks/bronze/PHRetailer/PH_PHRetailer_MappingStore_RRHIFCDS",
+					"source_customer": "phretailer"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-08-16T08:50:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						0
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

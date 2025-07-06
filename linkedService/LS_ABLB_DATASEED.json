@@ -1,0 +1,19 @@
+{
+	"name": "LS_ABLB_DATASEED",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "The BLOB storage container where you deployment seed data is stored.  You can read data from here as part of your scripted deployment in any environment.",
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"sasUri": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LS_KV_LOCAL",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "DataSeedSASUri"
+			}
+		}
+	}
+}

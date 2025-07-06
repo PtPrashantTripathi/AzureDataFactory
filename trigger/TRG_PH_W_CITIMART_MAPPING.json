@@ -1,0 +1,114 @@
+{
+	"name": "TRG_PH_W_CITIMART_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_CITIMART_SKU_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Citimart/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Citimart",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Citimart",
+					"Blob_Destination": "/landing/Citimart/MappingSKU/",
+					"last_execution_file_name": "last_execution_Citimart_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Citimart",
+					"create_directory": "/Shared/notebooks/bronze/CITIMART/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/CITIMART/Citimart_MappingSKU"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_CITIMART_STOREMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Citimart/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Citimart",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/Citimart",
+					"Blob_Destination": "/landing/Citimart/MappingStore/",
+					"last_execution_file_name": "last_execution_Citimart_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Citimart",
+					"create_directory": "/Shared/notebooks/bronze/CITIMART/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/CITIMART/Citimart_MappingStore"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_CITIMART_CUSTOMERMAP_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Citimart/MappingCustomer",
+					"source_container": "landing",
+					"object_name": "MappingCustomer",
+					"object_type": "parquet",
+					"primary_keys": "customer_number",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Citimart",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/03 CRM Data/Citimart/Masterlist/CUSTOMER",
+					"Blob_Destination": "/landing/Citimart/MappingCustomer/",
+					"last_execution_file_name": "last_execution_Citimart_MappingCustomer",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Citimart",
+					"create_directory": "/Workspace/Shared/notebooks/bronze/CITIMART/Citimart_MappingCustomer",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/CITIMART/Citimart_MappingCustomer"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-09-20T07:39:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						22
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

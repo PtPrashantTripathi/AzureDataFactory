@@ -1,0 +1,60 @@
+{
+	"name": "TRG_PH_W_EMILUS_POS",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_EMILUS_POS_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Emilus/POS",
+					"source_container": "landing",
+					"object_name": "POS",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Emilus",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "/Shared Documents/LandingSpace/PH/EMILUS/POS",
+					"Blob_Destination": "/landing/Emilus/POS",
+					"last_execution_file_name": "last_execution_Emilus_POS",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Emilus",
+					"create_directory": "/Shared/notebooks/bronze/EMILUS/Folder_creation",
+					"custom_notebook_path": "/Shared/notebooks/bronze/EMILUS/Emilus_POS"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-09-20T07:47:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						10
+					],
+					"hours": [
+						22
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

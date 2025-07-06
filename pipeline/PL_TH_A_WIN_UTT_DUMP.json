@@ -1,0 +1,100 @@
+{
+	"name": "PL_TH_A_WIN_UTT_DUMP",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy from UTT",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": false,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "ParquetReadSettings"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"copyBehavior": "PreserveHierarchy"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "TH_WIN_SYN_UTT_DUMP",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "TH_WIN_SYN_BLOB_DUMP",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "transform",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Copy from UTT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/notebooks/bronze/WIN_APP/WIN_adhoc_dump"
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB_BigCluster",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": "TH",
+						"UniframeVersion": "LATEST",
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "TH/WIN"
+		},
+		"annotations": []
+	}
+}

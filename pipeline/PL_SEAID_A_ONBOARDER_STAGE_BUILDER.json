@@ -1,0 +1,441 @@
+{
+	"name": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_STAGE_BUILDER",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@pipeline().parameters.onboarder_notebook_path",
+						"type": "Expression"
+					},
+					"baseParameters": {
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"write_mode": {
+							"value": "@pipeline().parameters.write_mode",
+							"type": "Expression"
+						},
+						"partition_keys": {
+							"value": "@pipeline().parameters.partition_keys",
+							"type": "Expression"
+						},
+						"time_zone": "utc",
+						"table_name": {
+							"value": "@pipeline().parameters.table_name",
+							"type": "Expression"
+						},
+						"stage": {
+							"value": "@pipeline().parameters.stage",
+							"type": "Expression"
+						},
+						"layer": {
+							"value": "@pipeline().parameters.layer",
+							"type": "Expression"
+						},
+						"number_of_days_look_back": {
+							"value": "@pipeline().parameters.number_of_days_look_back",
+							"type": "Expression"
+						},
+						"job_id": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"kwargs": {
+							"value": "@pipeline().parameters.kwargs",
+							"type": "Expression"
+						},
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						},
+						"cache_level": {
+							"value": "@pipeline().parameters.cache_level",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v2.sh",
+						"UniframeVersion": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						},
+						"RuntimeVersion": {
+							"value": "@pipeline().parameters.adb_runtime_version",
+							"type": "Expression"
+						},
+						"MinWorkers": {
+							"value": "@pipeline().parameters.adb_min_workers",
+							"type": "Expression"
+						},
+						"MaxWorkers": {
+							"value": "@pipeline().parameters.adb_max_workers",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "AT_FAIL_pipelines",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_ERROR-Message",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": {
+						"value": "@activity('AT_ADB_STAGE_BUILDER').output.runOutput.message",
+						"type": "Expression"
+					},
+					"errorCode": "500"
+				}
+			},
+			{
+				"name": "AT_SET_Status-Result",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_STAGE_BUILDER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "status",
+					"value": {
+						"value": "@activity('AT_ADB_STAGE_BUILDER').output.runOutput.status",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "AT_IF_OnboarderProcessSuccess",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_Status-Result",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(variables('status'), 'SUCCESS')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "AT_SET_FAIL-Message",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "fail_message",
+								"value": {
+									"value": "@activity('AT_ADB_STAGE_BUILDER').output.runOutput.message",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AT_FAIL",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "AT_EXEP_ALERT_OnError",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@variables('fail_message')",
+									"type": "Expression"
+								},
+								"errorCode": "500"
+							}
+						},
+						{
+							"name": "AT_EXEP_ALERT_OnError",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "AT_SET_FAIL-Message",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_SEAID_A_ONBOARDER_ALERT",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": false,
+								"parameters": {
+									"is_alert": true,
+									"invalid_records": {
+										"value": "@activity('AT_ADB_STAGE_BUILDER').output.runOutput.invalid_records",
+										"type": "Expression"
+									},
+									"data_owner_email": {
+										"value": "@activity('AT_ADB_STAGE_BUILDER').output.runOutput.points_of_contact.data_owner",
+										"type": "Expression"
+									},
+									"process_owner_email": {
+										"value": "@activity('AT_ADB_STAGE_BUILDER').output.runOutput.points_of_contact.process_owner",
+										"type": "Expression"
+									},
+									"error_case": "CRITICAL_ERROR",
+									"data_source": {
+										"value": "@pipeline().parameters.source_name",
+										"type": "Expression"
+									},
+									"object_name": {
+										"value": "@pipeline().parameters.object_name",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "AT_EXEP_ALERT_OnSuccess",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_SEAID_A_ONBOARDER_ALERT",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": false,
+								"parameters": {
+									"is_alert": {
+										"value": "@pipeline().parameters.on_error_alert",
+										"type": "Expression"
+									},
+									"invalid_records": {
+										"value": "@activity('AT_ADB_STAGE_BUILDER').output.runOutput.invalid_records",
+										"type": "Expression"
+									},
+									"data_owner_email": {
+										"value": "@activity('AT_ADB_STAGE_BUILDER').output.runOutput.points_of_contact.data_owner",
+										"type": "Expression"
+									},
+									"process_owner_email": {
+										"value": "@activity('AT_ADB_STAGE_BUILDER').output.runOutput.points_of_contact.process_owner",
+										"type": "Expression"
+									},
+									"error_case": "INGEST_ERROR",
+									"data_source": {
+										"value": "@pipeline().parameters.source_name",
+										"type": "Expression"
+									},
+									"object_name": {
+										"value": "@pipeline().parameters.object_name",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_SET_Status-UnexpectedError",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_STAGE_BUILDER",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "status",
+					"value": "ERROR"
+				}
+			},
+			{
+				"name": "AT_SET_ERROR-Message",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_Status-UnexpectedError",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "fail_message",
+					"value": {
+						"value": "@activity('AT_ADB_STAGE_BUILDER').output.runError",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_name": {
+				"type": "string"
+			},
+			"object_name": {
+				"type": "string"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "SEAID"
+			},
+			"landing_date": {
+				"type": "string"
+			},
+			"write_mode": {
+				"type": "string",
+				"defaultValue": "scd"
+			},
+			"onboarder_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/Universal_Stage_Builder"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"on_error_alert": {
+				"type": "bool",
+				"defaultValue": true
+			},
+			"table_name": {
+				"type": "string",
+				"defaultValue": "data_source.object_name"
+			},
+			"layer": {
+				"type": "string",
+				"defaultValue": "Silver"
+			},
+			"stage": {
+				"type": "string",
+				"defaultValue": "Dimension"
+			},
+			"number_of_days_look_back": {
+				"type": "string",
+				"defaultValue": "7"
+			},
+			"kwargs": {
+				"type": "string",
+				"defaultValue": "None"
+			},
+			"uniframe_version": {
+				"type": "string",
+				"defaultValue": "2.2.22"
+			},
+			"adb_runtime_version": {
+				"type": "string",
+				"defaultValue": "10.4.x-scala2.12"
+			},
+			"adb_min_workers": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"adb_max_workers": {
+				"type": "int",
+				"defaultValue": 10
+			},
+			"metastore": {
+				"type": "string",
+				"defaultValue": "hive"
+			},
+			"cache_level": {
+				"type": "string",
+				"defaultValue": "NONE"
+			}
+		},
+		"variables": {
+			"status": {
+				"type": "String"
+			},
+			"fail_message": {
+				"type": "String"
+			},
+			"landing_date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ONBOARDER"
+		},
+		"annotations": []
+	}
+}

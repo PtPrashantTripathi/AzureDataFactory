@@ -1,0 +1,122 @@
+{
+	"name": "DS_MSQL_UGMS_GM_TB_CATALOG",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_MSQL_UGMS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "UGMS"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "CATALOG_ID",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "SYSTEM_ITEM_ID",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "DESCRIPTION",
+				"type": "nvarchar"
+			},
+			{
+				"name": "COLOR",
+				"type": "nvarchar"
+			},
+			{
+				"name": "NET_WEIGHT",
+				"type": "nvarchar"
+			},
+			{
+				"name": "WEIGHT",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SIZE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DIMENSION",
+				"type": "nvarchar"
+			},
+			{
+				"name": "FILE_LINK",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ENABLED_FLAG",
+				"type": "varchar"
+			},
+			{
+				"name": "CREATED_BY",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CREATION_DATE",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "LAST_UPDATED_BY",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "LAST_UPDATE_DATE",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "DIMENSION_H",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "DIMENSION_W",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "DIMENSION_L",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "SIZE_H",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "SIZE_W",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			},
+			{
+				"name": "SIZE_L",
+				"type": "decimal",
+				"precision": 32,
+				"scale": 2
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "GM_TB_CATALOG"
+		}
+	}
+}

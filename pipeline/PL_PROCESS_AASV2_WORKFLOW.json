@@ -1,0 +1,183 @@
+{
+	"name": "PL_PROCESS_AASV2_WORKFLOW",
+	"properties": {
+		"description": "Pause resume and/or scale ASS",
+		"activities": [
+			{
+				"name": "Resume and Scale AAS V2",
+				"type": "WebHook",
+				"dependsOn": [
+					{
+						"activity": "Resume and Scale SQLDW V2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://58aa0e39-9d27-49e5-b6b8-62c34ebca19d.webhook.ne.azure-automation.net/webhooks?token=5YAOtPHqnZurkDoQRkdFU2W%2fOAg5hByVJnrS%2fbH%2fOpI%3d",
+					"method": "POST",
+					"body": {
+						"value": "@json(concat('{\n\t\"WebhookType\" : \"Aas\",\n\t\"DataFactory\" : {\n\t\t\"RunId\" : \"',pipeline().RunId,'\",\n\t\t\"DataFactoryName\" : \"',pipeline().DataFactory,'\",\n\t\t\"PipelineName\" : \"',pipeline().Pipeline,'\"\n\t},\n\t\"Payload\" : {\n\t\t\"OverrideFileName\" : \"\",\n\t\t\"Aas\": {\n                     \"state\":\"',String(pipeline().parameters.AasState),'\",\n\t\t\t\t\t \"scale\":\"',String(pipeline().parameters.AasSku),'\"\n                }\n\t},\n\t\"LogFile\" : {\n\t \"PurgeThresholdDays\" : \"',pipeline().parameters.PurgeThresholdDays,'\"\n\t}\n}'))\n",
+						"type": "Expression"
+					},
+					"timeout": "00:5:00",
+					"reportStatusOnCallBack": true
+				}
+			},
+			{
+				"name": "Resume and Scale SQLDW V2",
+				"type": "WebHook",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://58aa0e39-9d27-49e5-b6b8-62c34ebca19d.webhook.ne.azure-automation.net/webhooks?token=5YAOtPHqnZurkDoQRkdFU2W%2fOAg5hByVJnrS%2fbH%2fOpI%3d",
+					"method": "POST",
+					"body": {
+						"value": "@json(concat('{\n\t\"WebhookType\" : \"Sql\",\n\t\"DataFactory\" : {\n\t\t\"RunId\" : \"',pipeline().RunId,'\",\n\t\t\"DataFactoryName\" : \"',pipeline().DataFactory,'\",\n\t\t\"PipelineName\" : \"',pipeline().Pipeline,'\"\n\t},\n\t\"Payload\" : {\n\t\t\"OverrideFileName\" : \"\",\n\t\t\"Sql\": {\n                     \"state\":\"',String(pipeline().parameters.SqlDwState),'\",\n\t\t\t\t\t \"edition\":\"',String(pipeline().parameters.SqlEdition),'\",\n\t\t\t\t\t \"scale\":\"',String(pipeline().parameters.SqlSku),'\"\n                }\n\t},\n\t\"LogFile\" : {\n\t \"PurgeThresholdDays\" : \"',pipeline().parameters.PurgeThresholdDays,'\"\n\t}\n}'))\n",
+						"type": "Expression"
+					},
+					"timeout": "00:5:00",
+					"reportStatusOnCallBack": true
+				}
+			},
+			{
+				"name": "Pause SQLDW V2",
+				"type": "WebHook",
+				"dependsOn": [
+					{
+						"activity": "Process Cube TMSL V2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://58aa0e39-9d27-49e5-b6b8-62c34ebca19d.webhook.ne.azure-automation.net/webhooks?token=5YAOtPHqnZurkDoQRkdFU2W%2fOAg5hByVJnrS%2fbH%2fOpI%3d",
+					"method": "POST",
+					"body": {
+						"value": "@json(concat('{\n\t\"WebhookType\" : \"Sql\",\n\t\"DataFactory\" : {\n\t\t\"RunId\" : \"',pipeline().RunId,'\",\n\t\t\"DataFactoryName\" : \"',pipeline().DataFactory,'\",\n\t\t\"PipelineName\" : \"',pipeline().Pipeline,'\"\n\t},\n\t\"Payload\" : {\n\t\t\"OverrideFileName\" : \"\",\n\t\t\"Sql\": {\n                     \"state\":\"','pause','\",\n\t\t\t\t\t \"scale\":\"','','\"\n                }\n\t},\n\t\"LogFile\" : {\n\t \"PurgeThresholdDays\" : \"',pipeline().parameters.PurgeThresholdDays,'\"\n\t}\n}'))\n",
+						"type": "Expression"
+					},
+					"timeout": "00:5:00",
+					"reportStatusOnCallBack": true
+				}
+			},
+			{
+				"name": "Process Cube TMSL V2",
+				"type": "WebHook",
+				"dependsOn": [
+					{
+						"activity": "Resume and Scale AAS V2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://58aa0e39-9d27-49e5-b6b8-62c34ebca19d.webhook.ne.azure-automation.net/webhooks?token=5YAOtPHqnZurkDoQRkdFU2W%2fOAg5hByVJnrS%2fbH%2fOpI%3d",
+					"method": "POST",
+					"body": {
+						"value": "@json(concat('{\r\n\t\"WebhookType\" : \"ProcessCube\",\r\n\t\"DataFactory\" : {\r\n\t\t\"RunId\" : \"',pipeline().RunId,'\",\r\n\t\t\"DataFactoryName\" : \"',pipeline().DataFactory,'\",\r\n\t\t\"PipelineName\" : \"',pipeline().Pipeline,'\"\r\n\t},\r\n\t\"Payload\" : {\r\n\t\t\"OverrideFileName\" : \"\",\r\n\t\t\"TMSL\":',String(pipeline().parameters.tmslScript),'\r\n\t},\r\n\t\"LogFile\" : {\r\n\t \"PurgeThresholdDays\" : \"',pipeline().parameters.PurgeThresholdDays,'\"\r\n\t}\r\n}'))",
+						"type": "Expression"
+					},
+					"timeout": "00:30:00",
+					"reportStatusOnCallBack": true
+				}
+			},
+			{
+				"name": "Backup Cube To Storage",
+				"type": "WebHook",
+				"dependsOn": [
+					{
+						"activity": "Process Cube TMSL V2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://58aa0e39-9d27-49e5-b6b8-62c34ebca19d.webhook.ne.azure-automation.net/webhooks?token=5YAOtPHqnZurkDoQRkdFU2W%2fOAg5hByVJnrS%2fbH%2fOpI%3d",
+					"method": "POST",
+					"body": {
+						"value": "@json(concat('{\r\n\t\"WebhookType\" : \"BackupCube\",\r\n\t\"DataFactory\" : {\r\n\t\t\"RunId\" : \"',pipeline().RunId,'\",\r\n\t\t\"DataFactoryName\" : \"',pipeline().DataFactory,'\",\r\n\t\t\"PipelineName\" : \"',pipeline().Pipeline,'\"\r\n\t},\r\n\t\"Payload\" : {\r\n\t\t\"OverrideFileName\" : \"\",\r\n\t\t\"Cube\":{\"name\": \"adventureworks\", \"purgeThresholdDays\": \"30\"}\r\n\t},\r\n\t\"LogFile\" : {\r\n\t \"PurgeThresholdDays\" : \"',pipeline().parameters.PurgeThresholdDays,'\"\r\n\t}\r\n}'))",
+						"type": "Expression"
+					},
+					"timeout": "00:30:00",
+					"reportStatusOnCallBack": true
+				}
+			},
+			{
+				"name": "Scale Web Plan V2",
+				"type": "WebHook",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://58aa0e39-9d27-49e5-b6b8-62c34ebca19d.webhook.ne.azure-automation.net/webhooks?token=5YAOtPHqnZurkDoQRkdFU2W%2fOAg5hByVJnrS%2fbH%2fOpI%3d",
+					"method": "POST",
+					"body": {
+						"value": "@json(concat('{\n\t\"WebhookType\" : \"Web\",\n\t\"DataFactory\" : {\n\t\t\"RunId\" : \"',pipeline().RunId,'\",\n\t\t\"DataFactoryName\" : \"',pipeline().DataFactory,'\",\n\t\t\"PipelineName\" : \"',pipeline().Pipeline,'\"\n\t},\n\t\"Payload\" : {\n\t\t\"OverrideFileName\" : \"\",\n\t\t\"Web\": {\n                     \"scale\":\"',String(pipeline().parameters.WebSku),'\"\n                }\n\t},\n\t\"LogFile\" : {\n\t \"PurgeThresholdDays\" : \"',pipeline().parameters.PurgeThresholdDays,'\"\n\t}\n}'))\n",
+						"type": "Expression"
+					},
+					"timeout": "00:5:00",
+					"reportStatusOnCallBack": true
+				}
+			}
+		],
+		"parameters": {
+			"AasState": {
+				"type": "string",
+				"defaultValue": "resume"
+			},
+			"PurgeThresholdDays": {
+				"type": "string",
+				"defaultValue": "14"
+			},
+			"overrideFileName": {
+				"type": "string"
+			},
+			"AasSku": {
+				"type": "string"
+			},
+			"sqlDwState": {
+				"type": "string",
+				"defaultValue": "resume"
+			},
+			"SqlEdition": {
+				"type": "string",
+				"defaultValue": "DataWarehouse"
+			},
+			"SqlSku": {
+				"type": "string",
+				"defaultValue": "DW200C"
+			},
+			"tmslScript": {
+				"type": "string",
+				"defaultValue": {
+					"refresh": {
+						"type": "dataOnly",
+						"objects": [
+							{
+								"database": "Livewire"
+							}
+						]
+					}
+				}
+			},
+			"WebSku": {
+				"type": "string",
+				"defaultValue": "B1"
+			}
+		},
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-09-06T08:29:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

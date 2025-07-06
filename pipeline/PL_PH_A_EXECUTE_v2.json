@@ -1,0 +1,357 @@
+{
+	"name": "PL_PH_A_EXECUTE_v2",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_SET_LANDING_DATE",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "GET METADATA",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LANDING_DATE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_BINARY_DIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.source_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.source_directory",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "FILTER_FILES",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "GET METADATA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GET METADATA').output.childItems",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(contains(toLower(item().name),toLower(variables('Contains'))), endswith(item().name,variables('file_format')))\n\n",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FILTER_FILES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Filter_Files').output.Value",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "AT_APPEND_File_names",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "files_name",
+								"value": {
+									"value": "@item().name",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "EXEP_ONBOARDER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ForEach",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_A_PHRETAILER_ONBOARDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"primary_keys": {
+							"value": "@pipeline().parameters.primary_keys",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"source_file_name": {
+							"value": "@variables('files_name')",
+							"type": "Expression"
+						},
+						"save_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"write_mode": {
+							"value": "@pipeline().parameters.write_mode",
+							"type": "Expression"
+						},
+						"custom_notebook_path": {
+							"value": "@pipeline().parameters.custom_notebook_path",
+							"type": "Expression"
+						},
+						"master_pipeline": {
+							"value": "@pipeline().parameters.master_pipeline",
+							"type": "Expression"
+						},
+						"uniframe_version": {
+							"value": "@pipeline().parameters.uniframe_version",
+							"type": "Expression"
+						},
+						"metastore": {
+							"value": "@pipeline().parameters.metastore",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "AT_WEB_CALL_LOGICAPP_CREATE_LAST_EXECUTION_FILE_SP",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "EXEP_ONBOARDER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:20:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"httpRequestTimeout": "00:10:00",
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_01",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "@concat('{\n    \"Logic Apps Case\":\"create_last_execution_file\",','\n    \"Site\":\"',pipeline().parameters.Site,'\",','\n    \"source_name\":\"',pipeline().parameters.source_name,'\",','\n    \"object_name\":\"',pipeline().parameters.object_name,'\",','\n    \"last_execution_file_name\":\"',pipeline().parameters.last_execution_file_name,'\",','\n    \"execution_env\":\"',pipeline().globalParameters.ENVIRONMENT,'\",','\n    }')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "MappingSKU_RRHIFCDS"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "phretailer"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "MappingSKU_RRHIFCDS"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string",
+				"defaultValue": "rob_sku_code"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "PHRetailer"
+			},
+			"Site": {
+				"type": "string",
+				"defaultValue": "https://unilever.sharepoint.com/sites/RRHIFCDS"
+			},
+			"Source": {
+				"type": "string",
+				"defaultValue": "/Shared Documents/General/Hair FCDS source RRHI/01 Dim SKU Map"
+			},
+			"Blob_Destination": {
+				"type": "string",
+				"defaultValue": "/phretailer/MappingSKU_RRHIFCDS/"
+			},
+			"last_execution_file_name": {
+				"type": "string",
+				"defaultValue": "last_execution_NCCC"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "overwrite"
+			},
+			"write_mode": {
+				"type": "string",
+				"defaultValue": "upsert"
+			},
+			"master_pipeline": {
+				"type": "string"
+			},
+			"source_customer": {
+				"type": "string"
+			},
+			"custom_notebook_path": {
+				"type": "string"
+			},
+			"uniframe_version": {
+				"type": "string",
+				"defaultValue": "3.*"
+			},
+			"metastore": {
+				"type": "string",
+				"defaultValue": "hive"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"last_exe": {
+				"type": "String"
+			},
+			"files_name": {
+				"type": "Array"
+			},
+			"Contains": {
+				"type": "String"
+			},
+			"output_dir": {
+				"type": "String"
+			},
+			"column_name": {
+				"type": "String"
+			},
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			},
+			"triggered_pipeline": {
+				"type": "String"
+			},
+			"source": {
+				"type": "String"
+			},
+			"Case": {
+				"type": "String"
+			},
+			"file_format": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PH/child_pipelines"
+		},
+		"annotations": []
+	}
+}

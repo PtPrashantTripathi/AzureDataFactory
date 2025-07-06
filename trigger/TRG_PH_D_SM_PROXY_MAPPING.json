@@ -1,0 +1,89 @@
+{
+	"name": "TRG_PH_D_SM_PROXY_MAPPING",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_SM_PROXY_SKU_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SM_PROXY/MappingSKU",
+					"source_container": "landing",
+					"object_name": "MappingSKU",
+					"object_type": "parquet",
+					"primary_keys": "child_sku_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "SM_PROXY",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/SM PROXY POS",
+					"Blob_Destination": "/landing/SM_PROXY/MappingSKU/",
+					"last_execution_file_name": "last_execution_SM_PROXY_MappingSKU",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "SM_PROXY",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/SM_PROXY/SM_PROXY_MappingSKU",
+					"uniframe_version": "4.*",
+					"metastore": "unity_catalog"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_D_SM_PROXY_STORE_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "SM_PROXY/MappingStore",
+					"source_container": "landing",
+					"object_name": "MappingStore",
+					"object_type": "parquet",
+					"primary_keys": "store_code",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "SM_PROXY",
+					"Site": "https://unilever.sharepoint.com/sites/RetailSolutionsDataHub",
+					"Source": "/Shared Documents/01 POS Data/02 Masterlist/SM PROXY POS",
+					"Blob_Destination": "/landing/SM_PROXY/MappingStore/",
+					"last_execution_file_name": "last_execution_SM_PROXY_MappingStore",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "SM_PROXY",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/SM_PROXY/SM_PROXY_MappingStore",
+					"uniframe_version": "4.*",
+					"metastore": "unity_catalog"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-11-19T08:12:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						45
+					],
+					"hours": [
+						1
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

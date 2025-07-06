@@ -1,0 +1,398 @@
+{
+	"name": "PL_PH_A_UNIFIEDMAPPING_PRODUCT_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_ADB_Silver_Layer_Onboarding",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "@concat(pipeline().parameters.onboarder_notebook_path,'/',pipeline().parameters.notebook)",
+						"type": "Expression"
+					},
+					"libraries": [
+						{
+							"jar": "dbfs:/mnt/databricks/jars/uniframe/deequ-2.0.1-spark-3.2.jar"
+						},
+						{
+							"maven": {
+								"coordinates": "com.crealytics:spark-excel_2.12:3.2.1_0.17.1"
+							}
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v2.sh",
+						"UniframeVersion": {
+							"value": "@pipeline().parameters.UniframeVersion",
+							"type": "Expression"
+						},
+						"RuntimeVersion": {
+							"value": "@pipeline().parameters.RuntimeVersion",
+							"type": "Expression"
+						},
+						"MinWorkers": 1,
+						"MaxWorkers": 10
+					}
+				}
+			},
+			{
+				"name": "AT_WEB_EMAIL_PROCEESSING_FAIL",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_Silver_Layer_Onboarding",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:10:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\"Logic Apps Case\" : \"Email Alert\", \n\"subject\":@{pipeline().globalParameters.ENVIRONMENT} - Silver Layer Proccessing Failed - @{pipeline().parameters.entity_name}\",\n\"to\":\"@{variables('receiver')}\",\n\"body\": \"Pipeline failed after Notebook activity.\" ,\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n    }",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FAIL1",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_EMAIL_PROCEESSING_FAIL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": {
+						"value": "@activity('AT_ADB_Silver_Layer_Onboarding').output.runError",
+						"type": "Expression"
+					},
+					"errorCode": "200"
+				}
+			},
+			{
+				"name": "AT_IF_MAIL",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_Silver_Layer_Onboarding",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('AT_ADB_Silver_Layer_Onboarding').output.runOutput.return_code, 'ERROR')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "AT_WEB_EMAIL_VALIDATION_FAIL",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Logic Apps Case\" : \"Email Alert\", \n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT}-Failed Databricks Silver Notebook Alert! @{pipeline().Pipeline}\",\n\"to\":\"@{variables('receiver')}\",\n\"body\": \"@{activity('AT_ADB_Silver_Layer_Onboarding').output.runOutput.message}\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n    }",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "FAIL",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "AT_WEB_EMAIL_VALIDATION_FAIL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@activity('AT_ADB_Silver_Layer_Onboarding').output",
+									"type": "Expression"
+								},
+								"errorCode": "200"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "AT_ADB_Silver_Layer_Onboarding_UM_MATERIAL_MASTER",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": {
+						"value": "/Shared/notebooks/silver/UnifiedMapping/UNIFIEDMAPPING_DIM_PH_MATERIAL_MASTER",
+						"type": "Expression"
+					},
+					"libraries": [
+						{
+							"jar": "dbfs:/mnt/databricks/jars/uniframe/deequ-2.0.1-spark-3.2.jar"
+						},
+						{
+							"maven": {
+								"coordinates": "com.crealytics:spark-excel_2.12:3.2.1_0.17.1"
+							}
+						}
+					]
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_ADB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ADBCountryCode": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"InitScriptPath": "/Shared/utilities/scripts/initial_script_databricks_cluster_v2.sh",
+						"UniframeVersion": {
+							"value": "@pipeline().parameters.UniframeVersion",
+							"type": "Expression"
+						},
+						"RuntimeVersion": {
+							"value": "@pipeline().parameters.RuntimeVersion",
+							"type": "Expression"
+						},
+						"MinWorkers": 1,
+						"MaxWorkers": 10
+					}
+				}
+			},
+			{
+				"name": "AT_WEB_EMAIL_PROCEESSING_FAIL_copy1",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_Silver_Layer_Onboarding_UM_MATERIAL_MASTER",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.00:10:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\"Logic Apps Case\" : \"Email Alert\", \n\"subject\":@{pipeline().globalParameters.ENVIRONMENT} - Silver Layer Proccessing Failed - @{pipeline().parameters.entity_name}\",\n\"to\":\"@{variables('receiver')}\",\n\"body\": \"Pipeline failed after Notebook activity.\" ,\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n    }",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "FAIL2",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "AT_WEB_EMAIL_PROCEESSING_FAIL_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": {
+						"value": "@activity('AT_ADB_Silver_Layer_Onboarding_UM_MATERIAL_MASTER').output.runError",
+						"type": "Expression"
+					},
+					"errorCode": "200"
+				}
+			},
+			{
+				"name": "AT_IF_MAIL_2",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "AT_ADB_Silver_Layer_Onboarding_UM_MATERIAL_MASTER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('AT_ADB_Silver_Layer_Onboarding_UM_MATERIAL_MASTER').output.runOutput.return_code, 'ERROR')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "AT_WEB_EMAIL_VALIDATION_FAIL_copy1",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.PH_MDL_LOGICAPPS_02",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Logic Apps Case\" : \"Email Alert\", \n\"subject\":\"@{pipeline().globalParameters.ENVIRONMENT}-Failed Databricks Silver Notebook Alert! @{pipeline().Pipeline}\",\n\"to\":\"@{variables('receiver')}\",\n\"body\": \"@{activity('AT_ADB_Silver_Layer_Onboarding_UM_MATERIAL_MASTER').output.runOutput.message}\",\n\"run_date_time\":\"@{formatDateTime(utcNow(),'dd/MM/yyyy')}\",\n\"run_id\":\"@{pipeline().RunId}\",\n    }",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "FAIL_2",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "AT_WEB_EMAIL_VALIDATION_FAIL_copy1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": {
+									"value": "@activity('AT_ADB_Silver_Layer_Onboarding_UM_MATERIAL_MASTER').output",
+									"type": "Expression"
+								},
+								"errorCode": "200"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "PL_PH_D_UNIFIEDMAPPING_MATERIAl_CUSTOMER_SKU_REL",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_D_UNIFIEDMAPPING_MATERIAL_CUSTOMER_SKU_REL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"parameters": {
+			"entity_name": {
+				"type": "string",
+				"defaultValue": "ALL"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"full_or_incl": {
+				"type": "string",
+				"defaultValue": "full"
+			},
+			"onboarder_notebook_path": {
+				"type": "string",
+				"defaultValue": "/Shared/notebooks/silver/UnifiedMapping/"
+			},
+			"notebook": {
+				"type": "string",
+				"defaultValue": "UNIFIEDMAPPING_DIM_PH_PRODUCT"
+			},
+			"UniframeVersion": {
+				"type": "string",
+				"defaultValue": "3.*"
+			},
+			"RuntimeVersion": {
+				"type": "string",
+				"defaultValue": "14.3.x-scala2.12"
+			}
+		},
+		"variables": {
+			"adhoc_ts": {
+				"type": "String"
+			},
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			}
+		},
+		"folder": {
+			"name": "ZZ_REMOVED (DISUSED)"
+		},
+		"annotations": []
+	}
+}

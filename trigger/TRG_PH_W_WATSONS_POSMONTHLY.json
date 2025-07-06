@@ -1,0 +1,59 @@
+{
+	"name": "TRG_PH_W_WATSONS_POSMONTHLY",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_WATSONS_POSMONTHLY_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "Watsons/POSMonthly",
+					"source_container": "landing",
+					"object_name": "POSMonthly",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "Watsons",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake/",
+					"Source": "/Shared Documents/LandingSpace/PH/WATSONS/POS",
+					"Blob_Destination": "/landing/Watsons/POSMonthly",
+					"last_execution_file_name": "last_execution_Watsons_POSMonthly",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "Watsons",
+					"custom_notebook_path": "/Shared/notebooks/bronze/WATSONS/Watsons POSMonthly"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-12-27T08:29:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						10
+					],
+					"hours": [
+						1
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

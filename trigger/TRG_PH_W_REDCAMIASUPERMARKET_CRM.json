@@ -1,0 +1,59 @@
+{
+	"name": "TRG_PH_W_REDCAMIASUPERMARKET_CRM",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_PH_W_REDCAMIASUPERMARKET_CRM_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "RedCamiaSupermarket/CRM",
+					"source_container": "landing",
+					"object_name": "CRM",
+					"object_type": "parquet",
+					"primary_keys": "rowidentifier",
+					"partition_keys": "YYYY,MM,DD",
+					"time_zone": "SE Asia Standard Time",
+					"country_code": "PH",
+					"source_name": "RedCamiaSupermarket",
+					"Site": "https://unilever.sharepoint.com/sites/SEAI-MarketDataLake",
+					"Source": "/Shared Documents/LandingSpace/PH/RED CAMIA SUPERMARKET/CRM",
+					"Blob_Destination": "/landing/RedCamiaSupermarket/CRM",
+					"last_execution_file_name": "last_execution_RedCamiaSupermarket_CRM",
+					"save_mode": "overwrite",
+					"write_mode": "upsert",
+					"library_name": "Documents",
+					"source_customer": "RedCamiaSupermarket",
+					"custom_notebook_path": "/Workspace/Shared/notebooks/bronze/RedCamiaSupermarket/RedCamiaSupermarket_CRM"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2024-06-11T12:18:00",
+				"timeZone": "Singapore Standard Time",
+				"schedule": {
+					"minutes": [
+						55
+					],
+					"hours": [
+						23
+					],
+					"weekDays": [
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thursday",
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

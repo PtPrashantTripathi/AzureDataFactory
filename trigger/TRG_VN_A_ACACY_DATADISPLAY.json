@@ -1,0 +1,32 @@
+{
+	"name": "TRG_VN_A_ACACY_DATADISPLAY",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_VN_A_ACACY_DATADISPLAY_MASTER",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"source_directory": "@substring(triggerBody().folderPath,add(indexof(triggerBody().folderPath,'/'),1),sub(length(triggerBody().folderPath),add(indexof(triggerBody().folderPath,'/'),1)))",
+					"source_container": "@substring(triggerBody().folderPath,0,indexof(triggerBody().folderPath,'/'))",
+					"source_file_name": [
+						"@{triggerBody().fileName}"
+					]
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/acacy/blobs/DataDisplay",
+			"blobPathEndsWith": ".csv",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/e1d1de9f-a503-4330-86fb-88f5f6fc3107/resourceGroups/bieno-da22-d-903766-rg/providers/Microsoft.Storage/storageAccounts/dbstorageda22d903766",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}

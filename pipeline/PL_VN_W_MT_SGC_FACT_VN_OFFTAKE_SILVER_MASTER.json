@@ -1,0 +1,133 @@
+{
+	"name": "PL_VN_W_MT_SGC_FACT_VN_OFFTAKE_SILVER_MASTER",
+	"properties": {
+		"activities": [
+			{
+				"name": "EXE_FACT_VN_OFFTAKE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PL_VN_W_SGC_WEEKLYOFFTAKE_BRONZE_MASTER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": "ModernTrade",
+						"object_name": "fact_vn_offtake",
+						"country_code": "VN",
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"write_mode": "overwrite",
+						"onboarder_notebook_path": "/Shared/notebooks/silver/ModernTrade/VN_MT_SGC_WEEKLYOFFTAKE_HARMONIZATION",
+						"partition_keys": "periodicity,account_name,sk_calendar",
+						"on_error_alert": true,
+						"layer": "Silver",
+						"stage": "Dimension",
+						"kwargs": {
+							"value": "{\n    \"catalog\": \"@{pipeline().globalParameters.UNITY_CATALOG}\"\n}",
+							"type": "Expression"
+						},
+						"uniframe_version": "4.*",
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"metastore": "unity_catalog"
+					}
+				}
+			},
+			{
+				"name": "PL_VN_W_SGC_WEEKLYOFFTAKE_BRONZE_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_VN_W_SGC_WEEKLYOFFTAKE_BRONZE_MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "EXE_FACT_VN_CALCULATE_MONTHLYOFFTAKE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EXE_FACT_VN_OFFTAKE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SEAID_A_ONBOARDER_STAGE_BUILDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_name": "ModernTrade",
+						"object_name": "fact_vn_offtake",
+						"country_code": "VN",
+						"landing_date": {
+							"value": "@pipeline().parameters.landing_date",
+							"type": "Expression"
+						},
+						"write_mode": "upsert",
+						"onboarder_notebook_path": "/Workspace/Shared/notebooks/silver/ModernTrade/VN_MT_SGC_WEEKLYOVERMONTH_OFFTAKE_HARMONIZATION",
+						"partition_keys": "periodicity,account_name,sk_calendar",
+						"on_error_alert": true,
+						"layer": "Silver",
+						"stage": "Fact",
+						"kwargs": {
+							"value": "{\n    \"catalog\": \"@{pipeline().globalParameters.UNITY_CATALOG}\"\n}",
+							"type": "Expression"
+						},
+						"uniframe_version": "4.0.8",
+						"adb_runtime_version": "14.3.x-scala2.12",
+						"adb_min_workers": 2,
+						"metastore": "unity_catalog"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"landing_date": {
+				"type": "string"
+			},
+			"catalog": {
+				"type": "string",
+				"defaultValue": "mdl_seaa_dev"
+			}
+		},
+		"folder": {
+			"name": "VN/MODERN_TRADE"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,413 @@
+{
+	"name": "PL_PH_A_PHRETAILER_EXECUTE",
+	"properties": {
+		"activities": [
+			{
+				"name": "AT_SET_LANDING_DATE",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "landing_date",
+					"value": {
+						"value": "@formatDateTime(convertTimeZone(utcNow(), 'UTC' , pipeline().parameters.time_zone), 'yyyyMMdd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "GET METADATA",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "AT_SET_LANDING_DATE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_BINARY_DIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": {
+								"value": "@pipeline().parameters.source_container",
+								"type": "Expression"
+							},
+							"directory": {
+								"value": "@pipeline().parameters.source_directory",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "FILTER_FILES",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "GET METADATA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GET METADATA').output.childItems",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@and(contains(item().name,variables('Contains')), endswith(item().name,'.xlsx' ))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEach",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FILTER_FILES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Filter_Files').output.Value",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "AT_APPEND_File_names",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "files_name",
+								"value": {
+									"value": "@item().name",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "EXEP_ONBOARDER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ForEach",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_PH_A_PHRETAILER_ONBOARDER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"source_directory": {
+							"value": "@pipeline().parameters.source_directory",
+							"type": "Expression"
+						},
+						"source_container": {
+							"value": "@pipeline().parameters.source_container",
+							"type": "Expression"
+						},
+						"object_name": {
+							"value": "@pipeline().parameters.object_name",
+							"type": "Expression"
+						},
+						"primary_keys": {
+							"value": "@pipeline().parameters.primary_keys",
+							"type": "Expression"
+						},
+						"country_code": {
+							"value": "@pipeline().parameters.country_code",
+							"type": "Expression"
+						},
+						"source_name": {
+							"value": "@pipeline().parameters.source_name",
+							"type": "Expression"
+						},
+						"source_file_name": {
+							"value": "@variables('files_name')",
+							"type": "Expression"
+						},
+						"save_mode": {
+							"value": "@pipeline().parameters.save_mode",
+							"type": "Expression"
+						},
+						"write_mode": {
+							"value": "@pipeline().parameters.write_mode",
+							"type": "Expression"
+						},
+						"custom_notebook_path": {
+							"value": "@pipeline().parameters.custom_notebook_path",
+							"type": "Expression"
+						},
+						"master_pipeline": {
+							"value": "@pipeline().parameters.master_pipeline",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "AT_CPY_LAST_EXECUTION_UPDATE",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "EXEP_ONBOARDER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"additionalColumns": [
+							{
+								"name": "last_execution",
+								"value": {
+									"value": "@formatDateTime(utcNow(),'yyyy-MM-ddTHH:mm:ss')",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"modifiedDatetimeStart": "2023-04-12T00:00:00.000Z",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['last_execution']"
+								},
+								"sink": {
+									"path": "$['last_execution']"
+								}
+							}
+						],
+						"collectionReference": ""
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_PH_JSON_GET_LAST_EXECUTION",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name": {
+								"value": "@concat('last_execution/','last_execution_stagging','.json')",
+								"type": "Expression"
+							},
+							"source_container": {
+								"value": "@pipeline().parameters.source_container",
+								"type": "Expression"
+							},
+							"source_customer": {
+								"value": "@pipeline().parameters.source_customer",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_PH_JSON_GET_LAST_EXECUTION",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name": {
+								"value": "@concat('last_execution/',pipeline().parameters.last_execution_file_name,'.json')",
+								"type": "Expression"
+							},
+							"source_container": {
+								"value": "@pipeline().parameters.source_container",
+								"type": "Expression"
+							},
+							"source_customer": {
+								"value": "@pipeline().parameters.source_customer",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"source_directory": {
+				"type": "string",
+				"defaultValue": "MappingSKU_RRHIFCDS"
+			},
+			"source_container": {
+				"type": "string",
+				"defaultValue": "phretailer"
+			},
+			"object_name": {
+				"type": "string",
+				"defaultValue": "MappingSKU_RRHIFCDS"
+			},
+			"object_type": {
+				"type": "string",
+				"defaultValue": "parquet"
+			},
+			"primary_keys": {
+				"type": "string",
+				"defaultValue": "rob_sku_code"
+			},
+			"partition_keys": {
+				"type": "string",
+				"defaultValue": "YYYY,MM,DD"
+			},
+			"time_zone": {
+				"type": "string",
+				"defaultValue": "SE Asia Standard Time"
+			},
+			"country_code": {
+				"type": "string",
+				"defaultValue": "PH"
+			},
+			"source_name": {
+				"type": "string",
+				"defaultValue": "PHRetailer"
+			},
+			"Site": {
+				"type": "string",
+				"defaultValue": "https://unilever.sharepoint.com/sites/RRHIFCDS"
+			},
+			"Source": {
+				"type": "string",
+				"defaultValue": "/Shared Documents/General/Hair FCDS source RRHI/01 Dim SKU Map"
+			},
+			"Blob_Destination": {
+				"type": "string",
+				"defaultValue": "/phretailer/MappingSKU_RRHIFCDS/"
+			},
+			"last_execution_file_name": {
+				"type": "string",
+				"defaultValue": "last_execution_NCCC"
+			},
+			"save_mode": {
+				"type": "string",
+				"defaultValue": "overwrite"
+			},
+			"write_mode": {
+				"type": "string",
+				"defaultValue": "upsert"
+			},
+			"master_pipeline": {
+				"type": "string"
+			},
+			"source_customer": {
+				"type": "string"
+			},
+			"custom_notebook_path": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"landing_date": {
+				"type": "String"
+			},
+			"last_exe": {
+				"type": "String"
+			},
+			"files_name": {
+				"type": "Array"
+			},
+			"Contains": {
+				"type": "String"
+			},
+			"output_dir": {
+				"type": "String"
+			},
+			"column_name": {
+				"type": "String"
+			},
+			"receiver": {
+				"type": "String",
+				"defaultValue": "ph_mdl@unilever.onmicrosoft.com"
+			},
+			"triggered_pipeline": {
+				"type": "String"
+			},
+			"source": {
+				"type": "String"
+			},
+			"Case": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "PH/child_pipelines"
+		},
+		"annotations": []
+	}
+}

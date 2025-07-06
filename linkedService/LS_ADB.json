@@ -1,0 +1,80 @@
+{
+	"name": "LS_ADB",
+	"properties": {
+		"parameters": {
+			"ADBCountryCode": {
+				"type": "String",
+				"defaultValue": "SEAID"
+			},
+			"InitScriptPath": {
+				"type": "string",
+				"defaultValue": "/Shared/utilities/scripts/initial_script_databricks_cluster_v_0_1_1.sh"
+			},
+			"UniframeVersion": {
+				"type": "string",
+				"defaultValue": "LATEST"
+			},
+			"RuntimeVersion": {
+				"type": "string",
+				"defaultValue": "10.4.x-scala2.12"
+			},
+			"MinWorkers": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"MaxWorkers": {
+				"type": "int",
+				"defaultValue": 10
+			}
+		},
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-6372787740735357.17.azuredatabricks.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/e1d1de9f-a503-4330-86fb-88f5f6fc3107/resourceGroups/bieno-da22-d-903766-rg/providers/Microsoft.Databricks/workspaces/bieno-da22-d-903766-adb-01",
+			"newClusterNodeType": "Standard_DS3_v2",
+			"newClusterNumOfWorker": "@concat(\n    string(linkedService().MinWorkers), ':',\n    string(linkedService().MaxWorkers)\n)",
+			"newClusterSparkConf": {
+				"spark.sql.sources.partitionOverwriteMode": "dynamic"
+			},
+			"newClusterSparkEnvVars": {
+				"AZ_UNIFRAME_ORG_NAME": "bnlwe-p-56728-ia-01-unilevercom-vsts",
+				"AZ_UNIFRAME_FEED_NAME": "uniframe_wheel",
+				"AZ_UNIFRAME_TOKEN": "{{secrets/databrickskv/KV-VN-UNIFRAME-ARTIFACT-TOKEN}}",
+				"AZ_UNIFRAME_PROJECT_NAME": "bieno-da-p-903766-vstsp",
+				"UNIFRAME_VERSION": {
+					"value": "@linkedService().UniframeVersion",
+					"type": "Expression"
+				},
+				"UC_STORAGE_LOCATION": "abfss://unilever@dbstorageda22d903766adls.dfs.core.windows.net/",
+				"PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+			},
+			"newClusterCustomTags": {
+				"Platform": "Core Data Ecosystem",
+				"ServiceName": "MDL SEAA",
+				"CostCentre": "A956001445",
+				"ICC": "ICC16464",
+				"ProjectSupportTeam": "LandscapeTeam",
+				"Environment": "Development",
+				"Purpose": "LS_ADB",
+				"CountryCode": {
+					"value": "@linkedService().ADBCountryCode",
+					"type": "Expression"
+				}
+			},
+			"newClusterVersion": "@linkedService().RuntimeVersion",
+			"newClusterLogDestination": "dbfs:/mnt/adls/Logs/ClusterLogs",
+			"newClusterDriverNodeType": "Standard_DS3_v2",
+			"clusterOption": "Autoscaling",
+			"newClusterInitScripts": [
+				{
+					"value": "@linkedService().InitScriptPath",
+					"type": "Expression"
+				}
+			],
+			"dataSecurityMode": "SINGLE_USER"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}
